@@ -1,0 +1,195 @@
+body {
+  margin: 0;
+  padding: 0 40px;
+  font: 24px/1.4 "Avenir Next", "Avenir", sans-serif;
+  overflow-x: hidden;
+}
+
+code {
+  font-family: "Courier", monospace;
+  color: #369;
+}
+
+a {
+  text-decoration: none;
+  color: #080;
+}
+
+a:focus {
+  background: #080;
+  color: #fff;
+  outline: none;
+}
+
+a:hover {
+  background: #080;
+  color: #fff;
+}
+
+a code {
+  color: inherit;
+}
+
+#css-header {
+  margin: 0 -9999px 0 -40px;
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: #c36;
+  background: rgb(250, 230, 245);
+  padding: 0 40px;
+  font-size: 75%;
+  color: #c36;
+}
+
+#css-header ::-moz-selection {
+  background: #c36;
+  color: #fff;
+}
+
+#css-header ::selection {
+  background: #c36;
+  color: #fff;
+}
+
+#css-header a {
+  border-bottom: 1px dotted #c36;
+  color: #c36;
+}
+
+#css-header a:visited {
+  border-bottom-color: #a25;
+  color: #a25;
+}
+
+#css-header a:focus {
+  background: #c36;
+  color: #fff;
+}
+
+#css-header a:hover {
+  border-bottom-style: solid;
+  background: #c36;
+  color: #fff;
+}
+
+#css-main {
+  max-width: 36em;
+  padding: 0 0 4em;
+}
+
+pre {
+  margin: 1.334em 0;
+  padding: 0;
+  font-size: 75%;
+  line-height: 1.334;
+}
+
+.examples {
+  margin: 0 -9999px 0 -40px;
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: #ada;
+  background: #efe;
+  padding: 0 40px;
+  font-size: 75%;
+  line-height: 1.334;
+  font-family: "Courier", monospace;
+  color: #666;
+}
+
+.examples:hover {
+  border-color: #080;
+  cursor: text;
+}
+
+.examples ::-moz-selection {
+  background: #080;
+  color: #fff;
+}
+
+.examples ::selection {
+  background: #080;
+  color: #fff;
+}
+
+.examples form {
+  margin: 1.334em 0;
+}
+
+.examples input {
+  display: inline;
+  width: 8888px;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: #080;
+  outline: none;
+}
+
+.examples .output {
+  white-space: pre;
+  color: #666;
+}
+
+.examples .output[data-error="true"] {
+  color: #c20;
+}
+
+.tight + .tight {
+  margin-left: -0.2em;
+}
+
+.arrow {
+  position: relative;
+  top: 0.1em;
+}
+
+.arrow-hyphen {
+  position: relative;
+  top: -0.1em;
+}
+
+h1,
+h2, .h2,
+h3, .h3,
+h4, .h4 {
+  margin: 0;
+  padding: 1em 0 0;
+  line-height: 1.5;
+}
+
+h1 {
+  font-size: 2em;
+  font-weight: normal;
+}
+
+h2, .h2 {
+  font-size: 1.5em;
+}
+
+h3, .h3 {
+  font-size: 1.167em;
+}
+
+h4, .h4 {
+  font-size: 1em;
+}
+
+h1 small {
+  font-size: 66.667%;
+  font-weight: normal;
+}
+
+p {
+  margin: 1em 0;
+}
+
+.pilcrow {
+  position: absolute;
+  display: block;
+  margin: 0 0 0 -40px;
+  width: 40px;
+  text-align: center;
+  color: #eee;
+}
