@@ -1,0 +1,13 @@
+{
+  "name": "sanctuary-site",
+  "private": true,
+  "dependencies": {
+    "ramda": "0.19.1",
+    "sanctuary": "0.9.1",
+    "sanctuary-def": "0.4.0"
+  },
+  "devDependencies": {
+    "jshint": "2.9.x",
+    "marked": "0.3.5"
+  }
+}

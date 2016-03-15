@@ -1,0 +1,322 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const fs                = require('fs');
+const path              = require('path');
+const vm                = require('vm');
+
+const marked            = require('marked');
+const R                 = require('ramda');
+const S                 = require('sanctuary');
+const $                 = require('sanctuary-def');
+
+
+const Either            = S.EitherType;
+const I                 = S.I;
+const K                 = S.K;
+const Left              = S.Left;
+const Right             = S.Right;
+const _                 = R.__;
+const all               = R.all;
+const ap                = R.ap;
+const apply             = R.apply;
+const at                = S.at;
+const binary            = R.binary;
+const chain             = R.chain;
+const compose           = S.compose;
+const concat            = R.concat;
+const cond              = R.cond;
+const contains          = R.contains;
+const curry             = R.curry;
+const drop_             = R.drop;
+const either            = S.either;
+const encaseEither      = S.encaseEither;
+const encaseEither2     = S.encaseEither2;
+const equals            = R.equals;
+const flip              = S.flip;
+const get               = S.get;
+const head_             = R.head;
+const ifElse            = S.ifElse;
+const isRight           = S.isRight;
+const join              = R.join;
+const lefts             = S.lefts;
+const lensIndex         = R.lensIndex;
+const lift2             = S.lift2;
+const lines             = S.lines;
+const lt                = R.lt;
+const map               = R.map;
+const match_            = R.match;
+const maybeToEither     = S.maybeToEither;
+const over              = R.over;
+const pair              = R.pair;
+const pipe              = S.pipe;
+const prepend           = R.prepend;
+const prop              = R.prop;
+const propEq            = R.propEq;
+const replace           = R.replace;
+const rights            = S.rights;
+const slice_            = R.slice;
+const split             = R.split;
+const tail_             = R.tail;
+const toString          = R.toString;
+const trim              = R.trim;
+const unapply           = R.unapply;
+const unlines           = S.unlines;
+const unnest            = R.unnest;
+
+const reset             = '\u001B[0m';
+const red               = '\u001B[31m';
+const green             = '\u001B[32m';
+
+const env               = concat($.env, [Either]);
+const def               = $.create(true, env);
+
+//    replace_ :: RegExp -> ([String] -> String) -> String -> String
+const replace_ =
+def('replace_',
+    {},
+    [$.RegExp, $.Function, $.String, $.String],
+    (pattern, f, s) => s.replace(pattern, unapply(compose(f, slice_(1, -2)))));
+
+//    htmlEncode :: String -> String
+const htmlEncode =
+def('htmlEncode',
+    {},
+    [$.String, $.String],
+    pipe([replace(/&/g, '&amp;'),
+          replace(/</g, '&lt;'),
+          replace(/>/g, '&gt;'),
+          replace(/"/g, '&quot;')]));
+
+//    wrap :: String -> String -> String -> String
+const wrap =
+def('wrap',
+    {},
+    [$.String, $.String, $.String, $.String],
+    (before, after, middle) => `${before}${middle}${after}`);
+
+//    el :: String -> String -> String -> String
+const el =
+def('el',
+    {},
+    [$.String, $.String, $.String, $.String],
+    (tagName, className, innerHtml) =>
+      `<${tagName} class="${className}">${innerHtml}</${tagName}>`);
+
+//    toInputMarkup :: String -> String
+const toInputMarkup =
+def('toInputMarkup',
+    {},
+    [$.String, $.String],
+    pipe([htmlEncode,
+          wrap('<input value="', '">'),
+          concat(htmlEncode('>\u00A0'))]));
+
+//    sqrt :: Number -> Either String Number
+const sqrt =
+def('sqrt',
+    {},
+    [$.Number, Either($.String, $.Number)],
+    ifElse(lt(_, 0),
+           K(Left('Cannot represent square root of negative number')),
+           compose(Right, Math.sqrt)));
+
+//    toOutputMarkup :: String -> String
+const toOutputMarkup =
+def('toOutputMarkup',
+    {},
+    [$.String, $.String],
+    pipe([encaseEither(prop('message'),
+                       curry(vm.runInNewContext)(_,
+                                                 {R: R, S: S, sqrt: sqrt},
+                                                 {displayErrors: false})),
+          either(pipe([concat('! '),
+                       htmlEncode,
+                       wrap('<div class="output" data-error="true">',
+                            '</div>')]),
+                 pipe([toString,
+                       htmlEncode,
+                       wrap('<div class="output">',
+                            '</div>')]))]));
+
+//    doctestsToMarkup :: String -> String
+const doctestsToMarkup =
+def('doctestsToMarkup',
+    {},
+    [$.String, $.String],
+    pipe([match_(/^(> .*(?:\n[.] .*)*)/gm),
+          map(lines),
+          map(map(drop_(2))),
+          map(map(trim)),
+          map(lift2(prepend, head_, compose(map(concat(' ')), tail_))),
+          map(join('')),
+          map(replace(/^global[.]/, 'const ')),
+          map(lift2(pair, toInputMarkup, toOutputMarkup)),
+          map(map(concat('    '))),
+          map(unlines),
+          map(wrap('  <form>\n', '  </form>\n')),
+          join(''),
+          wrap('<div class="examples">\n', '</div>\n')]));
+
+//    substitutionPattern :: RegExp
+const substitutionPattern =
+/(<pre>[\s\S]*?<[/]pre>|<div class="examples">[\s\S]*?^<[/]div>| :: |[=~-](?:&gt;|>)|[.][.][.])/gm;
+
+//    substitutions :: String -> String
+const substitutions =
+def('substitutions',
+    {},
+    [$.String, $.String],
+    replace_(substitutionPattern,
+             apply(cond([[equals(' :: '),
+                          K(' ' +
+                            el('span', 'tight', ':') +
+                            el('span', 'tight', ':') +
+                            ' ')],
+                         [contains(_, ap([I, htmlEncode], ['=>'])),
+                          K(el('span', 'arrow', htmlEncode('=>')))],
+                         [contains(_, ap([I, htmlEncode], ['~>'])),
+                          K(el('span', 'arrow', htmlEncode('~>')))],
+                         [contains(_, ap([I, htmlEncode], ['->'])),
+                          K(el('span', 'arrow',
+                               el('span', 'arrow-hyphen', htmlEncode('-')) +
+                               htmlEncode('>')))],
+                         [equals('...'),
+                          K(el('span', 'tight', '.') +
+                            el('span', 'tight', '.') +
+                            el('span', 'tight', '.'))],
+                         [K(true),
+                          I]]))));
+
+//    generate :: String -> String
+const generate =
+def('generate',
+    {},
+    [$.String, $.String],
+    pipe([replace(/<h4 name=/g, '<h4 id='),
+          replace_(/^```javascript\n(> [\s\S]*?)^```\n/gm,
+                   apply(doctestsToMarkup)),
+          //  Replace NO-BREAK SPACE characters with SYMBOL FOR SPACE
+          //  characters to work around chjj/marked#363.
+          replace(/\u00A0/g, '\u2420'),
+          flip(marked)({pedantic: true}),
+          replace(/\u2420/g, '\u00A0'),
+          replace(/\n\n(?=\n<[/]code><[/]pre>)/g, ''),
+          replace(/(?=<(h[2-6]) id="([^"]*)")/g,
+                  '<a class="pilcrow $1" href="#$2">\u00B6</a>\n'),
+          substitutions]));
+
+//    readFile :: String -> Either String String
+const readFile =
+def('readFile',
+    {},
+    [$.String, Either($.String, $.String)],
+    encaseEither(prop('message'), compose(String, fs.readFileSync)));
+
+//    writeFile :: String -> String -> Either String String
+const writeFile =
+def('writeFile',
+    {},
+    [$.String, $.String, Either($.String, $.String)],
+    encaseEither2(prop('message'), lift2(K, K, binary(fs.writeFileSync))));
+
+//    version :: String -> Either String String
+const version =
+def('version',
+    {},
+    [$.String, Either($.String, $.String)],
+    pipe([flip(path.join)('package.json'),
+          readFile,
+          chain(encaseEither(prop('message'), JSON.parse)),
+          map(get(String, 'version')),
+          chain(maybeToEither('Invalid "version"'))]));
+
+//    customize :: String -> Either String (String -> Either String String)
+const customize =
+def('customize',
+    {},
+    [$.String, Either($.String, $.Function)],
+    pipe([readFile,
+          map(split(/\n={79}\n\n/)),
+          chain(ifElse(propEq('length', 2),
+                       Right,
+                       K(Left('Expected exactly one separator')))),
+          map(apply((existing, replacement) =>
+                      ifElse(contains(existing),
+                             compose(Right, replace(existing, replacement)),
+                             K(Left('Substring not found')))))]));
+
+//    readme :: String -> Either String String
+const readme =
+def('readme',
+    {},
+    [$.String, Either($.String, $.String)],
+    pipe([flip(path.join)('README.md'),
+          readFile,
+          ap(customize('custom/introduction.md')),
+          unnest,
+          ap(customize('custom/type-checking-sanctuary.md')),
+          unnest,
+          ap(customize('custom/type-checking-ramda.md')),
+          unnest,
+          map(generate),
+          map(concat('\n')),
+          map(replace(/\n$/, ''))]));
+
+const toDocument =
+def('toDocument',
+    {},
+    [$.String, $.String],
+    content => `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sanctuary</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body spellcheck="false">
+  <div id="css-header">
+    <p>
+      Join the Sanctuary community on
+      <a href="https://github.com/plaid/sanctuary">GitHub</a> and
+      <a href="https://gitter.im/plaid/sanctuary">Gitter</a>
+    </p>
+  </div>
+  <div id="css-main">
+${content}
+  </div>
+  <script src="vendor/ramda.js"></script>
+  <script src="vendor/sanctuary-def.js"></script>
+  <script src="vendor/sanctuary.js"></script>
+  <script src="behaviour.js"></script>
+</body>
+</html>
+`);
+
+//    failure :: String -> Undefined
+const failure = s => {
+  process.stderr.write(`${red}${s}${reset}\n`);
+  process.exit(1);
+};
+
+//    success :: String -> Undefined
+const success = s => {
+  process.stdout.write(`${green}Successfully created ${s}${reset}\n`);
+  process.exit(0);
+};
+
+pipe([at(2),
+      maybeToEither('Missing command-line argument'),
+      map(lift2(pair, I, I)),
+      map(over(lensIndex(0), version)),
+      map(over(lensIndex(1), readme)),
+      chain(ifElse(all(isRight),
+                   pipe([rights, Right]),
+                   pipe([lefts, join('\n'), Left]))),
+      map(over(lensIndex(0), wrap(' <small>v', '</small>'))),
+      map(apply(replace(/(?=<[/]h1>)/))),
+      map(toDocument),
+      chain(writeFile('index.html')),
+      either(failure, success)],
+     process.argv);
