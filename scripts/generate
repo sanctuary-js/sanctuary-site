@@ -273,6 +273,14 @@ def('toDocument',
 <head>
   <meta charset="utf-8">
   <title>Sanctuary</title>
+  <script>
+    if (location.hostname.split('.').slice(-2).join('.') === 'github.io') {
+      location.replace('http://sanctuary.js.org' +
+                       location.pathname.replace('/sanctuary-site/', '/') +
+                       location.search +
+                       location.hash);
+    }
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body spellcheck="false">
