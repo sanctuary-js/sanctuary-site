@@ -1,11 +1,27 @@
 ```javascript
 S.inc('XXX');
-// ! TypeError: ‘inc’ expected a value of type FiniteNumber as its first argument; received "XXX"
+// ! TypeError: Invalid value
+//
+//   inc :: FiniteNumber -> FiniteNumber
+//          ^^^^^^^^^^^^
+//               1
+//
+//   1)  "XXX" :: String
+//
+//   The value at position 1 is not a member of ‘FiniteNumber’.
 ```
 
 ===============================================================================
 
 ```javascript
 > S.inc('XXX')
-! ‘inc’ expected a value of type FiniteNumber as its first argument; received "XXX"
+! Invalid value
+
+inc :: FiniteNumber -> FiniteNumber
+       ^^^^^^^^^^^^
+            1
+
+1)  "XXX" :: String
+
+The value at position 1 is not a member of ‘FiniteNumber’.
 ```
