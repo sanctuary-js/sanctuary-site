@@ -23,7 +23,7 @@
   </div>
   <div id="css-main">
 
-<h1 id="sanctuary">Sanctuary <small>v0.9.1</small></h1>
+<h1 id="sanctuary">Sanctuary <small>v0.10.0</small></h1>
 <p>Sanctuary is a functional programming library inspired by Haskell and
 PureScript. It depends on and works nicely with <a href="http://ramdajs.com/">Ramda</a>. Sanctuary
 makes it possible to write safe code without null checks.</p>
@@ -115,7 +115,16 @@ silent failures due to type coercion (at worst). For example:</p>
 <div class="examples">
   <form>
     &gt; <input value="S.inc('XXX')">
-    <div class="output" data-error="true">! ‘inc’ expected a value of type FiniteNumber as its first argument; received &quot;XXX&quot;</div>
+    <div class="output" data-error="true">! Invalid value
+
+inc :: FiniteNumber -&gt; FiniteNumber
+       ^^^^^^^^^^^^
+            1
+
+1)  &quot;XXX&quot; :: String
+
+The value at position 1 is not a member of ‘FiniteNumber’.
+</div>
   </form>
 </div>
 
@@ -123,7 +132,7 @@ silent failures due to type coercion (at worst). For example:</p>
 <div class="examples">
   <form>
     &gt; <input value="R.inc('XXX')">
-    <div class="output">&quot;1XXX&quot;</div>
+    <div class="output">NaN</div>
   </form>
 </div>
 
@@ -146,7 +155,7 @@ of the Sanctuary module to use:</p>
 <a class="pilcrow h3" href="#classify">¶</a>
 <h3 id="classify">Classify</h3>
 <a class="pilcrow h4" href="#type">¶</a>
-<h4 id="type"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L341">type <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
+<h4 id="type"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L358">type <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
 
 <p>Takes a value, <code>x</code>, of any type and returns its type identifier. If
 <code>x</code> has a <code>&#39;@@type&#39;</code> property whose value is a string, <code>x[&#39;@@type&#39;]</code>
@@ -167,7 +176,7 @@ is defined.</p>
 </div>
 
 <a class="pilcrow h4" href="#is">¶</a>
-<h4 id="is"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L365">is <span class="tight">:</span><span class="tight">:</span> TypeRep a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="is"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L382">is <span class="tight">:</span><span class="tight">:</span> TypeRep a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Takes a <a href="#type-representatives">type representative</a> and a value of
 any type and returns <code>true</code> if the given value is of the specified
@@ -190,7 +199,7 @@ type; <code>false</code> otherwise. Subtyping is not respected.</p>
 <a class="pilcrow h3" href="#combinator">¶</a>
 <h3 id="combinator">Combinator</h3>
 <a class="pilcrow h4" href="#I">¶</a>
-<h4 id="I"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L395">I <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
+<h4 id="I"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L412">I <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
 
 <p>The I combinator. Returns its argument. Equivalent to Haskell&#39;s <code>id</code>
 function.</p>
@@ -202,7 +211,7 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#K">¶</a>
-<h4 id="K"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L410">K <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
+<h4 id="K"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L427">K <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
 
 <p>The K combinator. Takes two values and returns the first. Equivalent to
 Haskell&#39;s <code>const</code> function.</p>
@@ -218,23 +227,23 @@ Haskell&#39;s <code>const</code> function.</p>
 </div>
 
 <a class="pilcrow h4" href="#A">¶</a>
-<h4 id="A"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L428">A <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</a></code></h4>
+<h4 id="A"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L445">A <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</a></code></h4>
 
 <p>The A combinator. Takes a function and a value, and returns the result of
 applying the function to the value. Equivalent to Haskell&#39;s <code>($)</code> function.</p>
 <div class="examples">
   <form>
-    &gt; <input value="S.A(R.inc, 1)">
+    &gt; <input value="S.A(S.inc, 1)">
     <div class="output">2</div>
   </form>
   <form>
-    &gt; <input value="R.map(S.A(R.__, 100), [R.inc, Math.sqrt])">
+    &gt; <input value="R.map(S.A(R.__, 100), [S.inc, Math.sqrt])">
     <div class="output">[101, 10]</div>
   </form>
 </div>
 
 <a class="pilcrow h4" href="#C">¶</a>
-<h4 id="C"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L446">C <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
+<h4 id="C"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L463">C <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
 
 <p>The C combinator. Takes a curried binary function and two values, and
 returns the result of applying the function to the values in reverse.
@@ -254,7 +263,7 @@ functions.</p>
 </div>
 
 <a class="pilcrow h4" href="#B">¶</a>
-<h4 id="B"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L469">B <span class="tight">:</span><span class="tight">:</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
+<h4 id="B"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L486">B <span class="tight">:</span><span class="tight">:</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
 
 <p>The B combinator. Takes two functions and a value, and returns the result
 of applying the first function to the result of applying the second to the
@@ -267,7 +276,7 @@ value. Equivalent to <a href="#compose"><code>compose</code></a> and Haskell&#39
 </div>
 
 <a class="pilcrow h4" href="#S">¶</a>
-<h4 id="S"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L485">S <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
+<h4 id="S"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L502">S <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
 
 <p>The S combinator. Takes a curried binary function, a unary function,
 and a value, and returns the result of applying the binary function to:</p>
@@ -277,7 +286,7 @@ and a value, and returns the result of applying the binary function to:</p>
 </ul>
 <div class="examples">
   <form>
-    &gt; <input value="S.S(R.add, Math.sqrt, 100)">
+    &gt; <input value="S.S(S.add, Math.sqrt, 100)">
     <div class="output">110</div>
   </form>
 </div>
@@ -285,7 +294,7 @@ and a value, and returns the result of applying the binary function to:</p>
 <a class="pilcrow h3" href="#function">¶</a>
 <h3 id="function">Function</h3>
 <a class="pilcrow h4" href="#flip">¶</a>
-<h4 id="flip"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L505">flip <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
+<h4 id="flip"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L522">flip <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
 
 <p>Takes a binary function and two values and returns the result of
 applying the function - with its argument order reversed - to the
@@ -300,7 +309,7 @@ function with arity greater than two.</p>
 </div>
 
 <a class="pilcrow h4" href="#lift">¶</a>
-<h4 id="lift"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L524">lift <span class="tight">:</span><span class="tight">:</span> Functor f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b</a></code></h4>
+<h4 id="lift"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L541">lift <span class="tight">:</span><span class="tight">:</span> Functor f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b</a></code></h4>
 
 <p>Promotes a unary function to a function which operates on a <a href="https://github.com/fantasyland/fantasy-land#functor">Functor</a>.</p>
 <div class="examples">
@@ -315,17 +324,17 @@ function with arity greater than two.</p>
 </div>
 
 <a class="pilcrow h4" href="#lift2">¶</a>
-<h4 id="lift2"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L541">lift2 <span class="tight">:</span><span class="tight">:</span> Apply f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f c</a></code></h4>
+<h4 id="lift2"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L558">lift2 <span class="tight">:</span><span class="tight">:</span> Apply f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f c</a></code></h4>
 
 <p>Promotes a binary function to a function which operates on two
 <a href="https://github.com/fantasyland/fantasy-land#apply">Apply</a>s.</p>
 <div class="examples">
   <form>
-    &gt; <input value="S.lift2(R.add, S.Just(2), S.Just(3))">
+    &gt; <input value="S.lift2(S.add, S.Just(2), S.Just(3))">
     <div class="output">Just(5)</div>
   </form>
   <form>
-    &gt; <input value="S.lift2(R.add, S.Just(2), S.Nothing())">
+    &gt; <input value="S.lift2(S.add, S.Just(2), S.Nothing())">
     <div class="output">Nothing()</div>
   </form>
   <form>
@@ -339,7 +348,7 @@ function with arity greater than two.</p>
 </div>
 
 <a class="pilcrow h4" href="#lift3">¶</a>
-<h4 id="lift3"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L565">lift3 <span class="tight">:</span><span class="tight">:</span> Apply f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> d) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f d</a></code></h4>
+<h4 id="lift3"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L582">lift3 <span class="tight">:</span><span class="tight">:</span> Apply f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> d) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f d</a></code></h4>
 
 <p>Promotes a ternary function to a function which operates on three
 <a href="https://github.com/fantasyland/fantasy-land#apply">Apply</a>s.</p>
@@ -357,7 +366,7 @@ function with arity greater than two.</p>
 <a class="pilcrow h3" href="#composition">¶</a>
 <h3 id="composition">Composition</h3>
 <a class="pilcrow h4" href="#compose">¶</a>
-<h4 id="compose"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L585">compose <span class="tight">:</span><span class="tight">:</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
+<h4 id="compose"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L602">compose <span class="tight">:</span><span class="tight">:</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
 
 <p>Takes two functions assumed to be unary and a value of any type,
 and returns the result of applying the first function to the result
@@ -373,7 +382,7 @@ unary functions.</p>
 </div>
 
 <a class="pilcrow h4" href="#pipe">¶</a>
-<h4 id="pipe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L606">pipe <span class="tight">:</span><span class="tight">:</span> [(a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b), (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c), <span class="tight">.</span><span class="tight">.</span><span class="tight">.</span>, (m <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> n)] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> n</a></code></h4>
+<h4 id="pipe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L623">pipe <span class="tight">:</span><span class="tight">:</span> [(a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b), (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c), <span class="tight">.</span><span class="tight">.</span><span class="tight">.</span>, (m <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> n)] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> n</a></code></h4>
 
 <p>Takes a list of functions assumed to be unary and a value of any type,
 and returns the result of applying the sequence of transformations to
@@ -389,7 +398,7 @@ of functions. <code>pipe([f, g, h], x)</code> is equivalent to <code>h(g(f(x)))<
 </div>
 
 <a class="pilcrow h4" href="#meld">¶</a>
-<h4 id="meld"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L627">meld <span class="tight">:</span><span class="tight">:</span> [** <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> *] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (* <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> * <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> <span class="tight">.</span><span class="tight">.</span><span class="tight">.</span> <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> *)</a></code></h4>
+<h4 id="meld"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L644">meld <span class="tight">:</span><span class="tight">:</span> [** <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> *] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (* <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> * <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> <span class="tight">.</span><span class="tight">.</span><span class="tight">.</span> <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> *)</a></code></h4>
 
 <p>Takes a list of non-nullary functions and returns a curried function
 whose arity is one greater than the sum of the arities of the given
@@ -422,15 +431,15 @@ either a Just whose value is of type <code>a</code> or a Nothing (with no value)
 <p>The Maybe type satisfies the <a href="https://github.com/fantasyland/fantasy-land#monoid">Monoid</a>, <a href="https://github.com/fantasyland/fantasy-land#monad">Monad</a>, <a href="https://github.com/fantasyland/fantasy-land#traversable">Traversable</a>,
 and <a href="https://github.com/fantasyland/fantasy-land#extend">Extend</a> specifications.</p>
 <a class="pilcrow h4" href="#MaybeType">¶</a>
-<h4 id="MaybeType"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L676">MaybeType <span class="tight">:</span><span class="tight">:</span> Type <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Type</a></code></h4>
+<h4 id="MaybeType"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L693">MaybeType <span class="tight">:</span><span class="tight">:</span> Type <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Type</a></code></h4>
 
 <p>A <a href="https://github.com/plaid/sanctuary-def#unarytype"><code>UnaryType</code></a> for use with <a href="https://github.com/plaid/sanctuary-def">sanctuary-def</a>.</p>
 <a class="pilcrow h4" href="#Maybe">¶</a>
-<h4 id="Maybe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L680">Maybe <span class="tight">:</span><span class="tight">:</span> TypeRep Maybe</a></code></h4>
+<h4 id="Maybe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L697">Maybe <span class="tight">:</span><span class="tight">:</span> TypeRep Maybe</a></code></h4>
 
 <p>The <a href="#type-representatives">type representative</a> for the Maybe type.</p>
 <a class="pilcrow h4" href="#Maybe.empty">¶</a>
-<h4 id="Maybe.empty"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L689">Maybe.empty <span class="tight">:</span><span class="tight">:</span> <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="Maybe.empty"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L706">Maybe.empty <span class="tight">:</span><span class="tight">:</span> <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Returns a Nothing.</p>
 <div class="examples">
@@ -441,7 +450,7 @@ and <a href="https://github.com/fantasyland/fantasy-land#extend">Extend</a> spec
 </div>
 
 <a class="pilcrow h4" href="#Maybe.of">¶</a>
-<h4 id="Maybe.of"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L703">Maybe.of <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="Maybe.of"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L720">Maybe.of <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Takes a value of any type and returns a Just with the given value.</p>
 <div class="examples">
@@ -452,11 +461,11 @@ and <a href="https://github.com/fantasyland/fantasy-land#extend">Extend</a> spec
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.@@type">¶</a>
-<h4 id="Maybe.prototype.@@type"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L717">Maybe#@@type <span class="tight">:</span><span class="tight">:</span> String</a></code></h4>
+<h4 id="Maybe.prototype.@@type"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L734">Maybe#@@type <span class="tight">:</span><span class="tight">:</span> String</a></code></h4>
 
 <p>Maybe type identifier, <code>&#39;sanctuary/Maybe&#39;</code>.</p>
 <a class="pilcrow h4" href="#Maybe.prototype.isNothing">¶</a>
-<h4 id="Maybe.prototype.isNothing"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L722">Maybe#isNothing <span class="tight">:</span><span class="tight">:</span> Boolean</a></code></h4>
+<h4 id="Maybe.prototype.isNothing"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L739">Maybe#isNothing <span class="tight">:</span><span class="tight">:</span> Boolean</a></code></h4>
 
 <p><code>true</code> if <code>this</code> is a Nothing; <code>false</code> if <code>this</code> is a Just.</p>
 <div class="examples">
@@ -471,7 +480,7 @@ and <a href="https://github.com/fantasyland/fantasy-land#extend">Extend</a> spec
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.isJust">¶</a>
-<h4 id="Maybe.prototype.isJust"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L734">Maybe#isJust <span class="tight">:</span><span class="tight">:</span> Boolean</a></code></h4>
+<h4 id="Maybe.prototype.isJust"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L751">Maybe#isJust <span class="tight">:</span><span class="tight">:</span> Boolean</a></code></h4>
 
 <p><code>true</code> if <code>this</code> is a Just; <code>false</code> if <code>this</code> is a Nothing.</p>
 <div class="examples">
@@ -486,7 +495,7 @@ and <a href="https://github.com/fantasyland/fantasy-land#extend">Extend</a> spec
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.ap">¶</a>
-<h4 id="Maybe.prototype.ap"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L746">Maybe#ap <span class="tight">:</span><span class="tight">:</span> Maybe (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow">~&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
+<h4 id="Maybe.prototype.ap"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L763">Maybe#ap <span class="tight">:</span><span class="tight">:</span> Maybe (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow">~&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
 
 <p>Takes a value of type <code>Maybe a</code> and returns a Nothing unless <code>this</code>
 is a Just <em>and</em> the argument is a Just, in which case it returns a
@@ -508,7 +517,7 @@ the given Just&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.chain">¶</a>
-<h4 id="Maybe.prototype.chain"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L769">Maybe#chain <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
+<h4 id="Maybe.prototype.chain"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L786">Maybe#chain <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
 
 <p>Takes a function and returns <code>this</code> if <code>this</code> is a Nothing; otherwise
 it returns the result of applying the function to this Just&#39;s value.</p>
@@ -528,7 +537,7 @@ it returns the result of applying the function to this Just&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.concat">¶</a>
-<h4 id="Maybe.prototype.concat"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L790">Maybe#concat <span class="tight">:</span><span class="tight">:</span> Semigroup a <span class="arrow">=&gt;</span> Maybe a <span class="arrow">~&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="Maybe.prototype.concat"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L807">Maybe#concat <span class="tight">:</span><span class="tight">:</span> Semigroup a <span class="arrow">=&gt;</span> Maybe a <span class="arrow">~&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Returns the result of concatenating two Maybe values of the same type.
 <code>a</code> must have a <a href="https://github.com/fantasyland/fantasy-land#semigroup">Semigroup</a> (indicated by the presence of a <code>concat</code>
@@ -559,7 +568,7 @@ the given Just&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.empty">¶</a>
-<h4 id="Maybe.prototype.empty"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L827">Maybe#empty <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> Maybe a</a></code></h4>
+<h4 id="Maybe.prototype.empty"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L844">Maybe#empty <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> Maybe a</a></code></h4>
 
 <p>Returns a Nothing.</p>
 <div class="examples">
@@ -570,7 +579,7 @@ the given Just&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.equals">¶</a>
-<h4 id="Maybe.prototype.equals"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L841">Maybe#equals <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="Maybe.prototype.equals"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L858">Maybe#equals <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Takes a value of any type and returns <code>true</code> if:</p>
 <ul>
@@ -604,7 +613,7 @@ according to <a href="http://ramdajs.com/docs/#equals"><code>R.equals</code></a>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.extend">¶</a>
-<h4 id="Maybe.prototype.extend"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L876">Maybe#extend <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="Maybe.prototype.extend"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L893">Maybe#extend <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Takes a function and returns <code>this</code> if <code>this</code> is a Nothing; otherwise
 it returns a Just whose value is the result of applying the function to
@@ -621,7 +630,7 @@ it returns a Just whose value is the result of applying the function to
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.filter">¶</a>
-<h4 id="Maybe.prototype.filter"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L895">Maybe#filter <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="Maybe.prototype.filter"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L912">Maybe#filter <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Takes a predicate and returns <code>this</code> if <code>this</code> is a Just whose value
 satisfies the predicate; Nothing otherwise.</p>
@@ -637,7 +646,7 @@ satisfies the predicate; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.map">¶</a>
-<h4 id="Maybe.prototype.map"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L913">Maybe#map <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
+<h4 id="Maybe.prototype.map"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L930">Maybe#map <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
 
 <p>Takes a function and returns <code>this</code> if <code>this</code> is a Nothing; otherwise
 it returns a Just whose value is the result of applying the function to
@@ -654,7 +663,7 @@ this Just&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.of">¶</a>
-<h4 id="Maybe.prototype.of"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L934">Maybe#of <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
+<h4 id="Maybe.prototype.of"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L951">Maybe#of <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
 
 <p>Takes a value of any type and returns a Just with the given value.</p>
 <div class="examples">
@@ -665,7 +674,7 @@ this Just&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.reduce">¶</a>
-<h4 id="Maybe.prototype.reduce"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L948">Maybe#reduce <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</a></code></h4>
+<h4 id="Maybe.prototype.reduce"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L965">Maybe#reduce <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</a></code></h4>
 
 <p>Takes a function and an initial value of any type, and returns:</p>
 <ul>
@@ -687,7 +696,7 @@ Just&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.sequence">¶</a>
-<h4 id="Maybe.prototype.sequence"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L972">Maybe#sequence <span class="tight">:</span><span class="tight">:</span> Applicative f <span class="arrow">=&gt;</span> Maybe (f a) <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f (Maybe a)</a></code></h4>
+<h4 id="Maybe.prototype.sequence"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L989">Maybe#sequence <span class="tight">:</span><span class="tight">:</span> Applicative f <span class="arrow">=&gt;</span> Maybe (f a) <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f (Maybe a)</a></code></h4>
 
 <p>Evaluates an applicative action contained within the Maybe, resulting in:</p>
 <ul>
@@ -708,7 +717,7 @@ Just&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.toBoolean">¶</a>
-<h4 id="Maybe.prototype.toBoolean"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L995">Maybe#toBoolean <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> Boolean</a></code></h4>
+<h4 id="Maybe.prototype.toBoolean"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1012">Maybe#toBoolean <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> Boolean</a></code></h4>
 
 <p>Returns <code>false</code> if <code>this</code> is a Nothing; <code>true</code> if <code>this</code> is a Just.</p>
 <div class="examples">
@@ -723,7 +732,7 @@ Just&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.toString">¶</a>
-<h4 id="Maybe.prototype.toString"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1012">Maybe#toString <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> String</a></code></h4>
+<h4 id="Maybe.prototype.toString"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1029">Maybe#toString <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> String</a></code></h4>
 
 <p>Returns the string representation of the Maybe.</p>
 <div class="examples">
@@ -738,7 +747,7 @@ Just&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Maybe.prototype.inspect">¶</a>
-<h4 id="Maybe.prototype.inspect"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1032">Maybe#inspect <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> String</a></code></h4>
+<h4 id="Maybe.prototype.inspect"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1049">Maybe#inspect <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> String</a></code></h4>
 
 <p>Returns the string representation of the Maybe. This method is used by
 <code>util.inspect</code> and the REPL to format a Maybe for display.</p>
@@ -755,7 +764,7 @@ Just&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Nothing">¶</a>
-<h4 id="Nothing"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1048">Nothing <span class="tight">:</span><span class="tight">:</span> <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="Nothing"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1065">Nothing <span class="tight">:</span><span class="tight">:</span> <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Returns a Nothing. Though this is a constructor function the <code>new</code>
 keyword needn&#39;t be used.</p>
@@ -767,7 +776,7 @@ keyword needn&#39;t be used.</p>
 </div>
 
 <a class="pilcrow h4" href="#Just">¶</a>
-<h4 id="Just"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1064">Just <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="Just"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1081">Just <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Takes a value of any type and returns a Just with the given value.
 Though this is a constructor function the <code>new</code> keyword needn&#39;t be
@@ -780,7 +789,7 @@ used.</p>
 </div>
 
 <a class="pilcrow h4" href="#isNothing">¶</a>
-<h4 id="isNothing"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1082">isNothing <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="isNothing"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1099">isNothing <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Returns <code>true</code> if the given Maybe is a Nothing; <code>false</code> if it is a Just.</p>
 <div class="examples">
@@ -795,7 +804,7 @@ used.</p>
 </div>
 
 <a class="pilcrow h4" href="#isJust">¶</a>
-<h4 id="isJust"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1099">isJust <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="isJust"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1116">isJust <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Returns <code>true</code> if the given Maybe is a Just; <code>false</code> if it is a Nothing.</p>
 <div class="examples">
@@ -810,7 +819,7 @@ used.</p>
 </div>
 
 <a class="pilcrow h4" href="#fromMaybe">¶</a>
-<h4 id="fromMaybe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1116">fromMaybe <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
+<h4 id="fromMaybe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1133">fromMaybe <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
 
 <p>Takes a default value and a Maybe, and returns the Maybe&#39;s value
 if the Maybe is a Just; the default value otherwise.</p>
@@ -826,7 +835,7 @@ if the Maybe is a Just; the default value otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#toMaybe">¶</a>
-<h4 id="toMaybe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1134">toMaybe <span class="tight">:</span><span class="tight">:</span> a? <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="toMaybe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1151">toMaybe <span class="tight">:</span><span class="tight">:</span> a? <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Takes a value and returns Nothing if the value is null or undefined;
 Just the value otherwise.</p>
@@ -842,7 +851,7 @@ Just the value otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#maybe">¶</a>
-<h4 id="maybe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1152">maybe <span class="tight">:</span><span class="tight">:</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</a></code></h4>
+<h4 id="maybe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1169">maybe <span class="tight">:</span><span class="tight">:</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</a></code></h4>
 
 <p>Takes a value of any type, a function, and a Maybe. If the Maybe is
 a Just, the return value is the result of applying the function to
@@ -859,7 +868,7 @@ the Just&#39;s value. Otherwise, the first argument is returned.</p>
 </div>
 
 <a class="pilcrow h4" href="#catMaybes">¶</a>
-<h4 id="catMaybes"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1171">catMaybes <span class="tight">:</span><span class="tight">:</span> [Maybe a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a]</a></code></h4>
+<h4 id="catMaybes"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1188">catMaybes <span class="tight">:</span><span class="tight">:</span> [Maybe a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a]</a></code></h4>
 
 <p>Takes a list of Maybes and returns a list containing each Just&#39;s value.</p>
 <div class="examples">
@@ -870,7 +879,7 @@ the Just&#39;s value. Otherwise, the first argument is returned.</p>
 </div>
 
 <a class="pilcrow h4" href="#mapMaybe">¶</a>
-<h4 id="mapMaybe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1185">mapMaybe <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [b]</a></code></h4>
+<h4 id="mapMaybe"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1202">mapMaybe <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [b]</a></code></h4>
 
 <p>Takes a function and a list, applies the function to each element of
 the list, and returns a list of &quot;successful&quot; results. If the result of
@@ -886,7 +895,7 @@ the output list.</p>
 </div>
 
 <a class="pilcrow h4" href="#encase">¶</a>
-<h4 id="encase"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1205">encase <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
+<h4 id="encase"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1222">encase <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
 
 <p>Takes a unary function <code>f</code> which may throw and a value <code>x</code> of any type,
 and applies <code>f</code> to <code>x</code> inside a <code>try</code> block. If an exception is caught,
@@ -905,11 +914,11 @@ result of applying <code>f</code> to <code>x</code>.</p>
 </div>
 
 <a class="pilcrow h4" href="#encase2">¶</a>
-<h4 id="encase2"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1233">encase2 <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe c</a></code></h4>
+<h4 id="encase2"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1250">encase2 <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe c</a></code></h4>
 
 <p>Binary version of <a href="#encase"><code>encase</code></a>.</p>
 <a class="pilcrow h4" href="#encase3">¶</a>
-<h4 id="encase3"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1248">encase3 <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> d) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe d</a></code></h4>
+<h4 id="encase3"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1265">encase3 <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> d) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe d</a></code></h4>
 
 <p>Ternary version of <a href="#encase"><code>encase</code></a>.</p>
 <a class="pilcrow h3" href="#either-type">¶</a>
@@ -920,15 +929,15 @@ value is of type <code>b</code>.</p>
 <p>The Either type satisfies the <a href="https://github.com/fantasyland/fantasy-land#semigroup">Semigroup</a>, <a href="https://github.com/fantasyland/fantasy-land#monad">Monad</a>, and <a href="https://github.com/fantasyland/fantasy-land#extend">Extend</a>
 specifications.</p>
 <a class="pilcrow h4" href="#EitherType">¶</a>
-<h4 id="EitherType"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1272">EitherType <span class="tight">:</span><span class="tight">:</span> Type <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Type <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Type</a></code></h4>
+<h4 id="EitherType"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1289">EitherType <span class="tight">:</span><span class="tight">:</span> Type <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Type <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Type</a></code></h4>
 
 <p>A <a href="https://github.com/plaid/sanctuary-def#binarytype"><code>BinaryType</code></a> for use with <a href="https://github.com/plaid/sanctuary-def">sanctuary-def</a>.</p>
 <a class="pilcrow h4" href="#Either">¶</a>
-<h4 id="Either"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1276">Either <span class="tight">:</span><span class="tight">:</span> TypeRep Either</a></code></h4>
+<h4 id="Either"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1293">Either <span class="tight">:</span><span class="tight">:</span> TypeRep Either</a></code></h4>
 
 <p>The <a href="#type-representatives">type representative</a> for the Either type.</p>
 <a class="pilcrow h4" href="#Either.of">¶</a>
-<h4 id="Either.of"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1285">Either.of <span class="tight">:</span><span class="tight">:</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
+<h4 id="Either.of"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1302">Either.of <span class="tight">:</span><span class="tight">:</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
 
 <p>Takes a value of any type and returns a Right with the given value.</p>
 <div class="examples">
@@ -939,11 +948,11 @@ specifications.</p>
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.@@type">¶</a>
-<h4 id="Either.prototype.@@type"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1299">Either#@@type <span class="tight">:</span><span class="tight">:</span> String</a></code></h4>
+<h4 id="Either.prototype.@@type"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1316">Either#@@type <span class="tight">:</span><span class="tight">:</span> String</a></code></h4>
 
 <p>Either type identifier, <code>&#39;sanctuary/Either&#39;</code>.</p>
 <a class="pilcrow h4" href="#Either.prototype.isLeft">¶</a>
-<h4 id="Either.prototype.isLeft"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1304">Either#isLeft <span class="tight">:</span><span class="tight">:</span> Boolean</a></code></h4>
+<h4 id="Either.prototype.isLeft"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1321">Either#isLeft <span class="tight">:</span><span class="tight">:</span> Boolean</a></code></h4>
 
 <p><code>true</code> if <code>this</code> is a Left; <code>false</code> if <code>this</code> is a Right.</p>
 <div class="examples">
@@ -958,7 +967,7 @@ specifications.</p>
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.isRight">¶</a>
-<h4 id="Either.prototype.isRight"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1316">Either#isRight <span class="tight">:</span><span class="tight">:</span> Boolean</a></code></h4>
+<h4 id="Either.prototype.isRight"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1333">Either#isRight <span class="tight">:</span><span class="tight">:</span> Boolean</a></code></h4>
 
 <p><code>true</code> if <code>this</code> is a Right; <code>false</code> if <code>this</code> is a Left.</p>
 <div class="examples">
@@ -973,7 +982,7 @@ specifications.</p>
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.ap">¶</a>
-<h4 id="Either.prototype.ap"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1328">Either#ap <span class="tight">:</span><span class="tight">:</span> Either a (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow">~&gt;</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</a></code></h4>
+<h4 id="Either.prototype.ap"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1345">Either#ap <span class="tight">:</span><span class="tight">:</span> Either a (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow">~&gt;</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</a></code></h4>
 
 <p>Takes a value of type <code>Either a b</code> and returns a Left unless <code>this</code>
 is a Right <em>and</em> the argument is a Right, in which case it returns
@@ -995,7 +1004,7 @@ the given Right&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.chain">¶</a>
-<h4 id="Either.prototype.chain"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1351">Either#chain <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</a></code></h4>
+<h4 id="Either.prototype.chain"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1368">Either#chain <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</a></code></h4>
 
 <p>Takes a function and returns <code>this</code> if <code>this</code> is a Left; otherwise
 it returns the result of applying the function to this Right&#39;s value.</p>
@@ -1019,7 +1028,7 @@ it returns the result of applying the function to this Right&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.concat">¶</a>
-<h4 id="Either.prototype.concat"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1379">Either#concat <span class="tight">:</span><span class="tight">:</span> (Semigroup a, Semigroup b) <span class="arrow">=&gt;</span> Either a b <span class="arrow">~&gt;</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
+<h4 id="Either.prototype.concat"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1396">Either#concat <span class="tight">:</span><span class="tight">:</span> (Semigroup a, Semigroup b) <span class="arrow">=&gt;</span> Either a b <span class="arrow">~&gt;</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
 
 <p>Returns the result of concatenating two Either values of the same type.
 <code>a</code> must have a <a href="https://github.com/fantasyland/fantasy-land#semigroup">Semigroup</a> (indicated by the presence of a <code>concat</code>
@@ -1051,7 +1060,7 @@ the given Right&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.equals">¶</a>
-<h4 id="Either.prototype.equals"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1418">Either#equals <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="Either.prototype.equals"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1435">Either#equals <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Takes a value of any type and returns <code>true</code> if:</p>
 <ul>
@@ -1078,7 +1087,7 @@ according to <a href="http://ramdajs.com/docs/#equals"><code>R.equals</code></a>
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.extend">¶</a>
-<h4 id="Either.prototype.extend"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1447">Either#extend <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> (Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
+<h4 id="Either.prototype.extend"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1464">Either#extend <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> (Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
 
 <p>Takes a function and returns <code>this</code> if <code>this</code> is a Left; otherwise it
 returns a Right whose value is the result of applying the function to
@@ -1095,7 +1104,7 @@ returns a Right whose value is the result of applying the function to
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.map">¶</a>
-<h4 id="Either.prototype.map"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1468">Either#map <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</a></code></h4>
+<h4 id="Either.prototype.map"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1485">Either#map <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</a></code></h4>
 
 <p>Takes a function and returns <code>this</code> if <code>this</code> is a Left; otherwise it
 returns a Right whose value is the result of applying the function to
@@ -1112,7 +1121,7 @@ this Right&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.of">¶</a>
-<h4 id="Either.prototype.of"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1489">Either#of <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</a></code></h4>
+<h4 id="Either.prototype.of"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1506">Either#of <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</a></code></h4>
 
 <p>Takes a value of any type and returns a Right with the given value.</p>
 <div class="examples">
@@ -1123,7 +1132,7 @@ this Right&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.toBoolean">¶</a>
-<h4 id="Either.prototype.toBoolean"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1503">Either#toBoolean <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> Boolean</a></code></h4>
+<h4 id="Either.prototype.toBoolean"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1520">Either#toBoolean <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> Boolean</a></code></h4>
 
 <p>Returns <code>false</code> if <code>this</code> is a Left; <code>true</code> if <code>this</code> is a Right.</p>
 <div class="examples">
@@ -1138,7 +1147,7 @@ this Right&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.toString">¶</a>
-<h4 id="Either.prototype.toString"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1520">Either#toString <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> String</a></code></h4>
+<h4 id="Either.prototype.toString"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1537">Either#toString <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> String</a></code></h4>
 
 <p>Returns the string representation of the Either.</p>
 <div class="examples">
@@ -1153,7 +1162,7 @@ this Right&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Either.prototype.inspect">¶</a>
-<h4 id="Either.prototype.inspect"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1540">Either#inspect <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> String</a></code></h4>
+<h4 id="Either.prototype.inspect"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1557">Either#inspect <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> String</a></code></h4>
 
 <p>Returns the string representation of the Either. This method is used by
 <code>util.inspect</code> and the REPL to format a Either for display.</p>
@@ -1170,7 +1179,7 @@ this Right&#39;s value.</p>
 </div>
 
 <a class="pilcrow h4" href="#Left">¶</a>
-<h4 id="Left"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1556">Left <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
+<h4 id="Left"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1573">Left <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
 
 <p>Takes a value of any type and returns a Left with the given value.
 Though this is a constructor function the <code>new</code> keyword needn&#39;t be
@@ -1183,7 +1192,7 @@ used.</p>
 </div>
 
 <a class="pilcrow h4" href="#Right">¶</a>
-<h4 id="Right"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1574">Right <span class="tight">:</span><span class="tight">:</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
+<h4 id="Right"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1591">Right <span class="tight">:</span><span class="tight">:</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
 
 <p>Takes a value of any type and returns a Right with the given value.
 Though this is a constructor function the <code>new</code> keyword needn&#39;t be
@@ -1196,7 +1205,7 @@ used.</p>
 </div>
 
 <a class="pilcrow h4" href="#isLeft">¶</a>
-<h4 id="isLeft"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1592">isLeft <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="isLeft"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1609">isLeft <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Returns <code>true</code> if the given Either is a Left; <code>false</code> if it is a Right.</p>
 <div class="examples">
@@ -1211,7 +1220,7 @@ used.</p>
 </div>
 
 <a class="pilcrow h4" href="#isRight">¶</a>
-<h4 id="isRight"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1609">isRight <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="isRight"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1626">isRight <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Returns <code>true</code> if the given Either is a Right; <code>false</code> if it is a Left.</p>
 <div class="examples">
@@ -1226,7 +1235,7 @@ used.</p>
 </div>
 
 <a class="pilcrow h4" href="#either">¶</a>
-<h4 id="either"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1626">either <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
+<h4 id="either"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1643">either <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</a></code></h4>
 
 <p>Takes two functions and an Either, and returns the result of
 applying the first function to the Left&#39;s value, if the Either
@@ -1244,7 +1253,7 @@ Right&#39;s value, if the Either is a Right.</p>
 </div>
 
 <a class="pilcrow h4" href="#lefts">¶</a>
-<h4 id="lefts"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1648">lefts <span class="tight">:</span><span class="tight">:</span> [Either a b] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a]</a></code></h4>
+<h4 id="lefts"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1665">lefts <span class="tight">:</span><span class="tight">:</span> [Either a b] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a]</a></code></h4>
 
 <p>Takes a list of Eithers and returns a list containing each Left&#39;s value.</p>
 <p>See also <a href="#rights"><code>rights</code></a>.</p>
@@ -1256,7 +1265,7 @@ Right&#39;s value, if the Either is a Right.</p>
 </div>
 
 <a class="pilcrow h4" href="#rights">¶</a>
-<h4 id="rights"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1666">rights <span class="tight">:</span><span class="tight">:</span> [Either a b] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [b]</a></code></h4>
+<h4 id="rights"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1683">rights <span class="tight">:</span><span class="tight">:</span> [Either a b] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [b]</a></code></h4>
 
 <p>Takes a list of Eithers and returns a list containing each Right&#39;s value.</p>
 <p>See also <a href="#lefts"><code>lefts</code></a>.</p>
@@ -1268,7 +1277,7 @@ Right&#39;s value, if the Either is a Right.</p>
 </div>
 
 <a class="pilcrow h4" href="#encaseEither">¶</a>
-<h4 id="encaseEither"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1684">encaseEither <span class="tight">:</span><span class="tight">:</span> (Error <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> l) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> r) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either l r</a></code></h4>
+<h4 id="encaseEither"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1701">encaseEither <span class="tight">:</span><span class="tight">:</span> (Error <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> l) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> r) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either l r</a></code></h4>
 
 <p>Takes two unary functions, <code>f</code> and <code>g</code>, the second of which may throw,
 and a value <code>x</code> of any type. Applies <code>g</code> to <code>x</code> inside a <code>try</code> block.
@@ -1292,15 +1301,15 @@ value is a Right containing the result of applying <code>g</code> to <code>x</co
 </div>
 
 <a class="pilcrow h4" href="#encaseEither2">¶</a>
-<h4 id="encaseEither2"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1716">encaseEither2 <span class="tight">:</span><span class="tight">:</span> (Error <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> l) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> r) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either l r</a></code></h4>
+<h4 id="encaseEither2"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1733">encaseEither2 <span class="tight">:</span><span class="tight">:</span> (Error <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> l) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> r) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either l r</a></code></h4>
 
 <p>Binary version of <a href="#encaseEither"><code>encaseEither</code></a>.</p>
 <a class="pilcrow h4" href="#encaseEither3">¶</a>
-<h4 id="encaseEither3"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1731">encaseEither3 <span class="tight">:</span><span class="tight">:</span> (Error <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> l) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> r) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either l r</a></code></h4>
+<h4 id="encaseEither3"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1748">encaseEither3 <span class="tight">:</span><span class="tight">:</span> (Error <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> l) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> r) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either l r</a></code></h4>
 
 <p>Ternary version of <a href="#encaseEither"><code>encaseEither</code></a>.</p>
 <a class="pilcrow h4" href="#maybeToEither">¶</a>
-<h4 id="maybeToEither"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1746">maybeToEither <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
+<h4 id="maybeToEither"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1763">maybeToEither <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</a></code></h4>
 
 <p>Takes a value of any type and a Maybe, and returns an Either.
 If the second argument is a Nothing, a Left containing the first
@@ -1320,7 +1329,7 @@ containing the Just&#39;s value is returned.</p>
 <a class="pilcrow h3" href="#alternative">¶</a>
 <h3 id="alternative">Alternative</h3>
 <a class="pilcrow h4" href="#and">¶</a>
-<h4 id="and"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1796">and <span class="tight">:</span><span class="tight">:</span> Alternative a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
+<h4 id="and"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1813">and <span class="tight">:</span><span class="tight">:</span> Alternative a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
 
 <p>Takes two values of the same type and returns the second value
 if the first is &quot;true&quot;; the first value otherwise. An array is
@@ -1339,7 +1348,7 @@ a <code>toBoolean</code> method.</p>
 </div>
 
 <a class="pilcrow h4" href="#or">¶</a>
-<h4 id="or"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1817">or <span class="tight">:</span><span class="tight">:</span> Alternative a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
+<h4 id="or"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1834">or <span class="tight">:</span><span class="tight">:</span> Alternative a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
 
 <p>Takes two values of the same type and returns the first value if it
 is &quot;true&quot;; the second value otherwise. An array is considered &quot;true&quot;
@@ -1357,7 +1366,7 @@ considered &quot;true&quot;. Other types must provide a <code>toBoolean</code> m
 </div>
 
 <a class="pilcrow h4" href="#xor">¶</a>
-<h4 id="xor"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1837">xor <span class="tight">:</span><span class="tight">:</span> (Alternative a, Monoid a) <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
+<h4 id="xor"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1854">xor <span class="tight">:</span><span class="tight">:</span> (Alternative a, Monoid a) <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
 
 <p>Takes two values of the same type and returns the &quot;true&quot; value
 if one value is &quot;true&quot; and the other is &quot;false&quot;; otherwise it
@@ -1379,7 +1388,7 @@ also considered &quot;true&quot;. Other types must provide <code>toBoolean</code
 <a class="pilcrow h3" href="#logic">¶</a>
 <h3 id="logic">Logic</h3>
 <a class="pilcrow h4" href="#not">¶</a>
-<h4 id="not"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1863">not <span class="tight">:</span><span class="tight">:</span> Boolean <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="not"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1880">not <span class="tight">:</span><span class="tight">:</span> Boolean <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Takes a Boolean and returns the negation of that value
 (<code>false</code> for <code>true</code>; <code>true</code> for <code>false</code>).</p>
@@ -1395,7 +1404,7 @@ also considered &quot;true&quot;. Other types must provide <code>toBoolean</code
 </div>
 
 <a class="pilcrow h4" href="#ifElse">¶</a>
-<h4 id="ifElse"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1881">ifElse <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</a></code></h4>
+<h4 id="ifElse"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1898">ifElse <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</a></code></h4>
 
 <p>Takes a unary predicate, a unary &quot;if&quot; function, a unary &quot;else&quot;
 function, and a value of any type, and returns the result of
@@ -1414,7 +1423,7 @@ value otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#allPass">¶</a>
-<h4 id="allPass"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1902">allPass <span class="tight">:</span><span class="tight">:</span> [a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="allPass"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1919">allPass <span class="tight">:</span><span class="tight">:</span> [a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Takes an array of unary predicates and a value of any type
 and returns <code>true</code> if all the predicates pass; <code>false</code> otherwise.
@@ -1432,7 +1441,7 @@ first failed predicate.</p>
 </div>
 
 <a class="pilcrow h4" href="#anyPass">¶</a>
-<h4 id="anyPass"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1927">anyPass <span class="tight">:</span><span class="tight">:</span> [a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="anyPass"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1944">anyPass <span class="tight">:</span><span class="tight">:</span> [a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Takes an array of unary predicates and a value of any type
 and returns <code>true</code> if any of the predicates pass; <code>false</code> otherwise.
@@ -1452,7 +1461,7 @@ first passed predicate.</p>
 <a class="pilcrow h3" href="#list">¶</a>
 <h3 id="list">List</h3>
 <a class="pilcrow h4" href="#slice">¶</a>
-<h4 id="slice"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1954">slice <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
+<h4 id="slice"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L1971">slice <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
 
 <p>Returns Just a list containing the elements from the supplied list
 from a beginning index (inclusive) to an end index (exclusive).
@@ -1486,7 +1495,7 @@ result, one may replace <code>[a]</code> with <code>String</code> in the type si
 </div>
 
 <a class="pilcrow h4" href="#at">¶</a>
-<h4 id="at"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L1996">at <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="at"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2013">at <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Takes an index and a list and returns Just the element of the list at
 the index if the index is within the list&#39;s bounds; Nothing otherwise.
@@ -1507,7 +1516,7 @@ A negative index represents an offset from the length of the list.</p>
 </div>
 
 <a class="pilcrow h4" href="#head">¶</a>
-<h4 id="head"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2020">head <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="head"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2037">head <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Takes a list and returns Just the first element of the list if the
 list contains at least one element; Nothing if the list is empty.</p>
@@ -1523,7 +1532,7 @@ list contains at least one element; Nothing if the list is empty.</p>
 </div>
 
 <a class="pilcrow h4" href="#last">¶</a>
-<h4 id="last"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2038">last <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="last"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2055">last <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Takes a list and returns Just the last element of the list if the
 list contains at least one element; Nothing if the list is empty.</p>
@@ -1539,7 +1548,7 @@ list contains at least one element; Nothing if the list is empty.</p>
 </div>
 
 <a class="pilcrow h4" href="#tail">¶</a>
-<h4 id="tail"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2056">tail <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
+<h4 id="tail"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2073">tail <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
 
 <p>Takes a list and returns Just a list containing all but the first
 of the list&#39;s elements if the list contains at least one element;
@@ -1556,7 +1565,7 @@ Nothing if the list is empty.</p>
 </div>
 
 <a class="pilcrow h4" href="#init">¶</a>
-<h4 id="init"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2075">init <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
+<h4 id="init"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2092">init <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
 
 <p>Takes a list and returns Just a list containing all but the last
 of the list&#39;s elements if the list contains at least one element;
@@ -1573,7 +1582,7 @@ Nothing if the list is empty.</p>
 </div>
 
 <a class="pilcrow h4" href="#take">¶</a>
-<h4 id="take"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2094">take <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
+<h4 id="take"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2111">take <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
 
 <p>Returns Just the first N elements of the given collection if N is
 greater than or equal to zero and less than or equal to the length
@@ -1595,7 +1604,7 @@ any other collection type which provides a <code>slice</code> method.</p>
 </div>
 
 <a class="pilcrow h4" href="#takeLast">¶</a>
-<h4 id="takeLast"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2119">takeLast <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
+<h4 id="takeLast"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2136">takeLast <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
 
 <p>Returns Just the last N elements of the given collection if N is
 greater than or equal to zero and less than or equal to the length
@@ -1617,7 +1626,7 @@ any other collection type which provides a <code>slice</code> method.</p>
 </div>
 
 <a class="pilcrow h4" href="#drop">¶</a>
-<h4 id="drop"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2144">drop <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
+<h4 id="drop"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2161">drop <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
 
 <p>Returns Just all but the first N elements of the given collection
 if N is greater than or equal to zero and less than or equal to the
@@ -1639,7 +1648,7 @@ and any other collection type which provides a <code>slice</code> method.</p>
 </div>
 
 <a class="pilcrow h4" href="#dropLast">¶</a>
-<h4 id="dropLast"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2169">dropLast <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
+<h4 id="dropLast"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2186">dropLast <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</a></code></h4>
 
 <p>Returns Just all but the last N elements of the given collection
 if N is greater than or equal to zero and less than or equal to the
@@ -1661,7 +1670,7 @@ and any other collection type which provides a <code>slice</code> method.</p>
 </div>
 
 <a class="pilcrow h4" href="#find">¶</a>
-<h4 id="find"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2194">find <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
+<h4 id="find"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2211">find <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</a></code></h4>
 
 <p>Takes a predicate and a list and returns Just the leftmost element of
 the list which satisfies the predicate; Nothing if none of the list&#39;s
@@ -1678,7 +1687,7 @@ elements satisfies the predicate.</p>
 </div>
 
 <a class="pilcrow h4" href="#indexOf">¶</a>
-<h4 id="indexOf"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2237">indexOf <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Integer</a></code></h4>
+<h4 id="indexOf"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2254">indexOf <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Integer</a></code></h4>
 
 <p>Takes a value of any type and a list, and returns Just the index
 of the first occurrence of the value in the list, if applicable;
@@ -1706,7 +1715,7 @@ type signature.</p>
 </div>
 
 <a class="pilcrow h4" href="#lastIndexOf">¶</a>
-<h4 id="lastIndexOf"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2262">lastIndexOf <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Integer</a></code></h4>
+<h4 id="lastIndexOf"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2279">lastIndexOf <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Integer</a></code></h4>
 
 <p>Takes a value of any type and a list, and returns Just the index
 of the last occurrence of the value in the list, if applicable;
@@ -1734,7 +1743,7 @@ type signature.</p>
 </div>
 
 <a class="pilcrow h4" href="#pluck">¶</a>
-<h4 id="pluck"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2287">pluck <span class="tight">:</span><span class="tight">:</span> Accessible a <span class="arrow">=&gt;</span> TypeRep b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [Maybe b]</a></code></h4>
+<h4 id="pluck"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2304">pluck <span class="tight">:</span><span class="tight">:</span> Accessible a <span class="arrow">=&gt;</span> TypeRep b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [Maybe b]</a></code></h4>
 
 <p>Takes a <a href="#type-representatives">type representative</a>, a property name,
 and a list of objects and returns a list of equal length. Each element
@@ -1750,7 +1759,7 @@ to <a href="#is"><code>is</code></a>); Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#reduce">¶</a>
-<h4 id="reduce"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2307">reduce <span class="tight">:</span><span class="tight">:</span> Foldable f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
+<h4 id="reduce"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2324">reduce <span class="tight">:</span><span class="tight">:</span> Foldable f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
 
 <p>Takes a binary function, an initial value, and a <a href="https://github.com/fantasyland/fantasy-land#foldable">Foldable</a>, and
 applies the function to the initial value and the Foldable&#39;s first
@@ -1771,7 +1780,7 @@ otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#unfoldr">¶</a>
-<h4 id="unfoldr"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2340">unfoldr <span class="tight">:</span><span class="tight">:</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe (a, b)) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a]</a></code></h4>
+<h4 id="unfoldr"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2357">unfoldr <span class="tight">:</span><span class="tight">:</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe (a, b)) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a]</a></code></h4>
 
 <p>Takes a function and a seed value, and returns a list generated by
 applying the function repeatedly. The list is initially empty. The
@@ -1794,7 +1803,7 @@ the list and the function is applied to the second element.</p>
 <a class="pilcrow h3" href="#object">¶</a>
 <h3 id="object">Object</h3>
 <a class="pilcrow h4" href="#get">¶</a>
-<h4 id="get"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2372">get <span class="tight">:</span><span class="tight">:</span> Accessible a <span class="arrow">=&gt;</span> TypeRep b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
+<h4 id="get"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2389">get <span class="tight">:</span><span class="tight">:</span> Accessible a <span class="arrow">=&gt;</span> TypeRep b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
 
 <p>Takes a <a href="#type-representatives">type representative</a>, a property
 name, and an object and returns Just the value of the specified object
@@ -1819,7 +1828,7 @@ values have <code>Object.prototype</code> in their prototype chains.</p>
 </div>
 
 <a class="pilcrow h4" href="#gets">¶</a>
-<h4 id="gets"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2400">gets <span class="tight">:</span><span class="tight">:</span> Accessible a <span class="arrow">=&gt;</span> TypeRep b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [String] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
+<h4 id="gets"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2417">gets <span class="tight">:</span><span class="tight">:</span> Accessible a <span class="arrow">=&gt;</span> TypeRep b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [String] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</a></code></h4>
 
 <p>Takes a <a href="#type-representatives">type representative</a>, a list of property
 names, and an object and returns Just the value at the path specified by
@@ -1844,7 +1853,7 @@ specified type; Nothing otherwise.</p>
 <a class="pilcrow h3" href="#number">¶</a>
 <h3 id="number">Number</h3>
 <a class="pilcrow h4" href="#negate">¶</a>
-<h4 id="negate"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2436">negate <span class="tight">:</span><span class="tight">:</span> ValidNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> ValidNumber</a></code></h4>
+<h4 id="negate"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2453">negate <span class="tight">:</span><span class="tight">:</span> ValidNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> ValidNumber</a></code></h4>
 
 <p>Negates its argument.</p>
 <div class="examples">
@@ -1859,7 +1868,7 @@ specified type; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#add">¶</a>
-<h4 id="add"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2453">add <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
+<h4 id="add"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2470">add <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
 
 <p>Returns the sum of two (finite) numbers.</p>
 <div class="examples">
@@ -1870,7 +1879,7 @@ specified type; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#sub">¶</a>
-<h4 id="sub"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2467">sub <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
+<h4 id="sub"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2484">sub <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
 
 <p>Returns the difference between two (finite) numbers.</p>
 <div class="examples">
@@ -1881,7 +1890,7 @@ specified type; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#inc">¶</a>
-<h4 id="inc"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2481">inc <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
+<h4 id="inc"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2498">inc <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
 
 <p>Increments a (finite) number by one.</p>
 <div class="examples">
@@ -1892,7 +1901,7 @@ specified type; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#dec">¶</a>
-<h4 id="dec"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2495">dec <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
+<h4 id="dec"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2512">dec <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
 
 <p>Decrements a (finite) number by one.</p>
 <div class="examples">
@@ -1903,7 +1912,7 @@ specified type; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#mult">¶</a>
-<h4 id="mult"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2509">mult <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
+<h4 id="mult"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2526">mult <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
 
 <p>Returns the product of two (finite) numbers.</p>
 <div class="examples">
@@ -1914,7 +1923,7 @@ specified type; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#div">¶</a>
-<h4 id="div"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2523">div <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> NonZeroFiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
+<h4 id="div"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2540">div <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> NonZeroFiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</a></code></h4>
 
 <p>Returns the result of dividing its first argument (a finite number) by
 its second argument (a non-zero finite number).</p>
@@ -1926,7 +1935,7 @@ its second argument (a non-zero finite number).</p>
 </div>
 
 <a class="pilcrow h4" href="#min">¶</a>
-<h4 id="min"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2538">min <span class="tight">:</span><span class="tight">:</span> Ord a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
+<h4 id="min"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2555">min <span class="tight">:</span><span class="tight">:</span> Ord a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
 
 <p>Returns the smaller of its two arguments.</p>
 <p>Strings are compared lexicographically. Specifically, the Unicode
@@ -1949,7 +1958,7 @@ to the value of the corresponding character in the second string.</p>
 </div>
 
 <a class="pilcrow h4" href="#max">¶</a>
-<h4 id="max"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2564">max <span class="tight">:</span><span class="tight">:</span> Ord a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
+<h4 id="max"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2581">max <span class="tight">:</span><span class="tight">:</span> Ord a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</a></code></h4>
 
 <p>Returns the larger of its two arguments.</p>
 <p>Strings are compared lexicographically. Specifically, the Unicode
@@ -1974,7 +1983,7 @@ to the value of the corresponding character in the second string.</p>
 <a class="pilcrow h3" href="#integer">¶</a>
 <h3 id="integer">Integer</h3>
 <a class="pilcrow h4" href="#even">¶</a>
-<h4 id="even"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2592">even <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="even"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2609">even <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Returns <code>true</code> if the given integer is even; <code>false</code> if it is odd.</p>
 <div class="examples">
@@ -1989,7 +1998,7 @@ to the value of the corresponding character in the second string.</p>
 </div>
 
 <a class="pilcrow h4" href="#odd">¶</a>
-<h4 id="odd"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2609">odd <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="odd"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2626">odd <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Returns <code>true</code> if the given integer is odd; <code>false</code> if it is even.</p>
 <div class="examples">
@@ -2006,7 +2015,7 @@ to the value of the corresponding character in the second string.</p>
 <a class="pilcrow h3" href="#parse">¶</a>
 <h3 id="parse">Parse</h3>
 <a class="pilcrow h4" href="#parseDate">¶</a>
-<h4 id="parseDate"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2628">parseDate <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Date</a></code></h4>
+<h4 id="parseDate"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2645">parseDate <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Date</a></code></h4>
 
 <p>Takes a string and returns Just the date represented by the string
 if it does in fact represent a date; Nothing otherwise.</p>
@@ -2022,7 +2031,7 @@ if it does in fact represent a date; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#parseFloat">¶</a>
-<h4 id="parseFloat"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2683">parseFloat <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Number</a></code></h4>
+<h4 id="parseFloat"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2700">parseFloat <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Number</a></code></h4>
 
 <p>Takes a string and returns Just the number represented by the string
 if it does in fact represent a number; Nothing otherwise.</p>
@@ -2038,7 +2047,7 @@ if it does in fact represent a number; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#parseInt">¶</a>
-<h4 id="parseInt"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2701">parseInt <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Integer</a></code></h4>
+<h4 id="parseInt"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2718">parseInt <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Integer</a></code></h4>
 
 <p>Takes a radix (an integer between 2 and 36 inclusive) and a string,
 and returns Just the number represented by the string if it does in
@@ -2063,7 +2072,7 @@ characters are members of the character set specified by the radix.</p>
 </div>
 
 <a class="pilcrow h4" href="#parseJson">¶</a>
-<h4 id="parseJson"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2746">parseJson <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Any</a></code></h4>
+<h4 id="parseJson"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2763">parseJson <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Any</a></code></h4>
 
 <p>Takes a string which may or may not be valid JSON, and returns Just
 the result of applying <code>JSON.parse</code> to the string if valid; Nothing
@@ -2082,7 +2091,7 @@ otherwise.</p>
 <a class="pilcrow h3" href="#regexp">¶</a>
 <h3 id="regexp">RegExp</h3>
 <a class="pilcrow h4" href="#regex">¶</a>
-<h4 id="regex"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2767">regex <span class="tight">:</span><span class="tight">:</span> RegexFlags <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> RegExp</a></code></h4>
+<h4 id="regex"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2784">regex <span class="tight">:</span><span class="tight">:</span> RegexFlags <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> RegExp</a></code></h4>
 
 <p>Takes a <a href="https://github.com/plaid/sanctuary-def#regexflags">RegexFlags</a> and a pattern, and returns a RegExp.</p>
 <div class="examples">
@@ -2093,7 +2102,7 @@ otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#regexEscape">¶</a>
-<h4 id="regexEscape"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2781">regexEscape <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
+<h4 id="regexEscape"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2798">regexEscape <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
 
 <p>Takes a string which may contain regular expression metacharacters,
 and returns a string with those metacharacters escaped.</p>
@@ -2109,7 +2118,7 @@ and returns a string with those metacharacters escaped.</p>
 </div>
 
 <a class="pilcrow h4" href="#test">¶</a>
-<h4 id="test"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2800">test <span class="tight">:</span><span class="tight">:</span> RegExp <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
+<h4 id="test"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2817">test <span class="tight">:</span><span class="tight">:</span> RegExp <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</a></code></h4>
 
 <p>Takes a pattern and a string, and returns <code>true</code> if the pattern
 matches the string; <code>false</code> otherwise.</p>
@@ -2125,7 +2134,7 @@ matches the string; <code>false</code> otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#match">¶</a>
-<h4 id="match"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2823">match <span class="tight">:</span><span class="tight">:</span> RegExp <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [Maybe String]</a></code></h4>
+<h4 id="match"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2840">match <span class="tight">:</span><span class="tight">:</span> RegExp <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [Maybe String]</a></code></h4>
 
 <p>Takes a pattern and a string, and returns Just a list of matches
 if the pattern matches the string; Nothing otherwise. Each match
@@ -2145,7 +2154,7 @@ optional capturing group.</p>
 <a class="pilcrow h3" href="#string">¶</a>
 <h3 id="string">String</h3>
 <a class="pilcrow h4" href="#toUpper">¶</a>
-<h4 id="toUpper"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2847">toUpper <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
+<h4 id="toUpper"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2865">toUpper <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
 
 <p>Returns the upper-case equivalent of its argument.</p>
 <p>See also <a href="#toLower"><code>toLower</code></a>.</p>
@@ -2157,7 +2166,7 @@ optional capturing group.</p>
 </div>
 
 <a class="pilcrow h4" href="#toLower">¶</a>
-<h4 id="toLower"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2863">toLower <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
+<h4 id="toLower"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2881">toLower <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
 
 <p>Returns the lower-case equivalent of its argument.</p>
 <p>See also <a href="#toUpper"><code>toUpper</code></a>.</p>
@@ -2169,7 +2178,7 @@ optional capturing group.</p>
 </div>
 
 <a class="pilcrow h4" href="#words">¶</a>
-<h4 id="words"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2879">words <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [String]</a></code></h4>
+<h4 id="words"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2897">words <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [String]</a></code></h4>
 
 <p>Takes a string and returns the list of words the string contains
 (words are delimited by whitespace characters).</p>
@@ -2182,7 +2191,7 @@ optional capturing group.</p>
 </div>
 
 <a class="pilcrow h4" href="#unwords">¶</a>
-<h4 id="unwords"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2896">unwords <span class="tight">:</span><span class="tight">:</span> [String] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
+<h4 id="unwords"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2914">unwords <span class="tight">:</span><span class="tight">:</span> [String] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
 
 <p>Takes a list of words and returns the result of joining the words
 with separating spaces.</p>
@@ -2195,7 +2204,7 @@ with separating spaces.</p>
 </div>
 
 <a class="pilcrow h4" href="#lines">¶</a>
-<h4 id="lines"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2913">lines <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [String]</a></code></h4>
+<h4 id="lines"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2931">lines <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [String]</a></code></h4>
 
 <p>Takes a string and returns the list of lines the string contains
 (lines are delimited by newlines: <code>&#39;\n&#39;</code> or <code>&#39;\r\n&#39;</code> or <code>&#39;\r&#39;</code>).
@@ -2209,7 +2218,7 @@ The resulting strings do not contain newlines.</p>
 </div>
 
 <a class="pilcrow h4" href="#unlines">¶</a>
-<h4 id="unlines"><code><a href="https://github.com/plaid/sanctuary/blob/v0.9.1/index.js#L2931">unlines <span class="tight">:</span><span class="tight">:</span> [String] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
+<h4 id="unlines"><code><a href="https://github.com/plaid/sanctuary/blob/v0.10.0/index.js#L2949">unlines <span class="tight">:</span><span class="tight">:</span> [String] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</a></code></h4>
 
 <p>Takes a list of lines and returns the result of joining the lines
 after appending a terminating line feed (<code>&#39;\n&#39;</code>) to each.</p>

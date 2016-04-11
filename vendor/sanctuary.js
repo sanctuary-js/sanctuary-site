@@ -25,7 +25,7 @@
 //. Sanctuary gives us a fighting chance of avoiding such errors. We might
 //. write:
 //.
-//.     R.map(R.toUpper, S.head(words))
+//.     R.map(S.toUpper, S.head(words))
 //.
 //. ## Types
 //.
@@ -111,14 +111,22 @@
 //.
 //. ```javascript
 //. S.inc('XXX');
-//. // ! TypeError: ‘inc’ expected a value of type FiniteNumber as its first argument; received "XXX"
+//. // ! TypeError: Invalid value
+//. //
+//. //   inc :: FiniteNumber -> FiniteNumber
+//. //          ^^^^^^^^^^^^
+//. //               1
+//. //
+//. //   1)  "XXX" :: String
+//. //
+//. //   The value at position 1 is not a member of ‘FiniteNumber’.
 //. ```
 //.
 //. Compare this to the behaviour of Ramda's unchecked equivalent:
 //.
 //. ```javascript
 //. R.inc('XXX');
-//. // => '1XXX'
+//. // => NaN
 //. ```
 //.
 //. There is a performance cost to run-time type checking. One may wish to
@@ -149,7 +157,7 @@
   'use strict';
 
   /* istanbul ignore else */
-  if (typeof module !== 'undefined') {
+  if (typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = f(require('ramda'), require('sanctuary-def'));
   } else if (typeof define === 'function' && define.amd != null) {
     define(['ramda', 'sanctuary-def'], f);
@@ -312,7 +320,6 @@
     $.NonZeroFiniteNumber,
     $Either,
     $.Integer,
-    List,
     $Maybe,
     $.RegexFlags,
     TypeRep,
@@ -329,11 +336,21 @@
 
   var def = $.create(checkTypes, env);
 
+  //  Note: Type checking of method arguments takes place once all arguments
+  //  have been provided (whereas function arguments are checked as early as
+  //  possible). This is not ideal, but provides two benefits:
+  //
+  //    - accurate type signatures in error messages (though "->" appears in
+  //      place of "~>"); and
+  //
+  //    - intuitive ordering (`a.m(b, c)` is checked in a-b-c order rather
+  //      than b-c-a order).
   var method = function(name, constraints, types, _f) {
     var f = def(name, constraints, types, _f);
-    return def(name, constraints, R.tail(types), function() {
-      return R.apply(f, R.prepend(this, arguments));
-    });
+    return def(name,
+               constraints,
+               R.repeat($.Any, types.length - 1),
+               function() { return R.apply(f, R.prepend(this, arguments)); });
   };
 
   //. ### Classify
@@ -386,7 +403,7 @@
         return x != null && (
           R.type(type.prototype['@@type']) === 'String' ?
             x['@@type'] === type.prototype['@@type'] :
-            R.type(x) === R.nth(1, R.match(/^function (\w*)/, String(type)))
+            R.type(x) === R.nth(1, R.match(/function (\w*)/, String(type)))
         );
       });
 
@@ -431,10 +448,10 @@
   //. applying the function to the value. Equivalent to Haskell's `($)` function.
   //.
   //. ```javascript
-  //. > S.A(R.inc, 1)
+  //. > S.A(S.inc, 1)
   //. 2
   //.
-  //. > R.map(S.A(R.__, 100), [R.inc, Math.sqrt])
+  //. > R.map(S.A(R.__, 100), [S.inc, Math.sqrt])
   //. [101, 10]
   //. ```
   S.A =
@@ -491,7 +508,7 @@
   //.   - the result of applying the unary function to the value.
   //.
   //. ```javascript
-  //. > S.S(R.add, Math.sqrt, 100)
+  //. > S.S(S.add, Math.sqrt, 100)
   //. 110
   //. ```
   S.S =
@@ -544,10 +561,10 @@
   //. [Apply][]s.
   //.
   //. ```javascript
-  //. > S.lift2(R.add, S.Just(2), S.Just(3))
+  //. > S.lift2(S.add, S.Just(2), S.Just(3))
   //. Just(5)
   //.
-  //. > S.lift2(R.add, S.Just(2), S.Nothing())
+  //. > S.lift2(S.add, S.Just(2), S.Nothing())
   //. Nothing()
   //.
   //. > S.lift2(S.and, S.Just(true), S.Just(true))
@@ -650,7 +667,7 @@
   //. > S.meld([Math.pow, S.sub])(3)(4)(5)
   //. 76
   //. ```
-  S.meld =
+  var meld = S.meld =
   def('meld',
       {},
       [$.Array($.Function), $.Function],
@@ -1146,7 +1163,7 @@
   var toMaybe = S.toMaybe =
   def('toMaybe',
       {},
-      [$.Any, $Maybe(a)],
+      [a, $Maybe(a)],
       function(x) { return x == null ? Nothing() : Just(x); });
 
   //# maybe :: b -> (a -> b) -> Maybe a -> b
@@ -1200,7 +1217,7 @@
   def('mapMaybe',
       {},
       [$.Function, $.Array(a), $.Array(b)],
-      R.compose(catMaybes, R.map));
+      meld([R.map, catMaybes]));
 
   //# encase :: (a -> b) -> a -> Maybe b
   //.
@@ -2735,7 +2752,7 @@
           R.filter(R.pipe(R.replace(/^[+-]/, ''),
                           radix === 16 ? R.replace(/^0x/i, '') : I,
                           R.split(''),
-                          R.all(R.pipe(R.toUpper,
+                          R.all(R.pipe(toUpper,
                                        R.indexOf(_, charset),
                                        R.gte(_, 0))))),
           R.map(R.partialRight(parseInt, [radix])),
@@ -2839,7 +2856,8 @@
       {},
       [$.RegExp, $.String, $Maybe($.Array($Maybe($.String)))],
       function(pattern, s) {
-        return R.map(R.map(toMaybe), toMaybe(s.match(pattern)));
+        var match = s.match(pattern);
+        return match == null ? Nothing() : Just(R.map(toMaybe, match));
       });
 
   //. ### String
@@ -2854,7 +2872,7 @@
   //. > S.toUpper('ABC def 123')
   //. 'ABC DEF 123'
   //. ```
-  S.toUpper =
+  var toUpper = S.toUpper =
   def('toUpper',
       {},
       [$.String, $.String],

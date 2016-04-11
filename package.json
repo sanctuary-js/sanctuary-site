@@ -2,9 +2,9 @@
   "name": "sanctuary-site",
   "private": true,
   "dependencies": {
-    "ramda": "0.19.1",
-    "sanctuary": "0.9.1",
-    "sanctuary-def": "0.4.0"
+    "ramda": "0.21.0",
+    "sanctuary": "0.10.0",
+    "sanctuary-def": "0.5.0"
   },
   "devDependencies": {
     "jshint": "2.9.x",

@@ -9,7 +9,7 @@ If `words` is `[]` we'll get a familiar error at run-time:
 Sanctuary gives us a fighting chance of avoiding such errors. We might
 write:
 
-    R.map(R.toUpper, S.head(words))
+    R.map(S.toUpper, S.head(words))
 
 ===============================================================================
 

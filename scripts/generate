@@ -25,6 +25,7 @@ const at                = S.at;
 const binary            = R.binary;
 const chain             = R.chain;
 const compose           = S.compose;
+const compose_          = R.compose;
 const concat            = R.concat;
 const cond              = R.cond;
 const contains          = R.contains;
@@ -40,6 +41,7 @@ const head_             = R.head;
 const ifElse            = S.ifElse;
 const isRight           = S.isRight;
 const join              = R.join;
+const juxt              = R.juxt;
 const lefts             = S.lefts;
 const lensIndex         = R.lensIndex;
 const lift2             = S.lift2;
@@ -77,7 +79,8 @@ const replace_ =
 def('replace_',
     {},
     [$.RegExp, $.Function, $.String, $.String],
-    (pattern, f, s) => s.replace(pattern, unapply(compose(f, slice_(1, -2)))));
+    (pattern, f, s) => s.replace(pattern,
+                                 unapply(compose_(f, slice_(1, -2)))));
 
 //    htmlEncode :: String -> String
 const htmlEncode =
@@ -245,7 +248,8 @@ def('customize',
           map(apply((existing, replacement) =>
                       ifElse(contains(existing),
                              compose(Right, replace(existing, replacement)),
-                             K(Left('Substring not found')))))]));
+                             K(Left('Substring not found:\n\n' +
+                                    existing)))))]));
 
 //    readme :: String -> Either String String
 const readme =
@@ -316,9 +320,7 @@ const success = s => {
 
 pipe([at(2),
       maybeToEither('Missing command-line argument'),
-      map(lift2(pair, I, I)),
-      map(over(lensIndex(0), version)),
-      map(over(lensIndex(1), readme)),
+      map(juxt([version, readme])),
       chain(ifElse(all(isRight),
                    pipe([rights, Right]),
                    pipe([lefts, join('\n'), Left]))),
