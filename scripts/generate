@@ -260,6 +260,7 @@ def('readme',
           readFile,
           ap(customize('custom/introduction.md')),
           unnest,
+          map(replace(/plaid(?=[/]sanctuary)/g, 'sanctuary-js')),
           ap(customize('custom/type-checking-sanctuary.md')),
           unnest,
           ap(customize('custom/type-checking-ramda.md')),
@@ -291,8 +292,8 @@ def('toDocument',
   <div id="css-header">
     <p>
       Join the Sanctuary community on
-      <a href="https://github.com/plaid/sanctuary">GitHub</a> and
-      <a href="https://gitter.im/plaid/sanctuary">Gitter</a>
+      <a href="https://github.com/sanctuary-js/sanctuary">GitHub</a> and
+      <a href="https://gitter.im/sanctuary-js/sanctuary">Gitter</a>
     </p>
   </div>
   <div id="css-main">
