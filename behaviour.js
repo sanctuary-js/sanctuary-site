@@ -1,5 +1,3 @@
-/* jshint browser: true */
-
 (function() {
 
   'use strict';
@@ -29,15 +27,17 @@
     var input = el.getElementsByTagName('input')[0];
     var output = el.getElementsByClassName('output')[0];
 
-    S.either(function(s) {
-               output.setAttribute('data-error', 'true');
-               output.textContent = '! ' + s;
-             },
-             function(x) {
-               output.setAttribute('data-error', 'false');
-               output.textContent = R.toString(x);
-             },
-             evaluate(input.value));
+    S.either(
+      function(s) {
+        output.setAttribute('data-error', 'true');
+        output.textContent = '! ' + s;
+      },
+      function(x) {
+        output.setAttribute('data-error', 'false');
+        output.textContent = R.toString(x);
+      },
+      evaluate(input.value)
+    );
   };
 
   //  evaluateForms :: Element -> Undefined
