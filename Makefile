@@ -1,4 +1,4 @@
-JSHINT = node_modules/.bin/jshint
+ESLINT = node_modules/.bin/eslint
 NPM = npm
 
 CUSTOM = $(shell find custom -name '*.md' | sort)
@@ -31,8 +31,19 @@ clean: $(FILES)
 
 
 .PHONY: lint
-lint: scripts/generate behaviour.js
-	$(JSHINT) -- $^
+lint:
+	$(ESLINT) \
+	  --config node_modules/sanctuary-style/eslint-es6.json \
+	  --env es6 \
+	  --env node \
+	  --rule 'max-len: [off]' \
+	  --rule 'prefer-template: [off]' \
+	  -- scripts/generate
+	$(ESLINT) \
+	  --config node_modules/sanctuary-style/eslint-es3.json \
+	  --env es3 \
+	  --env browser \
+	  -- behaviour.js
 	make clean
 	make
 	git diff --exit-code
