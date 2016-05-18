@@ -72,7 +72,7 @@ const red               = '\u001B[31m';
 const green             = '\u001B[32m';
 
 const env               = concat($.env, [Either]);
-const def               = $.create(true, env);
+const def               = $.create({checkTypes: true, env: env});
 
 //    replace_ :: RegExp -> ([String] -> String) -> String -> String
 const replace_ =
@@ -260,7 +260,6 @@ def('readme',
           readFile,
           ap(customize('custom/introduction.md')),
           unnest,
-          map(replace(/plaid(?=[/]sanctuary)/g, 'sanctuary-js')),
           ap(customize('custom/type-checking-sanctuary.md')),
           unnest,
           ap(customize('custom/type-checking-ramda.md')),
