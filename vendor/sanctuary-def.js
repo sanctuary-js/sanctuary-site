@@ -1,6 +1,4 @@
-/* global define, self */
-
-;(function(f) {
+(function(f) {
 
   'use strict';
 
@@ -29,6 +27,30 @@
   var hasOwnProperty    = Object.prototype.hasOwnProperty;
   var toString          = Object.prototype.toString;
 
+  //  Left :: a -> Either a b
+  var Left = function Left(x) {
+    return {
+      '@@type': 'sanctuary-def/Either',
+      isLeft: true,
+      isRight: false,
+      chain: function(f) { return Left(x); },
+      map: function(f) { return Left(x); },
+      value: x
+    };
+  };
+
+  //  Right :: b -> Either a b
+  var Right = function Right(x) {
+    return {
+      '@@type': 'sanctuary-def/Either',
+      isLeft: false,
+      isRight: true,
+      chain: function(f) { return f(x); },
+      map: function(f) { return Right(f(x)); },
+      value: x
+    };
+  };
+
   //  K :: a -> b -> a
   var K = function(x) { return function(y) { return x; }; };
 
@@ -42,6 +64,16 @@
 
   //  always :: a -> (-> a)
   var always = function(x) { return function() { return x; }; };
+
+  //  assoc :: (String, a, StrMap a) -> StrMap a
+  var assoc = function(key, value, strMap) {
+    var result = {};
+    for (var k in strMap) {
+      result[k] = strMap[k];
+    }
+    result[key] = value;
+    return result;
+  };
 
   //  chain :: ([a], (a -> [b])) -> [b]
   var chain = function(xs, f) {
@@ -231,9 +263,17 @@
   //  TypeClass :: (String, (a -> Boolean)) -> TypeClass
   $.TypeClass = function(name, test) {
     return {
+      '@@type': 'sanctuary-def/TypeClass',
       name: name,
-      test: test,
+      _test: test,
       toString: always(stripNamespace(name))
+    };
+  };
+
+  //  testFrom :: (a -> Result) -> a -> Boolean
+  var testFrom = function(validate) {
+    return function(x) {
+      return validate(x).isRight;
     };
   };
 
@@ -241,15 +281,15 @@
   var Unknown = {
     '@@type': 'sanctuary-def/Type',
     type: 'UNKNOWN',
-    test: K(true),
+    validate: Right,
+    _test: K(true),
     toString: always('???')
   };
 
   //  Inconsistent :: Type
   var Inconsistent = {
-    '@@type': 'sanctuary-def/Inconsistent',
+    '@@type': 'sanctuary-def/Type',
     type: 'INCONSISTENT',
-    test: K(false),
     toString: always('???')
   };
 
@@ -259,20 +299,26 @@
       '@@type': 'sanctuary-def/Type',
       type: 'VARIABLE',
       name: name,
-      test: K(true),
+      validate: Right,
+      _test: K(true),
       toString: always(name)
     };
   };
 
   //  NullaryType :: (String, (x -> Boolean)) -> Type
   var NullaryType = $.NullaryType = function(name, test) {
-    return {
+    var t = {
       '@@type': 'sanctuary-def/Type',
       type: 'NULLARY',
       name: name,
-      test: test,
+      validate: function(x) {
+        return test(x) ? Right(x)
+                       : Left({value: x, typePath: [t], propPath: []});
+      },
+      _test: test,
       toString: always(stripNamespace(name))
     };
+    return t;
   };
 
   //  UnaryType :: (String, (x -> Boolean), (t a -> [a])) -> Type -> Type
@@ -281,22 +327,38 @@
       var format = function(f, f$1) {
         return f('(' + stripNamespace(name) + ' ') + f$1(String($1)) + f(')');
       };
-      return {
+      var validate = function(x) {
+        if (!test(x)) {
+          return Left({value: x, typePath: [t], propPath: []});
+        }
+        for (var idx = 0, xs = _1(x); idx < xs.length; idx += 1) {
+          var result = $1.validate(xs[idx]);
+          if (result.isLeft) {
+            return Left({value: result.value.value,
+                         typePath: [t].concat(result.value.typePath),
+                         propPath: ['$1'].concat(result.value.propPath)});
+          }
+        }
+        return Right(x);
+      };
+      var t = {
         '@@type': 'sanctuary-def/Type',
         type: 'UNARY',
         name: name,
-        test: test,
+        validate: validate,
+        _test: testFrom(validate),
         format: format,
         toString: always(format(id, id)),
         _1: _1,
         $1: $1
       };
+      return t;
     };
   };
 
   //  UnaryType.from :: Type -> (Type -> Type)
   UnaryType.from = function(t) {
-    return UnaryType(t.name, t.test, t._1);
+    return UnaryType(t.name, t._test, t._1);
   };
 
   //  BinaryType :: (String, (x -> Boolean), (t a b -> [a]), (t a b -> [b])) ->
@@ -307,11 +369,30 @@
         return f('(' + stripNamespace(name) + ' ') +
                f$1(String($1)) + f(' ') + f$2(String($2)) + f(')');
       };
-      return {
+      var validate = function(x) {
+        if (!test(x)) {
+          return Left({value: x, typePath: [t], propPath: []});
+        }
+        for (var n = 1; n <= 2; n += 1) {
+          var _ = '_' + String(n);
+          var $ = '$' + String(n);
+          for (var idx = 0, xs = t[_](x); idx < xs.length; idx += 1) {
+            var result = t[$].validate(xs[idx]);
+            if (result.isLeft) {
+              return Left({value: result.value.value,
+                           typePath: [t].concat(result.value.typePath),
+                           propPath: [$].concat(result.value.propPath)});
+            }
+          }
+        }
+        return Right(x);
+      };
+      var t = {
         '@@type': 'sanctuary-def/Type',
         type: 'BINARY',
         name: name,
-        test: test,
+        validate: validate,
+        _test: testFrom(validate),
         format: format,
         toString: always(format(id, id, id)),
         _1: _1,
@@ -319,12 +400,13 @@
         $1: $1,
         $2: $2
       };
+      return t;
     };
   };
 
   //  BinaryType.from :: Type -> ((Type, Type) -> Type)
   BinaryType.from = function(t) {
-    return BinaryType(t.name, t.test, t._1, t._2);
+    return BinaryType(t.name, t._test, t._1, t._2);
   };
 
   //  BinaryType.xprod :: (Type, [Type], [Type]) -> [Type]
@@ -341,20 +423,25 @@
   var EnumType = $.EnumType = function(members) {
     var types = map(members, $$type);
     var reprs = map(members, show);
-    return {
+    var validate = function(x) {
+      //  We use `show` to perform value-based equality checks (since we
+      //  don't have access to `R.equals` and don't want to implement it).
+      //  We avoid a lot of unnecessary work by checking the type of `x`
+      //  before determining its string representation. Only if `x` is of
+      //  the same type as one or more of the `members` do we incur the
+      //  cost of determining its string representation.
+      return types.indexOf($$type(x)) >= 0 && reprs.indexOf(show(x)) >= 0 ?
+        Right(x) :
+        Left({value: x, typePath: [t], propPath: []});
+    };
+    var t = {
       '@@type': 'sanctuary-def/Type',
       type: 'ENUM',
-      test: function(x) {
-        //  We use `show` to perform value-based equality checks (since we
-        //  don't have access to `R.equals` and don't want to implement it).
-        //  We avoid a lot of unnecessary work by checking the type of `x`
-        //  before determining its string representation. Only if `x` is of
-        //  the same type as one or more of the `members` do we incur the
-        //  cost of determining its string representation.
-        return types.indexOf($$type(x)) >= 0 && reprs.indexOf(show(x)) >= 0;
-      },
+      validate: validate,
+      _test: testFrom(validate),
       toString: always('(' + reprs.join(' | ') + ')')
     };
+    return t;
   };
 
   //  RecordType :: {Type} -> Type
@@ -372,7 +459,8 @@
       throw new TypeError(trimTrailingSpaces(unlines([
         'Invalid values',
         '',
-        'The argument to ‘RecordType’ must be an object mapping field name to type.',
+        'The argument to ‘RecordType’ must be an object ' +
+          'mapping field name to type.',
         '',
         'The following mappings are invalid:',
         '',
@@ -380,31 +468,46 @@
       ])));
     }
 
-    return {
+    var format = function(f, kv) {
+      var s = f('{');
+      for (var idx = 0; idx < names.length; idx += 1) {
+        var name = names[idx];
+        s += f(idx === 0 ? ' ' : ', ');
+        s += f(name + ' :: ') + kv(name)(showType(fields[name]));
+        if (idx === names.length - 1) s += f(' ');
+      }
+      return s + f('}');
+    };
+
+    var validate = function(x) {
+      if (x == null) {
+        return Left({value: x, typePath: [t], propPath: []});
+      }
+      for (var idx = 0; idx < names.length; idx += 1) {
+        var name = names[idx];
+        if (!has(name, x)) {
+          return Left({value: x, typePath: [t], propPath: []});
+        }
+        var result = fields[name].validate(x[name]);
+        if (result.isLeft) {
+          return Left({value: result.value.value,
+                       typePath: [t].concat(result.value.typePath),
+                       propPath: [name].concat(result.value.propPath)});
+        }
+      }
+      return Right(x);
+    };
+
+    var t = {
       '@@type': 'sanctuary-def/Type',
       type: 'RECORD',
-      test: function(x) {
-        if (x == null) return false;
-        for (var idx = 0; idx < names.length; idx += 1) {
-          var name = names[idx];
-          if (!has(name, x) || !test(fields[name], x[name]).valid) {
-            return false;
-          }
-        }
-        return true;
-      },
-      toString: function() {
-        var s = '{';
-        for (var idx = 0; idx < names.length; idx += 1) {
-          var name = names[idx];
-          s += idx === 0 ? ' ' : ', ';
-          s += name + ' :: ' + fields[name];
-          if (idx === names.length - 1) s += ' ';
-        }
-        return s + '}';
-      },
+      validate: validate,
+      _test: testFrom(validate),
+      format: format,
+      toString: always(format(id, K(id))),
       fields: fields
     };
+    return t;
   };
 
   //  Nullable :: Type -> Type
@@ -417,7 +520,7 @@
   //  StrMap :: Type -> Type
   var StrMap = UnaryType(
     'sanctuary-def/StrMap',
-    function(x) { return $.Object.test(x); },
+    function(x) { return $.Object._test(x); },
     function(strMap) {
       return map(keys(strMap), function(k) { return strMap[k]; });
     }
@@ -447,21 +550,30 @@
     return UnaryType(name, $$typeEq(name), _1);
   };
 
-  //  $.env :: [Type]
-  $.env = [
-    ($.Array      = type1('Array', id)),
-    ($.Boolean    = type0('Boolean')),
-    ($.Date       = type0('Date')),
-    ($.Error      = type0('Error')),
-    ($.Function   = type0('Function')),
-    ($.Null       = type0('Null')),
-    ($.Number     = type0('Number')),
-    ($.Object     = type0('Object')),
-    ($.RegExp     = type0('RegExp')),
-    ($.StrMap     = StrMap),
-    ($.String     = type0('String')),
-    ($.Undefined  = type0('Undefined'))
-  ];
+  //  applyParameterizedTypes :: [Type] -> [Type]
+  var applyParameterizedTypes = function(types) {
+    return map(types, function(x) {
+      return typeof x === 'function' ?
+        x.apply(null, map(range(0, x.length), K(Unknown))) :
+        x;
+    });
+  };
+
+  //  defaultEnv :: [Type]
+  var defaultEnv = $.env = applyParameterizedTypes([
+    $.Array     = type1('Array', id),
+    $.Boolean   = type0('Boolean'),
+    $.Date      = type0('Date'),
+    $.Error     = type0('Error'),
+    $.Function  = type0('Function'),
+    $.Null      = type0('Null'),
+    $.Number    = type0('Number'),
+    $.Object    = type0('Object'),
+    $.RegExp    = type0('RegExp'),
+    $.StrMap    = StrMap,
+    $.String    = type0('String'),
+    $.Undefined = type0('Undefined')
+  ]);
 
   //  Any :: Type
   $.Any = NullaryType(
@@ -469,66 +581,86 @@
     K(true)
   );
 
+  //  Pair :: (Type, Type) -> Type
+  $.Pair = $.BinaryType(
+    'sanctuary-def/Pair',
+    function(x) { return $$typeEq('Array')(x) && x.length === 2; },
+    function(pair) { return [pair[0]]; },
+    function(pair) { return [pair[1]]; }
+  );
+
   //  ValidDate :: Type
   $.ValidDate = NullaryType(
     'sanctuary-def/ValidDate',
-    function(x) { return $.Date.test(x) && !isNaN(x.valueOf()); }
+    function(x) { return $.Date._test(x) && !isNaN(x.valueOf()); }
   );
 
   //  PositiveNumber :: Type
   $.PositiveNumber = NullaryType(
     'sanctuary-def/PositiveNumber',
-    function(x) { return $.Number.test(x) && x > 0; }
+    function(x) { return $.Number._test(x) && x > 0; }
   );
 
   //  NegativeNumber :: Type
   $.NegativeNumber = NullaryType(
     'sanctuary-def/NegativeNumber',
-    function(x) { return $.Number.test(x) && x < 0; }
+    function(x) { return $.Number._test(x) && x < 0; }
   );
 
   //  ValidNumber :: Type
   var ValidNumber = $.ValidNumber = NullaryType(
     'sanctuary-def/ValidNumber',
-    function(x) { return $.Number.test(x) && !isNaN(x); }
+    function(x) { return $.Number._test(x) && !isNaN(x); }
   );
 
   //  NonZeroValidNumber :: Type
   $.NonZeroValidNumber = NullaryType(
     'sanctuary-def/NonZeroValidNumber',
-    function(x) { return ValidNumber.test(x) && x != 0; }
+    function(x) {
+      return ValidNumber._test(x) &&
+             /* eslint-disable eqeqeq */
+             x != 0;
+             /* eslint-enable eqeqeq */
+    }
   );
 
   //  FiniteNumber :: Type
   var FiniteNumber = $.FiniteNumber = NullaryType(
     'sanctuary-def/FiniteNumber',
-    function(x) { return ValidNumber.test(x) && isFinite(x); }
+    function(x) { return ValidNumber._test(x) && isFinite(x); }
   );
 
   //  PositiveFiniteNumber :: Type
   $.PositiveFiniteNumber = NullaryType(
     'sanctuary-def/PositiveFiniteNumber',
-    function(x) { return FiniteNumber.test(x) && x > 0; }
+    function(x) { return FiniteNumber._test(x) && x > 0; }
   );
 
   //  NegativeFiniteNumber :: Type
   $.NegativeFiniteNumber = NullaryType(
     'sanctuary-def/NegativeFiniteNumber',
-    function(x) { return FiniteNumber.test(x) && x < 0; }
+    function(x) { return FiniteNumber._test(x) && x < 0; }
   );
 
   //  NonZeroFiniteNumber :: Type
   $.NonZeroFiniteNumber = NullaryType(
     'sanctuary-def/NonZeroFiniteNumber',
-    function(x) { return FiniteNumber.test(x) && x != 0; }
+    function(x) {
+      return FiniteNumber._test(x) &&
+             /* eslint-disable eqeqeq */
+             x != 0;
+             /* eslint-enable eqeqeq */
+    }
   );
 
   //  Integer :: Type
   var Integer = $.Integer = NullaryType(
     'sanctuary-def/Integer',
     function(x) {
-      return ValidNumber.test(x) &&
+      return ValidNumber._test(x) &&
+             /* eslint-disable eqeqeq */
              Math.floor(x) == x &&
+             /* eslint-enable eqeqeq */
              x >= MIN_SAFE_INTEGER &&
              x <= MAX_SAFE_INTEGER;
     }
@@ -537,23 +669,34 @@
   //  PositiveInteger :: Type
   $.PositiveInteger = NullaryType(
     'sanctuary-def/PositiveInteger',
-    function(x) { return Integer.test(x) && x > 0; }
+    function(x) { return Integer._test(x) && x > 0; }
   );
 
   //  NegativeInteger :: Type
   $.NegativeInteger = NullaryType(
     'sanctuary-def/NegativeInteger',
-    function(x) { return Integer.test(x) && x < 0; }
+    function(x) { return Integer._test(x) && x < 0; }
   );
 
   //  NonZeroInteger :: Type
   $.NonZeroInteger = NullaryType(
     'sanctuary-def/NonZeroInteger',
-    function(x) { return Integer.test(x) && x != 0; }
+    function(x) {
+      return Integer._test(x) &&
+             /* eslint-disable eqeqeq */
+             x != 0;
+             /* eslint-enable eqeqeq */
+    }
   );
 
   //  RegexFlags :: Type
   $.RegexFlags = EnumType(['', 'g', 'i', 'm', 'gi', 'gm', 'im', 'gim']);
+
+  //  Type :: Type
+  var Type = type0('sanctuary-def/Type');
+
+  //  TypeClass :: Type
+  var TypeClass = type0('sanctuary-def/TypeClass');
 
   //  arity :: (Number, Function) -> Function
   var arity = function(n, f) {
@@ -605,7 +748,7 @@
   var numArgs = function(n) {
     switch (n) {
       case  0:  return  'zero arguments';
-      case  1:  return   'one argument' ;
+      case  1:  return   'one argument';
       case  2:  return   'two arguments';
       case  3:  return 'three arguments';
       case  4:  return  'four arguments';
@@ -693,70 +836,264 @@
     });
   };
 
-  //  testNested :: (Type, Any, Integer) -> Result
-  var testNested = function(t, x, position) {
-    var _ = '_' + String(position);
-    var $ = '$' + String(position);
-    for (var idx = 0, xs = t[_](x); idx < xs.length; idx += 1) {
-      var result = test(t[$], xs[idx]);
-      if (!result.valid) {
-        result.typePath.unshift(t);
-        result.propPath.unshift($);
-        return result;
+  //  _determineActualTypes :: (Boolean, [Type], [Object], [Any]) -> [Type]
+  var _determineActualTypes = function recur(loose, env, seen, values) {
+    if (isEmpty(values)) return [Unknown];
+    //  typeses :: [[Type]]
+    var typeses = map(values, function(value) {
+      var seen$;
+      if (typeof value === 'object' && value != null ||
+          typeof value === 'function') {
+        //  Abort if a circular reference is encountered; add the current
+        //  object to the list of seen objects otherwise.
+        if (seen.indexOf(value) >= 0) return [];
+        seen$ = seen.concat([value]);
+      } else {
+        seen$ = seen;
       }
+      return chain(env, function(t) {
+        return (
+          t.name === 'sanctuary-def/Nullable' || !t._test(value) ?
+            [] :
+          t.type === 'UNARY' ?
+            map(recur(loose, env, seen$, t._1(value)), UnaryType.from(t)) :
+          t.type === 'BINARY' ?
+            BinaryType.xprod(t,
+                             recur(loose, env, seen$, t._1(value)),
+                             recur(loose, env, seen$, t._2(value))) :
+          // else
+            [t]
+        );
+      });
+    });
+    //  common :: [Type]
+    var common = commonTypes(typeses, loose);
+    if (!isEmpty(common)) return common;
+    //  If none of the values is a member of a type in the environment,
+    //  and all the values have the same type identifier, the values are
+    //  members of a "foreign" type.
+    if (isEmpty(filterTypesByValues(env, values)) &&
+        all(values.slice(1), $$typeEq($$type(values[0])))) {
+      //  Create a nullary type for the foreign type.
+      return [type0($$type(values[0]))];
     }
-    return {valid: true, value: x};
+    return [Inconsistent];
   };
 
-  //  test :: (Type, Any) -> Result
-  var test = function(t, x) {
-    if (!t.test(x)) {
-      return {valid: false, value: x, typePath: [t], propPath: []};
-    } else if (t.type === 'UNARY') {
-      return testNested(t, x, 1);
-    } else if (t.type === 'BINARY') {
-      var lhs = testNested(t, x, 1);
-      return lhs.valid ? testNested(t, x, 2) : lhs;
-    } else {
-      return {valid: true, value: x};
-    }
+  //  rejectInconsistent :: [Type] -> [Type]
+  var rejectInconsistent = function(types) {
+    return filter(types, function(t) {
+      return t.type !== 'INCONSISTENT' && t.type !== 'UNKNOWN';
+    });
+  };
+
+  //  determineActualTypesStrict :: ([Type], [Any]) -> [Type]
+  var determineActualTypesStrict = function(env, values) {
+    return rejectInconsistent(_determineActualTypes(false, env, [], values));
+  };
+
+  //  determineActualTypesLoose :: ([Type], [Any]) -> [Type]
+  var determineActualTypesLoose = function(env, values) {
+    return rejectInconsistent(_determineActualTypes(true, env, [], values));
+  };
+
+  //  valuesToPairs :: ([Type], [Any]) -> [Pair Any [Type]]
+  var valuesToPairs = function(env, values) {
+    return map(values, function(x) {
+      return [x, determineActualTypesLoose(env, [x])];
+    });
+  };
+
+  //  _satisfactoryTypes ::
+  //    ... -> Either Error { typeVarMap :: StrMap { info :: Info
+  //                                               , types :: [Type] }
+  //                        , types :: [Type] }
+  var _satisfactoryTypes = function(
+    env,            // :: [Type]
+    name,           // :: String
+    constraints,    // :: StrMap [TypeClass]
+    expTypes,       // :: [Type]
+    index           // :: Integer
+  ) {
+    return function recur(
+      typeVarMap,   // :: StrMap { info :: Info, types :: [Type] }
+      expType,      // :: Type
+      values,       // :: [Any]
+      typePath,     // :: [Type]
+      propPath      // :: [String]
+    ) {
+      var idx, okTypes;
+      if (!all(values, expType._test)) {
+        return Left(new TypeError('Invalid value'));
+      }
+      switch (expType.type) {
+
+        case 'VARIABLE':
+          var typeVarName = expType.name;
+          if (has(typeVarName, constraints)) {
+            var typeClasses = constraints[typeVarName];
+            for (idx = 0; idx < values.length; idx += 1) {
+              for (var idx2 = 0; idx2 < typeClasses.length; idx2 += 1) {
+                if (!typeClasses[idx2]._test(values[idx])) {
+                  return Left(typeClassConstraintViolation(
+                    name,
+                    constraints,
+                    expTypes,
+                    typeClasses[idx2],
+                    Info(env,
+                         [values[idx]],
+                         typePath.concat([expType]),
+                         propPath,
+                         index)
+                  ));
+                }
+              }
+            }
+          }
+          if (has(typeVarName, typeVarMap)) {
+            okTypes = filterTypesByValues(typeVarMap[typeVarName].types,
+                                          values);
+            if (isEmpty(okTypes)) {
+              return Left(typeVarConstraintViolation2(
+                name,
+                constraints,
+                expTypes,
+                Info(env,
+                     values,
+                     typePath.concat([expType]),
+                     propPath,
+                     index),
+                typeVarMap[typeVarName].info
+              ));
+            }
+          } else {
+            okTypes = determineActualTypesStrict(env, values);
+            if (isEmpty(okTypes) && !isEmpty(values)) {
+              return Left(typeVarConstraintViolation(
+                name,
+                constraints,
+                expTypes,
+                Info(env,
+                     values,
+                     typePath.concat([expType]),
+                     propPath,
+                     index)
+              ));
+            }
+          }
+          return Right({
+            typeVarMap: isEmpty(okTypes) ? typeVarMap : assoc(
+              typeVarName,
+              {types: okTypes,
+               info: Info(env,
+                          values,
+                          typePath.concat([expType]),
+                          propPath,
+                          index)},
+              typeVarMap
+            ),
+            types: okTypes
+          });
+
+        case 'UNARY':
+          return recur(
+            typeVarMap,
+            expType.$1,
+            chain(values, expType._1),
+            typePath.concat([expType]),
+            propPath.concat(['$1'])
+          )
+          .map(function(result) {
+            return {
+              typeVarMap: result.typeVarMap,
+              types: map(or(result.types, [expType.$1]),
+                         UnaryType.from(expType))
+            };
+          });
+
+        case 'BINARY':
+          return recur(
+            typeVarMap,
+            expType.$1,
+            chain(values, expType._1),
+            typePath.concat([expType]),
+            propPath.concat(['$1'])
+          )
+          .chain(function(result) {
+            var $1s = result.types;
+            return recur(
+              result.typeVarMap,
+              expType.$2,
+              chain(values, expType._2),
+              typePath.concat([expType]),
+              propPath.concat(['$2'])
+            )
+            .map(function(result) {
+              var $2s = result.types;
+              return {
+                typeVarMap: result.typeVarMap,
+                types: BinaryType.xprod(expType,
+                                        or($1s, [expType.$1]),
+                                        or($2s, [expType.$2]))
+              };
+            });
+          });
+
+        default:
+          return Right({typeVarMap: typeVarMap,
+                        types: determineActualTypesStrict(env, values)});
+      }
+    };
+  };
+
+  //  satisfactoryTypes :: ... -> Either Error [Type]
+  var satisfactoryTypes = function(
+    env,            // :: [Type]
+    name,           // :: String
+    constraints,    // :: StrMap [TypeClass]
+    expTypes,       // :: [Type]
+    typeVarMap,     // :: StrMap { info :: Info, types :: [Type] }
+    value,          // :: Any
+    index           // :: Integer
+  ) {
+    var result = expTypes[index].validate(value);
+    return result.isLeft ?
+      Left(invalidValue(name,
+                        constraints,
+                        expTypes,
+                        Info(env,
+                             [result.value.value],
+                             result.value.typePath,
+                             result.value.propPath,
+                             index))) :
+      result.chain(function(value) {
+        var f = _satisfactoryTypes(env, name, constraints, expTypes, index);
+        return f(typeVarMap, expTypes[index], [value], [], []);
+      });
+  };
+
+  //  test :: ([Type], Type, Any) -> Boolean
+  var test = $.test = function(_env, t, x) {
+    var env = applyParameterizedTypes(_env);
+    var f = _satisfactoryTypes(env, 'name', {}, [t], 0);
+    return f({}, t, [x], [], []).isRight;
   };
 
   //  filterTypesByValues :: ([Type], [Any]) -> [Type]
-  var filterTypesByValues = function(types, values) {
-    return filter(types, function(t) {
+  var filterTypesByValues = function(env, values) {
+    return filter(env, function(t) {
       return all(values, function(x) {
-        return test(t, x).valid;
+        return test(env, t, x);
       });
     });
   };
 
-  //  ordinals :: [String]
-  var ordinals = [
-    'first',
-    'second',
-    'third',
-    'fourth',
-    'fifth',
-    'sixth',
-    'seventh',
-    'eighth',
-    'ninth'
-  ];
-
+  //  invalidArgumentsLength :: (String, Integer, Integer) -> Error
   var invalidArgumentsLength = function(name, expectedLength, actualLength) {
     return new TypeError(
       LEFT_SINGLE_QUOTATION_MARK + name + RIGHT_SINGLE_QUOTATION_MARK +
       ' requires ' + numArgs(expectedLength) + ';' +
       ' received ' + numArgs(actualLength)
-    );
-  };
-
-  var invalidArgument = function(name, types, value, index) {
-    return new TypeError(
-      LEFT_SINGLE_QUOTATION_MARK + name + RIGHT_SINGLE_QUOTATION_MARK +
-      ' expected a value of type ' + types.join(' or ') + ' as its ' +
-      ordinals[index] + ' argument; received ' + show(value)
     );
   };
 
@@ -799,6 +1136,13 @@
     return isParameterizedType(t) ? s.slice(1, -1) : s;
   };
 
+  //  showTypeQuoted :: Type -> String
+  var showTypeQuoted = function(t) {
+    return LEFT_SINGLE_QUOTATION_MARK +
+           showType(t) +
+           RIGHT_SINGLE_QUOTATION_MARK;
+  };
+
   //  showTypeSig :: [Type] -> String
   var showTypeSig = function(types) {
     return arrowJoin(map(types, showType));
@@ -831,18 +1175,21 @@
         var t = type;
         var types = [t];
         for (var idx = 0; idx < propPath.length; idx += 1) {
-          types.push(t = t[propPath[idx]]);
+          types.push(t = (t.type === 'RECORD' ? t.fields : t)[propPath[idx]]);
         }
 
         var s = f(String(last(types)));
         for (idx = types.length - 2; idx >= 0; idx -= 1) {
+          var k = propPath[idx];
           t = types[idx];
           s = t.type === 'UNARY' ?
                 t.format(_, K(s)) :
-              t.type === 'BINARY' && propPath[idx] === '$1' ?
+              t.type === 'BINARY' && k === '$1' ?
                 t.format(_, K(s), _) :
+              t.type === 'BINARY' && k === '$2' ?
+                t.format(_, _, K(s)) :
               // else
-                t.format(_, _, K(s));
+                t.format(_, function(k$) { return k$ === k ? K(s) : _; });
         }
 
         return isParameterizedType(type) ? s.slice(1, -1) : s;
@@ -854,6 +1201,14 @@
   //         , pairs :: [Pair Any [Type]]
   //         , propPath :: [String]
   //         , typePath :: [Type] }
+
+  //  Info :: ([Type], [Any], [Type], [String], Integer) -> Info
+  var Info = function(env, values, typePath, propPath, index) {
+    return {index: index,
+            pairs: valuesToPairs(env, values),
+            propPath: propPath,
+            typePath: typePath};
+  };
 
   //  typeClassConstraintViolation :: ... -> Error
   var typeClassConstraintViolation = function(
@@ -887,8 +1242,9 @@
       '',
       '1)  ' + map(info.pairs, showValueAndType).join('\n    '),
       '',
-      LEFT_SINGLE_QUOTATION_MARK + name + RIGHT_SINGLE_QUOTATION_MARK + ' requires ' +
-        LEFT_SINGLE_QUOTATION_MARK + typeVarName + RIGHT_SINGLE_QUOTATION_MARK +
+      LEFT_SINGLE_QUOTATION_MARK + name + RIGHT_SINGLE_QUOTATION_MARK +
+        ' requires ' + LEFT_SINGLE_QUOTATION_MARK +
+        typeVarName + RIGHT_SINGLE_QUOTATION_MARK +
         ' to satisfy the ' + typeClass + ' type-class constraint;' +
         ' the value at position 1 does not.'
     ])));
@@ -902,7 +1258,7 @@
     f,              // :: String -> String
     g               // :: String -> String
   ) {
-    return _(_showTypeSig((types.slice(0, fst.index)))) +
+    return _(_showTypeSig(types.slice(0, fst.index))) +
            underline(fst.typePath[0])(fst.propPath)(f) +
            _(_showTypeSig_(types.slice(fst.index + 1, snd.index))) +
            underline(snd.typePath[0])(snd.propPath)(g);
@@ -995,212 +1351,33 @@
       '1)  ' + map(info.pairs, showValueAndType).join('\n    '),
       '',
       'The value at position 1 is not a member of ' +
-        LEFT_SINGLE_QUOTATION_MARK + showType(last(info.typePath)) + RIGHT_SINGLE_QUOTATION_MARK + '.'
+        showTypeQuoted(last(info.typePath)) + '.'
     ])));
   };
 
-  //  create :: (Boolean, [Type]) -> Function
-  $.create = function(checkTypes, _env) {
+  //  assertRight :: Either a b -> Undefined !
+  var assertRight = function(either) {
+    if (either.isLeft) throw either.value;
+  };
+
+  //  Options :: Type
+  var Options = RecordType({checkTypes: $.Boolean, env: $.Array($.Any)});
+
+  //  create :: Options -> Function
+  $.create = function(opts) {
+    assertRight(satisfactoryTypes(defaultEnv,
+                                  'create',
+                                  {},
+                                  [Options, $.Function],
+                                  {},
+                                  opts,
+                                  0));
+
+    //  checkTypes :: Boolean
+    var checkTypes = opts.checkTypes;
+
     //  env :: [Type]
-    var env = map(_env, function(x) {
-      return typeof x === 'function' ?
-        x.apply(null, map(range(0, x.length), K(Unknown))) :
-        x;
-    });
-
-    //  _determineActualTypes :: (Boolean, [Object], [Any]) -> [Type]
-    var _determineActualTypes = function recur(loose, seen, values) {
-      if (isEmpty(values)) return [Unknown];
-      //  typeses :: [[Type]]
-      var typeses = map(values, function(value) {
-        var seen$;
-        if (typeof value === 'object' && value != null ||
-            typeof value === 'function') {
-          //  Abort if a circular reference is encountered; add the current
-          //  object to the list of seen objects otherwise.
-          if (seen.indexOf(value) >= 0) return [];
-          seen$ = seen.concat([value]);
-        } else {
-          seen$ = seen;
-        }
-        return chain(env, function(t) {
-          return (
-            t.name === 'sanctuary-def/Nullable' || !test(t, value).valid ?
-              [] :
-            t.type === 'UNARY' ?
-              map(recur(loose, seen$, t._1(value)), UnaryType.from(t)) :
-            t.type === 'BINARY' ?
-              BinaryType.xprod(t,
-                               recur(loose, seen$, t._1(value)),
-                               recur(loose, seen$, t._2(value))) :
-            // else
-              [t]
-          );
-        });
-      });
-      //  common :: [Type]
-      var common = commonTypes(typeses, loose);
-      if (!isEmpty(common)) return common;
-      //  If none of the values is a member of a type in the environment,
-      //  and all the values have the same type identifier, the values are
-      //  members of a "foreign" type.
-      if (isEmpty(filterTypesByValues(env, values)) &&
-          all(values.slice(1), $$typeEq($$type(values[0])))) {
-        //  Create a nullary type for the foreign type.
-        return [type0($$type(values[0]))];
-      }
-      return [Inconsistent];
-    };
-
-    //  rejectInconsistent :: [Type] -> [Type]
-    var rejectInconsistent = function(types) {
-      return filter(types, function(t) {
-        return t.type !== 'INCONSISTENT' && t.type !== 'UNKNOWN';
-      });
-    };
-
-    //  determineActualTypesStrict :: [Any] -> [Type]
-    var determineActualTypesStrict = function(values) {
-      return rejectInconsistent(_determineActualTypes(false, [], values));
-    };
-
-    //  determineActualTypesLoose :: [Any] -> [Type]
-    var determineActualTypesLoose = function(values) {
-      return rejectInconsistent(_determineActualTypes(true, [], values));
-    };
-
-    //  valuesToPairs :: [Any] -> [Pair Any [Type]]
-    var valuesToPairs = function(values) {
-      return map(values, function(x) {
-        return [x, determineActualTypesLoose([x])];
-      });
-    };
-
-    //  _satisfactoryTypes :: ... -> [Type]
-    var _satisfactoryTypes = function(
-      name,         // :: String
-      constraints,  // :: StrMap [TypeClass]
-      expTypes,     // :: [Type]
-      $typeVarMap,  // :: StrMap { info :: Info, types :: [Type] }
-      index         // :: Integer
-    ) {
-      return function recur(
-        expType,    // :: Type
-        values,     // :: [Any]
-        typePath,   // :: [Type]
-        propPath    // :: [String]
-      ) {
-        var $1s, $2s, idx, okTypes;
-        switch (expType.type) {
-
-          case 'VARIABLE':
-            var typeVarName = expType.name;
-            if (has(typeVarName, constraints)) {
-              var typeClasses = constraints[typeVarName];
-              for (idx = 0; idx < values.length; idx += 1) {
-                for (var idx2 = 0; idx2 < typeClasses.length; idx2 += 1) {
-                  if (!typeClasses[idx2].test(values[idx])) {
-                    throw typeClassConstraintViolation(
-                      name,
-                      constraints,
-                      expTypes,
-                      typeClasses[idx2],
-                      {index: index,
-                       pairs: valuesToPairs([values[idx]]),
-                       propPath: propPath,
-                       typePath: typePath.concat([expType])}
-                    );
-                  }
-                }
-              }
-            }
-            if (has(typeVarName, $typeVarMap)) {
-              okTypes = filterTypesByValues($typeVarMap[typeVarName].types,
-                                            values);
-              if (isEmpty(okTypes)) {
-                throw typeVarConstraintViolation2(
-                  name,
-                  constraints,
-                  expTypes,
-                  {index: index,
-                   pairs: valuesToPairs(values),
-                   propPath: propPath,
-                   typePath: typePath.concat([expType])},
-                  $typeVarMap[typeVarName].info
-                );
-              }
-            } else {
-              okTypes = determineActualTypesStrict(values);
-              if (isEmpty(okTypes) && !isEmpty(values)) {
-                throw typeVarConstraintViolation(
-                  name,
-                  constraints,
-                  expTypes,
-                  {index: index,
-                   pairs: valuesToPairs(values),
-                   propPath: propPath,
-                   typePath: typePath.concat([expType])}
-                );
-              }
-            }
-            if (!isEmpty(okTypes)) {
-              $typeVarMap[typeVarName] = {
-                types: okTypes,
-                info: {
-                  index: index,
-                  pairs: valuesToPairs(values),
-                  propPath: propPath,
-                  typePath: typePath.concat([expType])
-                }
-              };
-            }
-            return okTypes;
-
-          case 'UNARY':
-            $1s = recur(expType.$1,
-                        chain(values, expType._1),
-                        typePath.concat([expType]),
-                        propPath.concat(['$1']));
-            return map(or($1s, [expType.$1]), UnaryType.from(expType));
-
-          case 'BINARY':
-            $1s = recur(expType.$1,
-                        chain(values, expType._1),
-                        typePath.concat([expType]),
-                        propPath.concat(['$1']));
-            $2s = recur(expType.$2,
-                        chain(values, expType._2),
-                        typePath.concat([expType]),
-                        propPath.concat(['$2']));
-            return BinaryType.xprod(expType,
-                                    or($1s, [expType.$1]),
-                                    or($2s, [expType.$2]));
-
-          default:
-            return determineActualTypesStrict(values);
-        }
-      };
-    };
-
-    //  satisfactoryTypes :: ... -> [Type]
-    var satisfactoryTypes = function(
-      name,         // :: String
-      constraints,  // :: StrMap [TypeClass]
-      expTypes,     // :: [Type]
-      $typeVarMap,  // :: StrMap { info :: Info, types :: [Type] }
-      value,        // :: Any
-      index         // :: Integer
-    ) {
-      return _satisfactoryTypes(name,
-                                constraints,
-                                expTypes,
-                                $typeVarMap,
-                                index)
-                               (expTypes[index],
-                                [value],
-                                [],
-                                []);
-    };
+    var env = applyParameterizedTypes(opts.env);
 
     //  curry :: ... -> Function
     var curry = function(
@@ -1213,7 +1390,6 @@
       impl          // :: Function
     ) {
       return arity(_indexes.length, function() {
-        var result;
         if (checkTypes) {
           var delta = _indexes.length - arguments.length;
           if (delta < 0) {
@@ -1222,10 +1398,7 @@
                                          expTypes.length - 1 - delta);
           }
         }
-        var $typeVarMap = {};
-        for (var typeVarName in _typeVarMap) {
-          $typeVarMap[typeVarName] = _typeVarMap[typeVarName];
-        }
+        var typeVarMap = _typeVarMap;
         var values = _values.slice();
         var indexes = [];
         for (var idx = 0; idx < _indexes.length; idx += 1) {
@@ -1238,22 +1411,15 @@
 
             var value = arguments[idx];
             if (checkTypes) {
-              result = test(expTypes[index], value);
-              if (!result.valid) {
-                throw invalidValue(name,
-                                   constraints,
-                                   expTypes,
-                                   {index: index,
-                                    pairs: valuesToPairs([result.value]),
-                                    propPath: result.propPath,
-                                    typePath: result.typePath});
-              }
-              satisfactoryTypes(name,
-                                constraints,
-                                expTypes,
-                                $typeVarMap,
-                                value,
-                                index);
+              var result = satisfactoryTypes(env,
+                                             name,
+                                             constraints,
+                                             expTypes,
+                                             typeVarMap,
+                                             value,
+                                             index);
+              assertRight(result);
+              typeVarMap = result.value.typeVarMap;
             }
             values[index] = value;
           } else {
@@ -1263,29 +1429,20 @@
         if (isEmpty(indexes)) {
           var returnValue = impl.apply(this, values);
           if (checkTypes) {
-            result = test(last(expTypes), returnValue);
-            if (!result.valid) {
-              throw invalidValue(name,
-                                 constraints,
-                                 expTypes,
-                                 {index: _indexes.length,
-                                  pairs: valuesToPairs([result.value]),
-                                  propPath: result.propPath,
-                                  typePath: result.typePath});
-            }
-            satisfactoryTypes(name,
-                              constraints,
-                              expTypes,
-                              $typeVarMap,
-                              returnValue,
-                              expTypes.length - 1);
+            assertRight(satisfactoryTypes(env,
+                                          name,
+                                          constraints,
+                                          expTypes,
+                                          typeVarMap,
+                                          returnValue,
+                                          expTypes.length - 1));
           }
           return returnValue;
         } else {
           return curry(name,
                        constraints,
                        expTypes,
-                       $typeVarMap,
+                       typeVarMap,
                        values,
                        indexes,
                        impl);
@@ -1299,12 +1456,19 @@
           throw invalidArgumentsLength('def', def.length, arguments.length);
         }
 
-        var Type = RecordType({test: $.Function});
-        var types = [$.String, $.Object, $.Array(Type), $.Function];
-        for (var idx = 0; idx < types.length; idx += 1) {
-          if (!test(types[idx], arguments[idx]).valid) {
-            throw invalidArgument('def', [types[idx]], arguments[idx], idx);
-          }
+        var types = [$.String,
+                     StrMap($.Array(TypeClass)),
+                     $.Array(Type),
+                     $.Function,
+                     $.Function];
+        for (var idx = 0; idx < types.length - 1; idx += 1) {
+          assertRight(satisfactoryTypes(defaultEnv,
+                                        'def',
+                                        {},
+                                        types,
+                                        {},
+                                        arguments[idx],
+                                        idx));
         }
       }
 
