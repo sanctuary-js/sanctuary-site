@@ -2,9 +2,9 @@ ESLINT = node_modules/.bin/eslint
 NPM = npm
 
 CUSTOM = $(shell find custom -name '*.md' | sort)
-VENDOR = ramda sanctuary sanctuary-def
+VENDOR = ramda sanctuary sanctuary-def snabbdom
 VENDOR_CHECKS = $(patsubst %,check-%-version,$(VENDOR))
-FILES = index.html $(patsubst %,vendor/%.js,$(VENDOR))
+FILES = index.html sig-data.js $(patsubst %,vendor/%.js,$(VENDOR))
 
 
 .PHONY: all
@@ -13,7 +13,13 @@ all: $(FILES)
 index.html: scripts/generate node_modules/sanctuary/README.md $(CUSTOM)
 	'$<' node_modules/sanctuary
 
+sig-data.js: scripts/generate-sig-data.js node_modules/sanctuary/README.md
+	'$<' node_modules/sanctuary
+
 vendor/ramda.js: node_modules/ramda/dist/ramda.js
+	cp '$<' '$@'
+
+vendor/snabbdom.js: node_modules/snabbdom/dist/snabbdom.min.js
 	cp '$<' '$@'
 
 vendor/%.js: node_modules/%/index.js
@@ -38,12 +44,12 @@ lint:
 	  --env node \
 	  --rule 'max-len: [off]' \
 	  --rule 'prefer-template: [off]' \
-	  -- scripts/generate
+	  -- scripts/*
 	$(ESLINT) \
 	  --config node_modules/sanctuary-style/eslint-es3.json \
 	  --env es3 \
 	  --env browser \
-	  -- behaviour.js
+	  -- behaviour.js search.js
 	make clean
 	make
 	git diff --exit-code
