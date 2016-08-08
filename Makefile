@@ -26,8 +26,8 @@ $(VENDOR_CHECKS): check-%-version:
 
 
 .PHONY: clean
-clean: $(FILES)
-	rm -f -- $^
+clean:
+	rm -f -- $(FILES)
 
 
 .PHONY: lint

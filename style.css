@@ -77,6 +77,40 @@ a code {
   padding: 0 0 4em;
 }
 
+#tagline {
+  margin: 0 0 2em;
+  font-size: 75%;
+  color: #666;
+}
+
+#toc {
+  list-style: none;
+  padding-left: 0;
+  font-size: 75%;
+  line-height: 1.5;
+}
+
+#toc ul {
+  list-style: none;
+  padding-left: 1em;
+}
+
+#toc li:before {
+  position: absolute;
+  display: block;
+  margin-left: -1em;
+  width: 1em;
+  content: "\2013";
+}
+
+#toc code {
+  font-size: 88.889%;
+}
+
+#toc .arrow-hyphen {
+  top: -0.05em;
+}
+
 pre {
   margin: 1.334em 0;
   padding: 0;

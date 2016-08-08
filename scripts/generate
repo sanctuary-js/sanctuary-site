@@ -14,8 +14,11 @@ const $                 = require('sanctuary-def');
 
 const Either            = S.EitherType;
 const I                 = S.I;
+const Just              = S.Just;
 const K                 = S.K;
 const Left              = S.Left;
+const Maybe             = S.MaybeType;
+const Nothing           = S.Nothing;
 const Right             = S.Right;
 const _                 = R.__;
 const all               = R.all;
@@ -36,18 +39,21 @@ const encaseEither      = S.encaseEither;
 const encaseEither2     = S.encaseEither2;
 const equals            = R.equals;
 const flip              = S.flip;
+const fromMaybe         = S.fromMaybe;
 const get               = S.get;
 const head_             = R.head;
 const ifElse            = S.ifElse;
 const isRight           = S.isRight;
 const join              = R.join;
+const justs             = S.justs;
 const juxt              = R.juxt;
 const lefts             = S.lefts;
-const lensIndex         = R.lensIndex;
+const lensProp          = R.lensProp;
 const lift2             = S.lift2;
 const lines             = S.lines;
 const lt                = R.lt;
 const map               = R.map;
+const match             = S.match;
 const match_            = R.match;
 const maybeToEither     = S.maybeToEither;
 const over              = R.over;
@@ -56,14 +62,20 @@ const pipe              = S.pipe;
 const prepend           = R.prepend;
 const prop              = R.prop;
 const propEq            = R.propEq;
+const reduce            = S.reduce;
+const regex             = S.regex;
+const regexEscape       = S.regexEscape;
+const repeat            = R.repeat;
 const replace           = R.replace;
 const rights            = S.rights;
 const slice_            = R.slice;
 const split             = R.split;
 const tail_             = R.tail;
+const toMaybe           = S.toMaybe;
 const toString          = R.toString;
 const trim              = R.trim;
 const unapply           = R.unapply;
+const unfoldr           = S.unfoldr;
 const unlines           = S.unlines;
 const unnest            = R.unnest;
 
@@ -73,6 +85,22 @@ const green             = '\u001B[32m';
 
 const env               = concat($.env, [Either]);
 const def               = $.create({checkTypes: true, env: env});
+
+//    matchAll :: GlobalRegExp -> String -> Array { match :: String, groups :: Array (Maybe String) }
+const matchAll =
+def('matchAll',
+    {},
+    [$.RegExp, $.String, $.Array($.RecordType({match: $.String, groups: $.Array(Maybe($.String))}))],
+    (pattern, s) => {
+      const lastIndex = pattern.lastIndex;
+      const result = [];
+      let m;
+      while ((m = pattern.exec(s)) != null) {
+        result.push({match: head_(m), groups: map(toMaybe, tail_(m))});
+      }
+      pattern.lastIndex = lastIndex;
+      return result;
+    });
 
 //    replace_ :: RegExp -> ([String] -> String) -> String -> String
 const replace_ =
@@ -268,11 +296,73 @@ def('readme',
           map(concat('\n')),
           map(replace(/\n$/, ''))]));
 
+//    pad :: Integer -> String
+const pad =
+def('pad',
+    {},
+    [$.Integer, $.String],
+    compose(join(''), repeat('  ')));
+
+//    colon :: String
+const colon = regexEscape('<span class="tight">:</span>');
+
+//    codeLink :: RegExp
+const codeLink =
+regex('', '^<code><a href="[^"]*">(.*? ' + colon + colon + ' .*)</a></code>$');
+
+//    toc :: String -> String
+const toc =
+def('toc',
+    {},
+    [$.String, $.String],
+    pipe([matchAll(/<(h[1-6]) id="([^"]*)">(.*)<[/]\1>/g),
+          map(prop('groups')),
+          map(justs),
+          reduce(({level, tagName, html}) => ([hN, id, innerHtml]) => {
+            const level$ = Number(hN[1]);
+            const level$$ = level$ > level ? hN === tagName ? level : level + 1 : level$;
+
+            const html$ =
+            html + '\n' +
+            (level$$ > level ?
+               pad(2 * level$$ - 2) + '<ul' + (level === 1 ? ' id="toc"' : '') + '>\n' +
+               pad(2 * level$$ - 1) + '<li>\n' +
+               pad(2 * level$$ - 0) :
+             level$$ < level ?
+               pad(2 * level$$ + 1) + '</li>\n' +
+               pad(2 * level$$ - 0) + '</ul>\n' +
+               pad(2 * level$$ - 1) + '</li>\n' +
+               pad(2 * level$$ - 1) + '<li>\n' +
+               pad(2 * level$$ - 0) :
+             // else
+               pad(2 * level$$ - 1) + '</li>\n' +
+               pad(2 * level$$ - 1) + '<li>\n' +
+               pad(2 * level$$ - 0)) +
+            pipe([match(codeLink),
+                  chain(at(1)),
+                  unnest,
+                  map(wrap('<code>', '</code>')),
+                  fromMaybe(innerHtml),
+                  wrap('<a href="#' + id + '">', '</a>')],
+                 innerHtml);
+
+            return {level: level$$, tagName: hN, html: html$};
+          }, {level: 1, tagName: 'h1', html: ''}),
+          over(lensProp('level'),
+               compose(join(''),
+                       unfoldr(level => level > 1 ?
+                                 Just(['\n' + pad(2 * level - 1) + '</li>' +
+                                       '\n' + pad(2 * level - 2) + '</ul>',
+                                      level - 1]) :
+                                 Nothing))),
+          lift2(concat, prop('html'), prop('level'))]));
+
+//    toDocument :: String -> String -> String
 const toDocument =
 def('toDocument',
     {},
-    [$.String, $.String],
-    content => `<!doctype html>
+    [$.String, $.String, $.String],
+    (version, content) => `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -296,6 +386,9 @@ def('toDocument',
     </p>
   </div>
   <div id="css-main">
+    <h1 id="sanctuary">Sanctuary <small>v${version}</small></h1>
+    <p id="tagline">Refuge from unsafe JavaScript</p>
+${toc(content)}
 ${content}
   </div>
   <script src="vendor/ramda.js"></script>
@@ -324,9 +417,7 @@ pipe([at(2),
       chain(ifElse(all(isRight),
                    pipe([rights, Right]),
                    pipe([lefts, join('\n'), Left]))),
-      map(over(lensIndex(0), wrap(' <small>v', '</small>'))),
-      map(apply(replace(/(?=<[/]h1>)/))),
-      map(toDocument),
+      map(apply(toDocument)),
       chain(writeFile('index.html')),
       either(failure, success)],
      process.argv);
