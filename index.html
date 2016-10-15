@@ -22,8 +22,566 @@
     </p>
   </div>
   <div id="css-main">
+    <h1 id="sanctuary">Sanctuary <small>v0.11.1</small></h1>
+    <p id="tagline">Refuge from unsafe JavaScript</p>
 
-<h1 id="sanctuary">Sanctuary <small>v0.11.1</small></h1>
+    <ul id="toc">
+      <li>
+        <a href="#overview">Overview</a>
+      </li>
+      <li>
+        <a href="#types">Types</a>
+        <ul>
+          <li>
+            <a href="#accessible-pseudotype">Accessible pseudotype</a>
+          </li>
+          <li>
+            <a href="#integer-pseudotype">Integer pseudotype</a>
+          </li>
+          <li>
+            <a href="#type-representatives">Type representatives</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#type-checking">Type checking</a>
+      </li>
+      <li>
+        <a href="#api">API</a>
+        <ul>
+          <li>
+            <a href="#create"><code>create <span class="tight">:</span><span class="tight">:</span> { checkTypes <span class="tight">:</span><span class="tight">:</span> Boolean, env <span class="tight">:</span><span class="tight">:</span> Array Type } <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Module</code></a>
+          </li>
+          <li>
+            <a href="#env"><code>env <span class="tight">:</span><span class="tight">:</span> Array Type</code></a>
+          </li>
+          <li>
+            <a href="#classify">Classify</a>
+            <ul>
+              <li>
+                <a href="#type"><code>type <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</code></a>
+              </li>
+              <li>
+                <a href="#is"><code>is <span class="tight">:</span><span class="tight">:</span> TypeRep a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#combinator">Combinator</a>
+            <ul>
+              <li>
+                <a href="#I"><code>I <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</code></a>
+              </li>
+              <li>
+                <a href="#K"><code>K <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</code></a>
+              </li>
+              <li>
+                <a href="#A"><code>A <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</code></a>
+              </li>
+              <li>
+                <a href="#T"><code>T <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</code></a>
+              </li>
+              <li>
+                <a href="#C"><code>C <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</code></a>
+              </li>
+              <li>
+                <a href="#B"><code>B <span class="tight">:</span><span class="tight">:</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</code></a>
+              </li>
+              <li>
+                <a href="#S"><code>S <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#function">Function</a>
+            <ul>
+              <li>
+                <a href="#flip"><code>flip <span class="tight">:</span><span class="tight">:</span> ((a, b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</code></a>
+              </li>
+              <li>
+                <a href="#lift"><code>lift <span class="tight">:</span><span class="tight">:</span> Functor f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b</code></a>
+              </li>
+              <li>
+                <a href="#lift2"><code>lift2 <span class="tight">:</span><span class="tight">:</span> Apply f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f c</code></a>
+              </li>
+              <li>
+                <a href="#lift3"><code>lift3 <span class="tight">:</span><span class="tight">:</span> Apply f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> d) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f d</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#composition">Composition</a>
+            <ul>
+              <li>
+                <a href="#compose"><code>compose <span class="tight">:</span><span class="tight">:</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</code></a>
+              </li>
+              <li>
+                <a href="#pipe"><code>pipe <span class="tight">:</span><span class="tight">:</span> [(a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b), (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c), <span class="tight">.</span><span class="tight">.</span><span class="tight">.</span>, (m <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> n)] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> n</code></a>
+              </li>
+              <li>
+                <a href="#meld"><code>meld <span class="tight">:</span><span class="tight">:</span> [** <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> *] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (* <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> * <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> <span class="tight">.</span><span class="tight">.</span><span class="tight">.</span> <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> *)</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#maybe-type">Maybe type</a>
+            <ul>
+              <li>
+                <a href="#MaybeType"><code>MaybeType <span class="tight">:</span><span class="tight">:</span> Type <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Type</code></a>
+              </li>
+              <li>
+                <a href="#Maybe"><code>Maybe <span class="tight">:</span><span class="tight">:</span> TypeRep Maybe</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.empty"><code>Maybe.empty <span class="tight">:</span><span class="tight">:</span> <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.of"><code>Maybe.of <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.@@type"><code>Maybe#@@type <span class="tight">:</span><span class="tight">:</span> String</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.isNothing"><code>Maybe#isNothing <span class="tight">:</span><span class="tight">:</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.isJust"><code>Maybe#isJust <span class="tight">:</span><span class="tight">:</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.ap"><code>Maybe#ap <span class="tight">:</span><span class="tight">:</span> Maybe (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow">~&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.chain"><code>Maybe#chain <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.concat"><code>Maybe#concat <span class="tight">:</span><span class="tight">:</span> Semigroup a <span class="arrow">=&gt;</span> Maybe a <span class="arrow">~&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.empty"><code>Maybe#empty <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.equals"><code>Maybe#equals <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.extend"><code>Maybe#extend <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.filter"><code>Maybe#filter <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.map"><code>Maybe#map <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.of"><code>Maybe#of <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.reduce"><code>Maybe#reduce <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> ((b, a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.sequence"><code>Maybe#sequence <span class="tight">:</span><span class="tight">:</span> Applicative f <span class="arrow">=&gt;</span> Maybe (f a) <span class="arrow">~&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f (Maybe a)</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.toBoolean"><code>Maybe#toBoolean <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.toString"><code>Maybe#toString <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> String</code></a>
+              </li>
+              <li>
+                <a href="#Maybe.prototype.inspect"><code>Maybe#inspect <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow">~&gt;</span> String</code></a>
+              </li>
+              <li>
+                <a href="#Nothing"><code>Nothing <span class="tight">:</span><span class="tight">:</span> <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#Just"><code>Just <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#isNothing"><code>isNothing <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#isJust"><code>isJust <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#fromMaybe"><code>fromMaybe <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</code></a>
+              </li>
+              <li>
+                <a href="#maybeToNullable"><code>maybeToNullable <span class="tight">:</span><span class="tight">:</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Nullable a</code></a>
+              </li>
+              <li>
+                <a href="#toMaybe"><code>toMaybe <span class="tight">:</span><span class="tight">:</span> a? <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#maybe"><code>maybe <span class="tight">:</span><span class="tight">:</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</code></a>
+              </li>
+              <li>
+                <a href="#justs"><code>justs <span class="tight">:</span><span class="tight">:</span> Array (Maybe a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array a</code></a>
+              </li>
+              <li>
+                <a href="#mapMaybe"><code>mapMaybe <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array b</code></a>
+              </li>
+              <li>
+                <a href="#encase"><code>encase <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</code></a>
+              </li>
+              <li>
+                <a href="#encase2"><code>encase2 <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe c</code></a>
+              </li>
+              <li>
+                <a href="#encase2_"><code>encase2_ <span class="tight">:</span><span class="tight">:</span> ((a, b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe c</code></a>
+              </li>
+              <li>
+                <a href="#encase3"><code>encase3 <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> d) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe d</code></a>
+              </li>
+              <li>
+                <a href="#encase3_"><code>encase3_ <span class="tight">:</span><span class="tight">:</span> ((a, b, c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> d) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe d</code></a>
+              </li>
+              <li>
+                <a href="#maybeToEither"><code>maybeToEither <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#either-type">Either type</a>
+            <ul>
+              <li>
+                <a href="#EitherType"><code>EitherType <span class="tight">:</span><span class="tight">:</span> Type <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Type <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Type</code></a>
+              </li>
+              <li>
+                <a href="#Either"><code>Either <span class="tight">:</span><span class="tight">:</span> TypeRep Either</code></a>
+              </li>
+              <li>
+                <a href="#Either.of"><code>Either.of <span class="tight">:</span><span class="tight">:</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.@@type"><code>Either#@@type <span class="tight">:</span><span class="tight">:</span> String</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.isLeft"><code>Either#isLeft <span class="tight">:</span><span class="tight">:</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.isRight"><code>Either#isRight <span class="tight">:</span><span class="tight">:</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.ap"><code>Either#ap <span class="tight">:</span><span class="tight">:</span> Either a (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow">~&gt;</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.chain"><code>Either#chain <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.concat"><code>Either#concat <span class="tight">:</span><span class="tight">:</span> (Semigroup a, Semigroup b) <span class="arrow">=&gt;</span> Either a b <span class="arrow">~&gt;</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.equals"><code>Either#equals <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.extend"><code>Either#extend <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> (Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.map"><code>Either#map <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.of"><code>Either#of <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a c</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.reduce"><code>Either#reduce <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> ((c, b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.sequence"><code>Either#sequence <span class="tight">:</span><span class="tight">:</span> Applicative f <span class="arrow">=&gt;</span> Either a (f b) <span class="arrow">~&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f (Either a b)</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.toBoolean"><code>Either#toBoolean <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.toString"><code>Either#toString <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> String</code></a>
+              </li>
+              <li>
+                <a href="#Either.prototype.inspect"><code>Either#inspect <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow">~&gt;</span> String</code></a>
+              </li>
+              <li>
+                <a href="#Left"><code>Left <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</code></a>
+              </li>
+              <li>
+                <a href="#Right"><code>Right <span class="tight">:</span><span class="tight">:</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b</code></a>
+              </li>
+              <li>
+                <a href="#isLeft"><code>isLeft <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#isRight"><code>isRight <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#either"><code>either <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c</code></a>
+              </li>
+              <li>
+                <a href="#lefts"><code>lefts <span class="tight">:</span><span class="tight">:</span> Array (Either a b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array a</code></a>
+              </li>
+              <li>
+                <a href="#rights"><code>rights <span class="tight">:</span><span class="tight">:</span> Array (Either a b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array b</code></a>
+              </li>
+              <li>
+                <a href="#encaseEither"><code>encaseEither <span class="tight">:</span><span class="tight">:</span> (Error <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> l) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> r) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either l r</code></a>
+              </li>
+              <li>
+                <a href="#encaseEither2"><code>encaseEither2 <span class="tight">:</span><span class="tight">:</span> (Error <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> l) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> r) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either l r</code></a>
+              </li>
+              <li>
+                <a href="#encaseEither2_"><code>encaseEither2_ <span class="tight">:</span><span class="tight">:</span> (Error <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> l) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> ((a, b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> r) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either l r</code></a>
+              </li>
+              <li>
+                <a href="#encaseEither3"><code>encaseEither3 <span class="tight">:</span><span class="tight">:</span> (Error <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> l) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> r) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either l r</code></a>
+              </li>
+              <li>
+                <a href="#encaseEither3_"><code>encaseEither3_ <span class="tight">:</span><span class="tight">:</span> (Error <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> l) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> ((a, b, c) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> r) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> c <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Either l r</code></a>
+              </li>
+              <li>
+                <a href="#eitherToMaybe"><code>eitherToMaybe <span class="tight">:</span><span class="tight">:</span> Either a b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#alternative">Alternative</a>
+            <ul>
+              <li>
+                <a href="#and"><code>and <span class="tight">:</span><span class="tight">:</span> Alternative a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</code></a>
+              </li>
+              <li>
+                <a href="#or"><code>or <span class="tight">:</span><span class="tight">:</span> Alternative a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</code></a>
+              </li>
+              <li>
+                <a href="#xor"><code>xor <span class="tight">:</span><span class="tight">:</span> (Alternative a, Monoid a) <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#logic">Logic</a>
+            <ul>
+              <li>
+                <a href="#not"><code>not <span class="tight">:</span><span class="tight">:</span> Boolean <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#ifElse"><code>ifElse <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</code></a>
+              </li>
+              <li>
+                <a href="#allPass"><code>allPass <span class="tight">:</span><span class="tight">:</span> Array (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#anyPass"><code>anyPass <span class="tight">:</span><span class="tight">:</span> Array (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#list">List</a>
+            <ul>
+              <li>
+                <a href="#concat"><code>concat <span class="tight">:</span><span class="tight">:</span> Semigroup a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</code></a>
+              </li>
+              <li>
+                <a href="#slice"><code>slice <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</code></a>
+              </li>
+              <li>
+                <a href="#at"><code>at <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#head"><code>head <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#last"><code>last <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#tail"><code>tail <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</code></a>
+              </li>
+              <li>
+                <a href="#init"><code>init <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</code></a>
+              </li>
+              <li>
+                <a href="#take"><code>take <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</code></a>
+              </li>
+              <li>
+                <a href="#takeLast"><code>takeLast <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</code></a>
+              </li>
+              <li>
+                <a href="#drop"><code>drop <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</code></a>
+              </li>
+              <li>
+                <a href="#dropLast"><code>dropLast <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe [a]</code></a>
+              </li>
+              <li>
+                <a href="#reverse"><code>reverse <span class="tight">:</span><span class="tight">:</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a]</code></a>
+              </li>
+              <li>
+                <a href="#indexOf"><code>indexOf <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Integer</code></a>
+              </li>
+              <li>
+                <a href="#lastIndexOf"><code>lastIndexOf <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> [a] <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Integer</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#array">Array</a>
+            <ul>
+              <li>
+                <a href="#append"><code>append <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array a</code></a>
+              </li>
+              <li>
+                <a href="#prepend"><code>prepend <span class="tight">:</span><span class="tight">:</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array a</code></a>
+              </li>
+              <li>
+                <a href="#find"><code>find <span class="tight">:</span><span class="tight">:</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+              <li>
+                <a href="#pluck"><code>pluck <span class="tight">:</span><span class="tight">:</span> Accessible a <span class="arrow">=&gt;</span> TypeRep b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array (Maybe b)</code></a>
+              </li>
+              <li>
+                <a href="#reduce"><code>reduce <span class="tight">:</span><span class="tight">:</span> Foldable f <span class="arrow">=&gt;</span> (a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</code></a>
+              </li>
+              <li>
+                <a href="#reduce_"><code>reduce_ <span class="tight">:</span><span class="tight">:</span> Foldable f <span class="arrow">=&gt;</span> ((a, b) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> f b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</code></a>
+              </li>
+              <li>
+                <a href="#unfoldr"><code>unfoldr <span class="tight">:</span><span class="tight">:</span> (b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe (Pair a b)) <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array a</code></a>
+              </li>
+              <li>
+                <a href="#range"><code>range <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array Integer</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#object">Object</a>
+            <ul>
+              <li>
+                <a href="#prop"><code>prop <span class="tight">:</span><span class="tight">:</span> Accessible a <span class="arrow">=&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> b</code></a>
+              </li>
+              <li>
+                <a href="#get"><code>get <span class="tight">:</span><span class="tight">:</span> Accessible a <span class="arrow">=&gt;</span> TypeRep b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</code></a>
+              </li>
+              <li>
+                <a href="#gets"><code>gets <span class="tight">:</span><span class="tight">:</span> Accessible a <span class="arrow">=&gt;</span> TypeRep b <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe b</code></a>
+              </li>
+              <li>
+                <a href="#keys"><code>keys <span class="tight">:</span><span class="tight">:</span> StrMap a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array String</code></a>
+              </li>
+              <li>
+                <a href="#values"><code>values <span class="tight">:</span><span class="tight">:</span> StrMap a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array a</code></a>
+              </li>
+              <li>
+                <a href="#pairs"><code>pairs <span class="tight">:</span><span class="tight">:</span> StrMap a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array (Pair String a)</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#number">Number</a>
+            <ul>
+              <li>
+                <a href="#negate"><code>negate <span class="tight">:</span><span class="tight">:</span> ValidNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> ValidNumber</code></a>
+              </li>
+              <li>
+                <a href="#add"><code>add <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</code></a>
+              </li>
+              <li>
+                <a href="#sum"><code>sum <span class="tight">:</span><span class="tight">:</span> Foldable f <span class="arrow">=&gt;</span> f FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</code></a>
+              </li>
+              <li>
+                <a href="#sub"><code>sub <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</code></a>
+              </li>
+              <li>
+                <a href="#inc"><code>inc <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</code></a>
+              </li>
+              <li>
+                <a href="#dec"><code>dec <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</code></a>
+              </li>
+              <li>
+                <a href="#mult"><code>mult <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</code></a>
+              </li>
+              <li>
+                <a href="#product"><code>product <span class="tight">:</span><span class="tight">:</span> Foldable f <span class="arrow">=&gt;</span> f FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</code></a>
+              </li>
+              <li>
+                <a href="#div"><code>div <span class="tight">:</span><span class="tight">:</span> FiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> NonZeroFiniteNumber <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> FiniteNumber</code></a>
+              </li>
+              <li>
+                <a href="#min"><code>min <span class="tight">:</span><span class="tight">:</span> Ord a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</code></a>
+              </li>
+              <li>
+                <a href="#max"><code>max <span class="tight">:</span><span class="tight">:</span> Ord a <span class="arrow">=&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> a</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#integer">Integer</a>
+            <ul>
+              <li>
+                <a href="#even"><code>even <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#odd"><code>odd <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#parse">Parse</a>
+            <ul>
+              <li>
+                <a href="#parseDate"><code>parseDate <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Date</code></a>
+              </li>
+              <li>
+                <a href="#parseFloat"><code>parseFloat <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Number</code></a>
+              </li>
+              <li>
+                <a href="#parseInt"><code>parseInt <span class="tight">:</span><span class="tight">:</span> Integer <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe Integer</code></a>
+              </li>
+              <li>
+                <a href="#parseJson"><code>parseJson <span class="tight">:</span><span class="tight">:</span> TypeRep a <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe a</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#regexp">RegExp</a>
+            <ul>
+              <li>
+                <a href="#regex"><code>regex <span class="tight">:</span><span class="tight">:</span> RegexFlags <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> RegExp</code></a>
+              </li>
+              <li>
+                <a href="#regexEscape"><code>regexEscape <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</code></a>
+              </li>
+              <li>
+                <a href="#test"><code>test <span class="tight">:</span><span class="tight">:</span> RegExp <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Boolean</code></a>
+              </li>
+              <li>
+                <a href="#match"><code>match <span class="tight">:</span><span class="tight">:</span> RegExp <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Maybe (Array (Maybe String))</code></a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#string">String</a>
+            <ul>
+              <li>
+                <a href="#toUpper"><code>toUpper <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</code></a>
+              </li>
+              <li>
+                <a href="#toLower"><code>toLower <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</code></a>
+              </li>
+              <li>
+                <a href="#trim"><code>trim <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</code></a>
+              </li>
+              <li>
+                <a href="#words"><code>words <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array String</code></a>
+              </li>
+              <li>
+                <a href="#unwords"><code>unwords <span class="tight">:</span><span class="tight">:</span> Array String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</code></a>
+              </li>
+              <li>
+                <a href="#lines"><code>lines <span class="tight">:</span><span class="tight">:</span> String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> Array String</code></a>
+              </li>
+              <li>
+                <a href="#unlines"><code>unlines <span class="tight">:</span><span class="tight">:</span> Array String <span class="arrow"><span class="arrow-hyphen">-</span>&gt;</span> String</code></a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+<a class="pilcrow h2" href="#overview">¶</a>
+<h2 id="overview">Overview</h2>
 <p>Sanctuary is a functional programming library inspired by Haskell and
 PureScript. It depends on and works nicely with <a href="http://ramdajs.com/">Ramda</a>. Sanctuary
 makes it possible to write safe code without null checks.</p>
@@ -1450,11 +2008,11 @@ value is a Right containing the result of applying <code>g</code> to <code>x</co
   </form>
   <form>
     &gt; <input value="S.encaseEither(S.I, JSON.parse, '[')">
-    <div class="output">Left(SyntaxError: Unexpected end of input)</div>
+    <div class="output">Left(SyntaxError: Unexpected end of JSON input)</div>
   </form>
   <form>
     &gt; <input value="S.encaseEither(S.prop('message'), JSON.parse, '[')">
-    <div class="output">Left(&quot;Unexpected end of input&quot;)</div>
+    <div class="output">Left(&quot;Unexpected end of JSON input&quot;)</div>
   </form>
 </div>
 

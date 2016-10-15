@@ -1,3 +1,9 @@
+# Sanctuary
+
+Sanctuary is a functional programming library inspired by Haskell and
+PureScript. It depends on and works nicely with [Ramda][]. Sanctuary
+makes it possible to write safe code without null checks.
+
 In JavaScript it's trivial to introduce a possible run-time type error:
 
     words[0].toUpperCase()
@@ -12,6 +18,12 @@ write:
     R.map(S.toUpper, S.head(words))
 
 ===============================================================================
+
+## Overview
+
+Sanctuary is a functional programming library inspired by Haskell and
+PureScript. It depends on and works nicely with [Ramda][]. Sanctuary
+makes it possible to write safe code without null checks.
 
 In JavaScript it's trivial to introduce a possible run-time type error.
 
