@@ -23,93 +23,70 @@ const I                 = S.I;
 const Just              = S.Just;
 const K                 = S.K;
 const Left              = S.Left;
-const Maybe             = S.MaybeType;
 const Nothing           = S.Nothing;
 const Right             = S.Right;
-const _                 = R.__;
-const all               = R.all;
-const ap                = R.ap;
+const _                 = S.__;
+const ap                = S.ap;
 const apply             = R.apply;
 const at                = S.at;
-const binary            = R.binary;
-const chain             = R.chain;
+const chain             = S.chain;
 const compose           = S.compose;
 const compose_          = R.compose;
-const concat            = R.concat;
+const concat            = S.concat;
 const cond              = R.cond;
 const contains          = R.contains;
-const curry             = R.curry;
-const drop_             = R.drop;
+const converge          = R.converge;
+const curry3            = S.curry3;
 const either            = S.either;
 const encaseEither      = S.encaseEither;
-const encaseEither2     = S.encaseEither2;
-const equals            = R.equals;
-const flip              = S.flip;
+const encaseEither2_    = S.encaseEither2_;
+const equals            = S.equals;
+const flip_             = S.flip_;
 const fromMaybe         = S.fromMaybe;
 const get               = S.get;
-const head_             = R.head;
+const head              = S.head;
 const ifElse            = S.ifElse;
-const isRight           = S.isRight;
-const join              = R.join;
+const is                = S.is;
+const join              = S.join;
+const joinWith          = S.joinWith;
 const justs             = S.justs;
-const juxt              = R.juxt;
-const lefts             = S.lefts;
 const lensProp          = R.lensProp;
 const lift2             = S.lift2;
-const lines             = S.lines;
 const lt                = R.lt;
-const map               = R.map;
+const map               = S.map;
 const match             = S.match;
-const match_            = R.match;
+const matchAll          = S.matchAll;
 const maybeToEither     = S.maybeToEither;
+const of                = S.of;
 const over              = R.over;
 const pair              = R.pair;
 const pipe              = S.pipe;
-const prepend           = R.prepend;
-const prop              = R.prop;
-const propEq            = R.propEq;
+const prop              = S.prop;
 const reduce            = S.reduce;
 const regex             = S.regex;
 const regexEscape       = S.regexEscape;
 const repeat            = R.repeat;
 const replace           = R.replace;
-const rights            = S.rights;
+const sequence          = S.sequence;
 const slice_            = R.slice;
 const split             = R.split;
-const tail_             = R.tail;
-const toMaybe           = S.toMaybe;
-const toString          = R.toString;
-const trim              = R.trim;
+const toString          = S.toString;
 const unapply           = R.unapply;
 const unfoldr           = S.unfoldr;
 const unlines           = S.unlines;
-const unnest            = R.unnest;
 
 const reset             = '\u001B[0m';
 const red               = '\u001B[31m';
 const green             = '\u001B[32m';
 
-//    matchAll :: GlobalRegExp -> String -> Array { match :: String, groups :: Array (Maybe String) }
-const matchAll =
-def('matchAll',
-    {},
-    [$.RegExp, $.String, $.Array($.RecordType({match: $.String, groups: $.Array(Maybe($.String))}))],
-    (pattern, s) => {
-      const lastIndex = pattern.lastIndex;
-      const result = [];
-      let m;
-      while ((m = pattern.exec(s)) != null) {
-        result.push({match: head_(m), groups: map(toMaybe, tail_(m))});
-      }
-      pattern.lastIndex = lastIndex;
-      return result;
-    });
+//    Fn :: (Type, Type) -> Type
+const Fn = (x, y) => $.Function([x, y]);
 
 //    replace_ :: RegExp -> ([String] -> String) -> String -> String
 const replace_ =
 def('replace_',
     {},
-    [$.RegExp, $.Function, $.String, $.String],
+    [$.RegExp, Fn($.Array($.String), $.String), $.String, $.String],
     (pattern, f, s) => s.replace(pattern,
                                  unapply(compose_(f, slice_(1, -2)))));
 
@@ -162,9 +139,10 @@ def('toOutputMarkup',
     {},
     [$.String, $.String],
     pipe([encaseEither(prop('message'),
-                       curry(vm.runInNewContext)(_,
-                                                 {R: R, S: S_, sqrt: sqrt},
-                                                 {displayErrors: false})),
+                       curry3(vm.runInNewContext,
+                              _,
+                              {R: R, S: S_, sqrt: sqrt},
+                              {displayErrors: false})),
           either(pipe([concat('! '),
                        htmlEncode,
                        wrap('<div class="output" data-error="true">',
@@ -179,18 +157,17 @@ const doctestsToMarkup =
 def('doctestsToMarkup',
     {},
     [$.String, $.String],
-    pipe([match_(/^(> .*(?:\n[.] .*)*)/gm),
-          map(lines),
-          map(map(drop_(2))),
-          map(map(trim)),
-          map(lift2(prepend, head_, compose(map(concat(' ')), tail_))),
-          map(join('')),
+    pipe([matchAll(/^> .*(?:\n[.] .*)*/gm),
+          map(prop('match')),
+          map(replace(/^../gm, '')),
+          map(replace(/^ +/gm, ' ')),
+          map(replace(/\n/g, '')),
           map(replace(/^global[.]/, 'const ')),
           map(lift2(pair, toInputMarkup, toOutputMarkup)),
           map(map(concat('    '))),
           map(unlines),
           map(wrap('  <form>\n', '  </form>\n')),
-          join(''),
+          joinWith(''),
           wrap('<div class="examples">\n', '</div>\n')]));
 
 //    substitutionPattern :: RegExp
@@ -234,7 +211,7 @@ def('generate',
           //  Replace NO-BREAK SPACE characters with SYMBOL FOR SPACE
           //  characters to work around chjj/marked#363.
           replace(/\u00A0/g, '\u2420'),
-          flip(marked)({pedantic: true}),
+          flip_(marked, {pedantic: true}),
           replace(/\u2420/g, '\u00A0'),
           replace(/\n\n(?=\n<[/]code><[/]pre>)/g, ''),
           replace(/(?=<(h[2-6]) id="([^"]*)")/g,
@@ -246,34 +223,36 @@ const readFile =
 def('readFile',
     {},
     [$.String, Either($.String, $.String)],
-    encaseEither(prop('message'), compose(String, fs.readFileSync)));
+    encaseEither(prop('message'), flip_(fs.readFileSync, 'utf8')));
 
 //    writeFile :: String -> String -> Either String String
 const writeFile =
 def('writeFile',
     {},
     [$.String, $.String, Either($.String, $.String)],
-    encaseEither2(prop('message'), lift2(K, K, binary(fs.writeFileSync))));
+    converge(map,
+             [compose_(K, K),
+              encaseEither2_(prop('message'), fs.writeFileSync)]));
 
 //    version :: String -> Either String String
 const version =
 def('version',
     {},
     [$.String, Either($.String, $.String)],
-    pipe([flip(path.join)('package.json'),
+    pipe([flip_(path.join, 'package.json'),
           readFile,
           chain(encaseEither(prop('message'), JSON.parse)),
-          map(get(String, 'version')),
+          map(get(is(String), 'version')),
           chain(maybeToEither('Invalid "version"'))]));
 
 //    customize :: String -> Either String (String -> Either String String)
 const customize =
 def('customize',
     {},
-    [$.String, Either($.String, $.Function)],
+    [$.String, Either($.String, Fn($.String, Either($.String, $.String)))],
     pipe([readFile,
           map(split(/\n={79}\n\n/)),
-          chain(ifElse(propEq('length', 2),
+          chain(ifElse(compose(equals(2), prop('length')),
                        Right,
                        K(Left('Expected exactly one separator')))),
           map(apply((existing, replacement) =>
@@ -287,14 +266,16 @@ const readme =
 def('readme',
     {},
     [$.String, Either($.String, $.String)],
-    pipe([flip(path.join)('README.md'),
+    pipe([flip_(path.join, 'README.md'),
           readFile,
-          ap(customize('custom/introduction.md')),
-          unnest,
+          ap(customize('custom/preamble.md')),
+          join,
+          ap(customize('custom/type-error.md')),
+          join,
           ap(customize('custom/type-checking-sanctuary.md')),
-          unnest,
+          join,
           ap(customize('custom/type-checking-ramda.md')),
-          unnest,
+          join,
           map(generate),
           map(concat('\n')),
           map(replace(/\n$/, ''))]));
@@ -304,7 +285,7 @@ const pad =
 def('pad',
     {},
     [$.Integer, $.String],
-    compose(join(''), repeat('  ')));
+    compose(joinWith(''), repeat('  ')));
 
 //    colon :: String
 const colon = regexEscape('<span class="tight">:</span>');
@@ -342,8 +323,9 @@ def('toc',
                pad(2 * level$$ - 1) + '<li>\n' +
                pad(2 * level$$ - 0)) +
             pipe([match(codeLink),
-                  chain(at(1)),
-                  unnest,
+                  map(prop('groups')),
+                  chain(head),
+                  join,
                   map(wrap('<code>', '</code>')),
                   fromMaybe(innerHtml),
                   wrap('<a href="#' + id + '">', '</a>')],
@@ -352,7 +334,7 @@ def('toc',
             return {level: level$$, tagName: hN, html: html$};
           }, {level: 1, tagName: 'h1', html: ''}),
           over(lensProp('level'),
-               compose(join(''),
+               compose(joinWith(''),
                        unfoldr(level => level > 1 ?
                                  Just(['\n' + pad(2 * level - 1) + '</li>' +
                                        '\n' + pad(2 * level - 2) + '</ul>',
@@ -396,8 +378,15 @@ ${toc(content)}
 ${content}
   </div>
   <script src="vendor/ramda.js"></script>
+  <script src="vendor/sanctuary-type-identifiers.js"></script>
+  <script src="vendor/sanctuary-type-classes.js"></script>
   <script src="vendor/sanctuary-def.js"></script>
   <script src="vendor/sanctuary.js"></script>
+  <script>
+    window.Z = window.sanctuaryTypeClasses;
+    window.$ = window.sanctuaryDef;
+    window.S = window.sanctuary;
+  </script>
   <script src="behaviour.js"></script>
 </body>
 </html>
@@ -417,10 +406,9 @@ const success = s => {
 
 pipe([at(2),
       maybeToEither('Missing command-line argument'),
-      map(juxt([version, readme])),
-      chain(ifElse(all(isRight),
-                   pipe([rights, Right]),
-                   pipe([lefts, join('\n'), Left]))),
+      map(of(Array)),
+      map(ap([version, readme])),
+      chain(sequence(S.Either)),
       map(apply(toDocument)),
       chain(writeFile('index.html')),
       either(failure, success)],

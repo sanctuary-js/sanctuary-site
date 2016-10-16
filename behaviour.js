@@ -2,25 +2,28 @@
 
   'use strict';
 
-  var R = window.R;
-  var S = window.S = window.sanctuary;
+  var S = window.S.create({checkTypes: false, env: window.S.env});
+
+  //  replace :: RegExp -> String -> String -> Either String String
+  var replace = S.curry3(function(pattern, replacement, s) {
+    return S.test(pattern, s) ? S.Left(s.replace(pattern, replacement))
+                              : S.Right(s);
+  });
 
   //  evaluate :: String -> Either String Any
-  var evaluate =
-  S.encaseEither(R.prop('message'),
-                 S.pipe([R.replace(/^const ([^ ]*) = (.*)/,
-                                   '(window.$1 = $2), undefined'),
-                         R.concat('return '),
-                         R.construct(Function),
-                         R.call]));
+  var evaluate = S.encaseEither(
+    S.prop('message'),
+    S.pipe([S.Right,
+            S.chain(replace(/^const ([^ ]*) = (.*)/)('window.$1 = $2')),
+            S.chain(replace(/^function ([^(]*).*/)('window.$1 = $&')),
+            S.either(S.I, S.concat('return ')),
+            function(body) { return new Function(body)(); }])
+  );
 
   //  hasClass :: String -> Element -> Boolean
-  function hasClass(className) {
-    return function(el) {
-      return el.nodeType === 1 &&
-             S.words(el.className).indexOf(className) >= 0;
-    };
-  }
+  var hasClass = S.curry2(function(className, el) {
+    return el.nodeType === 1 && S.words(el.className).indexOf(className) >= 0;
+  });
 
   //  evaluateForm :: Element -> Undefined
   function evaluateForm(el) {
@@ -34,7 +37,7 @@
       },
       function(x) {
         output.setAttribute('data-error', 'false');
-        output.textContent = R.toString(x);
+        output.textContent = S.toString(x);
       },
       evaluate(input.value)
     );
@@ -42,7 +45,8 @@
 
   //  evaluateForms :: Element -> Undefined
   function evaluateForms(el) {
-    R.forEach(evaluateForm, el.getElementsByTagName('form'));
+    var forms = el.getElementsByTagName('form');
+    Array.prototype.forEach.call(forms, evaluateForm);
   }
 
   evaluateForms(document.body);
