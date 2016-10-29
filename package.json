@@ -9,6 +9,6 @@
   "devDependencies": {
     "eslint": "2.9.x",
     "marked": "0.3.5",
-    "sanctuary-style": "0.2.x"
+    "sanctuary-style": "0.3.x"
   }
 }
