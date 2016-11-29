@@ -2,9 +2,11 @@
   "name": "sanctuary-site",
   "private": true,
   "dependencies": {
+    "hindley-milner-parser-js": "kedashoe/hindley-milner-parser-js#8d9a95d",
     "ramda": "0.21.0",
     "sanctuary": "0.11.1",
-    "sanctuary-def": "0.6.0"
+    "sanctuary-def": "0.6.0",
+    "snabbdom": "risto-stevcev/snabbdom#43908d8"
   },
   "devDependencies": {
     "eslint": "2.9.x",

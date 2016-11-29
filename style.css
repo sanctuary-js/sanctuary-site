@@ -72,6 +72,16 @@ a code {
   color: #fff;
 }
 
+#css-search {
+  position: absolute;
+  top: 135px;
+  left: 650px;
+}
+
+#search-input {
+  width: 250px;
+}
+
 #css-main {
   max-width: 36em;
   padding: 0 0 4em;
