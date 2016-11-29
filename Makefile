@@ -51,7 +51,7 @@ lint:
 
 .PHONY: setup
 setup:
-	$(NPM) update
+	$(NPM) install
 
 
 .PHONY: test

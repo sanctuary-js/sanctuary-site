@@ -1,5 +1,6 @@
 dependencies:
   override:
+    - rm -rf node_modules
     - make setup
 
 machine:
