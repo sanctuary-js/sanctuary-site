@@ -15,15 +15,15 @@
                          R.call]));
 
   //  hasClass :: String -> Element -> Boolean
-  var hasClass = function(className) {
+  function hasClass(className) {
     return function(el) {
       return el.nodeType === 1 &&
              S.words(el.className).indexOf(className) >= 0;
     };
-  };
+  }
 
   //  evaluateForm :: Element -> Undefined
-  var evaluateForm = function(el) {
+  function evaluateForm(el) {
     var input = el.getElementsByTagName('input')[0];
     var output = el.getElementsByClassName('output')[0];
 
@@ -38,12 +38,12 @@
       },
       evaluate(input.value)
     );
-  };
+  }
 
   //  evaluateForms :: Element -> Undefined
-  var evaluateForms = function(el) {
+  function evaluateForms(el) {
     R.forEach(evaluateForm, el.getElementsByTagName('form'));
-  };
+  }
 
   evaluateForms(document.body);
 
