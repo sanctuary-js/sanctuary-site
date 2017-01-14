@@ -6,11 +6,17 @@ const fs                = require('fs');
 const path              = require('path');
 const vm                = require('vm');
 
+const envvar            = require('envvar');
 const marked            = require('marked');
 const R                 = require('ramda');
-const S                 = require('sanctuary');
+const S_                = require('sanctuary');
 const $                 = require('sanctuary-def');
 
+
+const checkTypes        = envvar.boolean('SANCTUARY_CHECK_TYPES', true);
+const {create, env}     = S_;
+const S                 = create({checkTypes, env});
+const def               = $.create({checkTypes, env});
 
 const Either            = S.EitherType;
 const I                 = S.I;
@@ -82,9 +88,6 @@ const unnest            = R.unnest;
 const reset             = '\u001B[0m';
 const red               = '\u001B[31m';
 const green             = '\u001B[32m';
-
-const env               = concat($.env, [Either]);
-const def               = $.create({checkTypes: true, env: env});
 
 //    matchAll :: GlobalRegExp -> String -> Array { match :: String, groups :: Array (Maybe String) }
 const matchAll =
@@ -160,7 +163,7 @@ def('toOutputMarkup',
     [$.String, $.String],
     pipe([encaseEither(prop('message'),
                        curry(vm.runInNewContext)(_,
-                                                 {R: R, S: S, sqrt: sqrt},
+                                                 {R: R, S: S_, sqrt: sqrt},
                                                  {displayErrors: false})),
           either(pipe([concat('! '),
                        htmlEncode,

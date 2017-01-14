@@ -8,6 +8,7 @@
     "sanctuary-logo": "1.0.0"
   },
   "devDependencies": {
+    "envvar": "1.1.x",
     "eslint": "2.9.x",
     "marked": "0.3.5",
     "sanctuary-style": "0.4.x"
