@@ -25,6 +25,13 @@
   <div id="css-main">
     <h1 id="sanctuary">Sanctuary <small>v0.12.2</small></h1>
     <p id="tagline">Refuge from unsafe JavaScript</p>
+    <div>
+      <input type="text" id="search-input" placeholder="search" />
+    </div>
+    <div id="search-results">
+      <div id="no-matches" style="display:none;">No matches</div>
+      <div id="yes-matches"></div>
+    </div>
 
     <ul id="toc">
       <li>
@@ -3956,5 +3963,6 @@ of its first argument.</p>
     window.S = window.sanctuary;
   </script>
   <script src="behaviour.js"></script>
+  <script src="search.js"></script>
 </body>
 </html>

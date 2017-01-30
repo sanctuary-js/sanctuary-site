@@ -111,6 +111,10 @@ a code {
   top: -0.05em;
 }
 
+#search-results .search-result {
+  font-size: 75%;
+}
+
 pre {
   margin: 1.334em 0;
   padding: 0;

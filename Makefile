@@ -1,10 +1,12 @@
+BROWSERIFY = node_modules/.bin/browserify
 ESLINT = node_modules/.bin/eslint
 NPM = npm
+UGLIFY = node_modules/.bin/uglifyjs
 
 CUSTOM = $(shell find custom -name '*.md' | sort)
 VENDOR = ramda sanctuary sanctuary-def sanctuary-type-classes sanctuary-type-identifiers
 VENDOR_CHECKS = $(patsubst %,check-%-version,$(VENDOR))
-FILES = favicon.png index.html $(patsubst %,vendor/%.js,$(VENDOR))
+FILES = favicon.png index.html search.js $(patsubst %,vendor/%.js,$(VENDOR))
 
 
 .PHONY: all
@@ -22,6 +24,8 @@ vendor/ramda.js: node_modules/ramda/dist/ramda.js
 vendor/%.js: node_modules/%/index.js
 	cp '$<' '$@'
 
+search.js: src/search.js
+	$(BROWSERIFY) '$<' | $(UGLIFY) > '$@'
 
 .PHONY: $(VENDOR_CHECKS)
 $(VENDOR_CHECKS): check-%-version:
@@ -47,7 +51,7 @@ lint:
 	  --config node_modules/sanctuary-style/eslint-es3.json \
 	  --env es3 \
 	  --env browser \
-	  -- behaviour.js
+	  -- behaviour.js src/search.js
 	make clean
 	make
 	git diff --exit-code
