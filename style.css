@@ -7,7 +7,7 @@ body {
 
 code {
   font-family: "Courier", monospace;
-  color: #369;
+  color: #c36;
 }
 
 a {
@@ -167,7 +167,7 @@ pre {
 }
 
 .examples .output[data-error="true"] {
-  color: #c20;
+  color: #c36;
 }
 
 .tight + .tight {
