@@ -2,7 +2,7 @@ ESLINT = node_modules/.bin/eslint
 NPM = npm
 
 CUSTOM = $(shell find custom -name '*.md' | sort)
-VENDOR = ramda sanctuary sanctuary-def
+VENDOR = ramda sanctuary sanctuary-def sanctuary-type-classes sanctuary-type-identifiers
 VENDOR_CHECKS = $(patsubst %,check-%-version,$(VENDOR))
 FILES = favicon.png index.html $(patsubst %,vendor/%.js,$(VENDOR))
 

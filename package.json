@@ -2,10 +2,12 @@
   "name": "sanctuary-site",
   "private": true,
   "dependencies": {
-    "ramda": "0.21.0",
-    "sanctuary": "0.11.1",
-    "sanctuary-def": "0.6.0",
-    "sanctuary-logo": "1.0.0"
+    "ramda": "0.23.0",
+    "sanctuary": "0.12.0",
+    "sanctuary-def": "0.9.0",
+    "sanctuary-logo": "1.0.0",
+    "sanctuary-type-classes": "3.0.1",
+    "sanctuary-type-identifiers": "1.0.0"
   },
   "devDependencies": {
     "envvar": "1.1.x",
