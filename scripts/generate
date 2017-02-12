@@ -302,9 +302,12 @@ def('toc',
     pipe([matchAll(/<(h[1-6]) id="([^"]*)">(.*)<[/]\1>/g),
           map(prop('groups')),
           map(justs),
-          reduce(({level, tagName, html}) => ([hN, id, innerHtml]) => {
+          reduce(({level, tagName, html}) => ([hN, id, _innerHtml]) => {
             const level$ = Number(hN[1]);
             const level$$ = level$ > level ? hN === tagName ? level : level + 1 : level$;
+
+            const innerHtml =
+            replace(/^(<code><a [^>]*>)([^ ]*)/, '$1<b>$2</b>', _innerHtml);
 
             const html$ =
             html + '\n' +
