@@ -1,5 +1,5 @@
 ESLINT = node_modules/.bin/eslint
-NPM = npm
+YARN = yarn
 
 CUSTOM = $(shell find custom -name '*.md' | sort)
 VENDOR = ramda sanctuary sanctuary-def
@@ -54,7 +54,10 @@ lint:
 
 .PHONY: setup
 setup:
-	$(NPM) install
+	$(YARN)
+
+yarn.lock: package.json
+	$(YARN)
 
 
 .PHONY: test
