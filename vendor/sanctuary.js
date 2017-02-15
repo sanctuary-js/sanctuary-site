@@ -207,18 +207,16 @@
 
   'use strict';
 
-  //  deps :: Array String
-  var deps = [
-    'sanctuary-def',
-    'sanctuary-type-classes',
-    'sanctuary-type-identifiers'
-  ];
-
   /* istanbul ignore else */
   if (typeof module === 'object' && typeof module.exports === 'object') {
-    module.exports = f(require(deps[0]), require(deps[1]), require(deps[2]));
+    module.exports = f(require('sanctuary-def'),
+                       require('sanctuary-type-classes'),
+                       require('sanctuary-type-identifiers'));
   } else if (typeof define === 'function' && define.amd != null) {
-    define(deps, f);
+    define(['sanctuary-def',
+            'sanctuary-type-classes',
+            'sanctuary-type-identifiers'],
+           f);
   } else {
     self.sanctuary = f(self.sanctuaryDef,
                        self.sanctuaryTypeClasses,
@@ -282,7 +280,7 @@
 
   //  readmeUrl :: String -> String
   function readmeUrl(id) {
-    var version = '0.12.0';  // updated programmatically
+    var version = '0.12.1';  // updated programmatically
     return 'https://github.com/sanctuary-js/sanctuary/tree/v' + version +
            '#' + id;
   }
@@ -482,7 +480,7 @@
 
   //# type :: Any -> String
   //.
-  //. Takes a value, `x`, of any type and returns its [type identifier][].
+  //. Returns the [type identifier][] of the given value.
   //.
   //. ```javascript
   //. > S.type(S.Just(42))
