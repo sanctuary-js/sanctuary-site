@@ -191,7 +191,9 @@ def('substitutions',
                           K(el('span', 'arrow', htmlEncode('~>')))],
                          [contains(_, ap([I, htmlEncode], ['->'])),
                           K(el('span', 'arrow',
-                               el('span', 'arrow-hyphen', htmlEncode('-')) +
+                               //  Use NON-BREAKING HYPHEN so arrow does
+                               //  not break because of line wrapping
+                               el('span', 'arrow-hyphen', '&#x2011;') +
                                htmlEncode('>')))],
                          [equals('...'),
                           K(el('span', 'tight', '.') +
