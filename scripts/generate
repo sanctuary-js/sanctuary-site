@@ -172,7 +172,7 @@ def('doctestsToMarkup',
 
 //    substitutionPattern :: RegExp
 const substitutionPattern =
-/(<pre>[\s\S]*?<[/]pre>|<div class="examples">[\s\S]*?^<[/]div>| :: |[=~-](?:&gt;|>)|[.][.][.])/gm;
+/(<pre>[\s\S]*?<[/]pre>|<div class="examples">[\s\S]*?^<[/]div>| :: |(?:=|~|-\u2060?)(?:&gt;|>)|[.][.][.])/gm;
 
 //    substitutions :: String -> String
 const substitutions =
@@ -193,6 +193,10 @@ def('substitutions',
                           K(el('span', 'arrow',
                                el('span', 'arrow-hyphen', htmlEncode('-')) +
                                htmlEncode('>')))],
+                         [equals('-\u2060>'),
+                          K(el('span', 'arrow',
+                               el('span', 'arrow-hyphen', htmlEncode('-')) +
+                               htmlEncode('\u2060>')))],
                          [equals('...'),
                           K(el('span', 'tight', '.') +
                             el('span', 'tight', '.') +
