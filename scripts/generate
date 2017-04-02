@@ -249,6 +249,17 @@ def('version',
           map(get(is(String), 'version')),
           chain(maybeToEither('Invalid "version"'))]));
 
+//    description :: String -> Either String String
+const description =
+def('description',
+    {},
+    [$.String, Either($.String, $.String)],
+    pipe([flip_(path.join, 'package.json'),
+          readFile,
+          chain(encaseEither(prop('message'), JSON.parse)),
+          map(get(is(String), 'description')),
+          chain(maybeToEither('Invalid "description"'))]));
+
 //    customize :: String -> Either String (String -> Either String String)
 const customize =
 def('customize',
@@ -349,12 +360,12 @@ def('toc',
                                  Nothing))),
           lift2(concat, prop('html'), prop('level'))]));
 
-//    toDocument :: String -> String -> String
+//    toDocument :: String -> String -> String -> String
 const toDocument =
 def('toDocument',
     {},
-    [$.String, $.String, $.String],
-    (version, content) => `<!doctype html>
+    [$.String, $.String, $.String, $.String],
+    (version, tagline, content) => `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -380,7 +391,7 @@ def('toDocument',
   </div>
   <div id="css-main">
     <h1 id="sanctuary">Sanctuary <small>v${version}</small></h1>
-    <p id="tagline">Refuge from unsafe JavaScript</p>
+    <p id="tagline">${tagline}</p>
 ${toc(content)}
 ${content}
   </div>
@@ -414,7 +425,7 @@ const success = s => {
 pipe([at(2),
       maybeToEither('Missing command-line argument'),
       map(of(Array)),
-      map(ap([version, readme])),
+      map(ap([version, description, readme])),
       chain(sequence(S.Either)),
       map(apply(toDocument)),
       chain(writeFile('index.html')),
