@@ -39,6 +39,7 @@ lint:
 	  --config node_modules/sanctuary-style/eslint-es6.json \
 	  --env es6 \
 	  --env node \
+	  --rule 'indent: [off]' \
 	  --rule 'max-len: [off]' \
 	  --rule 'prefer-template: [off]' \
 	  -- scripts/generate
