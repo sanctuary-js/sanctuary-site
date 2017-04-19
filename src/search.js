@@ -29,9 +29,9 @@
     var $container = document.getElementById('yes-matches');
     var $containerNo = document.getElementById('no-matches');
     var $els = initSigNodes(document.getElementById('search-results'));
-    var $index = HMS.index(Array.prototype.map.call($els, function(el) {
+    var search = HMS.init(Array.prototype.map.call($els, function(el) {
       return el.innerText.trim().split(/\s+/).join(' ');
-    }));
+    }), {fuzzy: false}).search;
     var $prevSearch = '';
     var searchInput = document.getElementById('search-input');
     searchInput.focus();
@@ -39,7 +39,7 @@
       var q = event.target.value;
       if (q !== $prevSearch) {
         $prevSearch = q;
-        var matches = HMS.search($index, q);
+        var matches = search(q);
         $containerNo.style.display =
           matches.length === 0 && q !== '' ? 'block' : 'none';
         while ($container.childNodes.length > 0) {
