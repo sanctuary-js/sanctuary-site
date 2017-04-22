@@ -45,12 +45,9 @@
         while ($container.childNodes.length > 0) {
           $container.removeChild($container.childNodes[0]);
         }
-        // if there is no query, do not show any matches
-        if (q !== '') {
-          matches.forEach(function(match) {
-            $container.appendChild($els[match.pointer]);
-          });
-        }
+        matches.forEach(function(match) {
+          $container.appendChild($els[match.pointer]);
+        });
       }
     });
   });
