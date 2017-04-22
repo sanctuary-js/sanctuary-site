@@ -32,23 +32,17 @@
     var search = HMS.init(Array.prototype.map.call($els, function(el) {
       return el.innerText.trim().split(/\s+/).join(' ');
     }), {fuzzy: false}).search;
-    var $prevSearch = '';
     var searchInput = document.getElementById('search-input');
     searchInput.focus();
     searchInput.addEventListener('keyup', function(event) {
-      var q = event.target.value;
-      if (q !== $prevSearch) {
-        $prevSearch = q;
-        var matches = search(q);
-        $containerNo.style.display =
-          matches.length === 0 && q !== '' ? 'block' : 'none';
-        while ($container.childNodes.length > 0) {
-          $container.removeChild($container.childNodes[0]);
-        }
-        matches.forEach(function(match) {
-          $container.appendChild($els[match.pointer]);
-        });
+      var matches = search(event.target.value);
+      $containerNo.style.display = matches.length === 0 ? 'block' : 'none';
+      while ($container.childNodes.length > 0) {
+        $container.removeChild($container.childNodes[0]);
       }
+      matches.forEach(function(match) {
+        $container.appendChild($els[match.pointer]);
+      });
     });
   });
 
