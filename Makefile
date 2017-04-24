@@ -1,12 +1,11 @@
 BROWSERIFY = node_modules/.bin/browserify
 ESLINT = node_modules/.bin/eslint
 NPM = npm
-UGLIFY = node_modules/.bin/uglifyjs
 
 CUSTOM = $(shell find custom -name '*.md' | sort)
 VENDOR = ramda sanctuary sanctuary-def sanctuary-type-classes sanctuary-type-identifiers
 VENDOR_CHECKS = $(patsubst %,check-%-version,$(VENDOR))
-FILES = favicon.png index.html search.js $(patsubst %,vendor/%.js,$(VENDOR))
+FILES = favicon.png index.html js/hm-search.js js/signatures.sanctuary.js $(patsubst %,vendor/%.js,$(VENDOR))
 
 
 .PHONY: all
@@ -24,8 +23,12 @@ vendor/ramda.js: node_modules/ramda/dist/ramda.js
 vendor/%.js: node_modules/%/index.js
 	cp '$<' '$@'
 
-search.js: src/search.js
-	$(BROWSERIFY) '$<' | $(UGLIFY) > '$@'
+js/hm-search.js: node_modules/hindley-milner-search/hm-search.js Makefile
+	$(BROWSERIFY) --standalone HMS -- '$<' >'$@'
+
+js/signatures.%.js: node_modules/%/index.js Makefile
+	( echo "window['signatures/$*'] = [" && sed -n "s!^ *//# \(.*\)!  '\1',!p" '$<' && echo "];" ) >'$@'
+
 
 .PHONY: $(VENDOR_CHECKS)
 $(VENDOR_CHECKS): check-%-version:

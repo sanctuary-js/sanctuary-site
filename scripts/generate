@@ -392,13 +392,6 @@ def('toDocument',
   <div id="css-main">
     <h1 id="sanctuary">Sanctuary <small>v${version}</small></h1>
     <p id="tagline">${tagline}</p>
-    <div>
-      <input type="text" id="search-input" placeholder="search" />
-    </div>
-    <div id="search-results">
-      <div id="no-matches" style="display:none;">No matches</div>
-      <div id="yes-matches"></div>
-    </div>
 ${toc(content)}
 ${content}
   </div>
@@ -413,7 +406,6 @@ ${content}
     window.S = window.sanctuary;
   </script>
   <script src="behaviour.js"></script>
-  <script src="search.js"></script>
 </body>
 </html>
 `);
