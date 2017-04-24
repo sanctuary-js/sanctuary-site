@@ -54,7 +54,7 @@ lint:
 	  --config node_modules/sanctuary-style/eslint-es3.json \
 	  --env es3 \
 	  --env browser \
-	  -- behaviour.js src/search.js
+	  -- behaviour.js
 	make clean
 	make
 	git diff --exit-code
