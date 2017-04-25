@@ -1,0 +1,32 @@
+<h1>Search</h1>
+<input id="query" type="text" autofocus>
+<ul id="results"></ul>
+<script src="../vendor/hindley-milner-search.js"></script>
+<script src="../signatures/sanctuary.js"></script>
+<script>
+  (function() {
+    var query = document.getElementById('query');
+    var results = document.getElementById('results');
+
+    var $elements = {};
+    window['signatures/sanctuary'].forEach(function(s) {
+      var el = document.createElement('li');
+      el.innerText = s;
+      $elements[s.split(' :: ')[0]] = el;
+    });
+
+    var search = HMS.init(window['signatures/sanctuary'], {fuzzy: false}).search;
+
+    query.addEventListener('keyup', onKeyUp, false);
+    function onKeyUp(event) {
+      while (results.lastChild != null) results.removeChild(results.lastChild);
+      if (event.target.value !== '') {
+        var fragment = document.createDocumentFragment();
+        search(event.target.value).forEach(function(r) {
+          fragment.appendChild($elements[r.name]);
+        });
+        results.appendChild(fragment);
+      }
+    }
+  }());
+</script>

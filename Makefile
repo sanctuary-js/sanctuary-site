@@ -2,9 +2,10 @@ ESLINT = node_modules/.bin/eslint
 NPM = npm
 
 CUSTOM = $(shell find custom -name '*.md' | sort)
-VENDOR = ramda sanctuary sanctuary-def sanctuary-type-classes sanctuary-type-identifiers
+SIGNATURES = $(patsubst %,signatures/%.js,sanctuary)
+VENDOR = hindley-milner-search ramda sanctuary sanctuary-def sanctuary-type-classes sanctuary-type-identifiers
 VENDOR_CHECKS = $(patsubst %,check-%-version,$(VENDOR))
-FILES = favicon.png index.html $(patsubst %,vendor/%.js,$(VENDOR))
+FILES = favicon.png index.html $(SIGNATURES) $(patsubst %,vendor/%.js,$(VENDOR))
 
 
 .PHONY: all
@@ -16,11 +17,17 @@ favicon.png: node_modules/sanctuary-logo/sanctuary-favicon.png
 index.html: scripts/generate node_modules/sanctuary/README.md $(CUSTOM)
 	'$<' node_modules/sanctuary
 
+vendor/hindley-milner-search.js: node_modules/hindley-milner-search/hms.js
+	cp '$<' '$@'
+
 vendor/ramda.js: node_modules/ramda/dist/ramda.js
 	cp '$<' '$@'
 
 vendor/%.js: node_modules/%/index.js
 	cp '$<' '$@'
+
+signatures/%.js: node_modules/%/index.js Makefile
+	( echo "window['signatures/$*'] = [" && sed -n "s!^ *//# \(.*\)!  '\1',!p" '$<' && echo "];" ) >'$@'
 
 
 .PHONY: $(VENDOR_CHECKS)
