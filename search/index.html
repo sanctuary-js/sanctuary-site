@@ -1,24 +1,21 @@
 <h1>Search</h1>
 <input id="query" type="text" autofocus>
 <ul id="results"></ul>
-<script src="../js/hm-search.js"></script>
-<script src="../js/signatures.sanctuary.js"></script>
+<script src="../vendor/hindley-milner-search.js"></script>
+<script src="../signatures/sanctuary.js"></script>
 <script>
   (function() {
     var query = document.getElementById('query');
     var results = document.getElementById('results');
 
     var $elements = {};
-    var signatures = {
-      sanctuary: window['signatures/sanctuary']
-    };
-    signatures.sanctuary.forEach(function(s) {
+    window['signatures/sanctuary'].forEach(function(s) {
       var el = document.createElement('li');
       el.innerText = s;
       $elements[s.split(' :: ')[0]] = el;
     });
 
-    var search = HMS.init(signatures.sanctuary, {fuzzy: false}).search;
+    var search = HMS.init(window['signatures/sanctuary'], {fuzzy: false}).search;
 
     query.addEventListener('keyup', onKeyUp, false);
     function onKeyUp(event) {
