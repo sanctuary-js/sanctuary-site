@@ -215,6 +215,10 @@ h1 small {
   font-weight: normal;
 }
 
+h4 code {
+  color: #333;
+}
+
 p {
   margin: 1em 0;
 }
