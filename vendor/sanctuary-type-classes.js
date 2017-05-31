@@ -31,37 +31,37 @@
 //. ## Type-class hierarchy
 //.
 //. <pre>
-//:  Setoid   Semigroup   Foldable        Functor
-//: (equals)   (concat)   (reduce)         (map)
-//:               |           \         / | | | | \
-//:               |            \       /  | | | |  \
-//:               |             \     /   | | | |   \
-//:               |              \   /    | | | |    \
-//:               |               \ /     | | | |     \
-//:            Monoid         Traversable | | | |      \
-//:            (empty)        (traverse)  / | | \       \
-//:                                      /  | |  \       \
-//:                                     /   / \   \       \
-//:                             Profunctor /   \ Bifunctor \
-//:                              (promap) /     \ (bimap)   \
-//:                                      /       \           \
-//:                                     /         \           \
-//:                                   Alt        Apply      Extend
-//:                                  (alt)        (ap)     (extend)
-//:                                   /           / \           \
-//:                                  /           /   \           \
-//:                                 /           /     \           \
-//:                                /           /       \           \
-//:                               /           /         \           \
-//:                             Plus    Applicative    Chain      Comonad
-//:                            (zero)       (of)      (chain)    (extract)
-//:                               \         / \         / \
-//:                                \       /   \       /   \
-//:                                 \     /     \     /     \
-//:                                  \   /       \   /       \
-//:                                   \ /         \ /         \
-//:                               Alternative    Monad     ChainRec
-//:                                                       (chainRec)
+//:  Setoid   Semigroupoid  Semigroup   Foldable        Functor      Contravariant
+//: (equals)    (compose)    (concat)   (reduce)         (map)        (contramap)
+//:     |           |           |           \         / | | | | \
+//:     |           |           |            \       /  | | | |  \
+//:     |           |           |             \     /   | | | |   \
+//:     |           |           |              \   /    | | | |    \
+//:     |           |           |               \ /     | | | |     \
+//:    Ord      Category     Monoid         Traversable | | | |      \
+//:   (lte)       (id)       (empty)        (traverse)  / | | \       \
+//:                                                    /  | |  \       \
+//:                                                   /   / \   \       \
+//:                                           Profunctor /   \ Bifunctor \
+//:                                            (promap) /     \ (bimap)   \
+//:                                                    /       \           \
+//:                                                   /         \           \
+//:                                                 Alt        Apply      Extend
+//:                                                (alt)        (ap)     (extend)
+//:                                                 /           / \           \
+//:                                                /           /   \           \
+//:                                               /           /     \           \
+//:                                              /           /       \           \
+//:                                             /           /         \           \
+//:                                           Plus    Applicative    Chain      Comonad
+//:                                          (zero)       (of)      (chain)    (extract)
+//:                                             \         / \         / \
+//:                                              \       /   \       /   \
+//:                                               \     /     \     /     \
+//:                                                \   /       \   /       \
+//:                                                 \ /         \ /         \
+//:                                             Alternative    Monad     ChainRec
+//:                                                                     (chainRec)
 //. </pre>
 //.
 //. ## API
@@ -112,6 +112,11 @@
     };
   }
 
+  //  sameType :: (a, b) -> Boolean
+  function sameType(x, y) {
+    return typeof x === typeof y && type(x) === type(y);
+  }
+
   //  type Iteration a = { value :: a, done :: Boolean }
 
   //  iterationNext :: a -> Iteration a
@@ -120,11 +125,12 @@
   //  iterationDone :: a -> Iteration a
   function iterationDone(x) { return {value: x, done: true}; }
 
-  //# TypeClass :: (String, Array TypeClass, a -> Boolean) -> TypeClass
+  //# TypeClass :: (String, String, Array TypeClass, a -> Boolean) -> TypeClass
   //.
   //. The arguments are:
   //.
   //.   - the name of the type class, prefixed by its npm package name;
+  //.   - the documentation URL of the type class;
   //.   - an array of dependencies; and
   //.   - a predicate which accepts any JavaScript value and returns `true`
   //.     if the value satisfies the requirements of the type class; `false`
@@ -137,10 +143,20 @@
   //. const hasMethod = name => x => x != null && typeof x[name] == 'function';
   //.
   //. //    Foo :: TypeClass
-  //. const Foo = Z.TypeClass('my-package/Foo', [], hasMethod('foo'));
+  //. const Foo = Z.TypeClass(
+  //.   'my-package/Foo',
+  //.   'http://example.com/my-package#Foo',
+  //.   [],
+  //.   hasMethod('foo')
+  //. );
   //.
   //. //    Bar :: TypeClass
-  //. const Bar = Z.TypeClass('my-package/Bar', [Foo], hasMethod('bar'));
+  //. const Bar = Z.TypeClass(
+  //.   'my-package/Bar',
+  //.   'http://example.com/my-package#Bar',
+  //.   [Foo],
+  //.   hasMethod('bar')
+  //. );
   //. ```
   //.
   //. Types whose values have a `foo` method are members of the Foo type class.
@@ -155,11 +171,12 @@
   //. `TypeClass` values may be used with [sanctuary-def][type-classes]
   //. to define parametrically polymorphic functions which verify their
   //. type-class constraints at run time.
-  function TypeClass(name, dependencies, test) {
+  function TypeClass(name, url, dependencies, test) {
     if (!(this instanceof TypeClass)) {
-      return new TypeClass(name, dependencies, test);
+      return new TypeClass(name, url, dependencies, test);
     }
     this.name = name;
+    this.url = url;
     this.test = function(x) {
       return dependencies.every(function(d) { return d.test(x); }) && test(x);
     };
@@ -196,14 +213,25 @@
     return _funcPath(false, path, implementations);
   }
 
+  //  functionName :: Function -> String
+  var functionName = 'name' in function f() {} ?
+    function functionName(f) { return f.name; } :
+    /* istanbul ignore next */
+    function functionName(f) {
+      var match = /function (\w*)/.exec(f);
+      return match == null ? '' : match[1];
+    };
+
   //  $ :: (String, Array TypeClass, StrMap (Array Location)) -> TypeClass
   function $(_name, dependencies, requirements) {
     function getBoundMethod(_name) {
       var name = 'fantasy-land/' + _name;
       return requirements[_name] === Constructor ?
         function(typeRep) {
-          return funcPath([name], typeRep) ||
-                 implPath([/function (\w*)/.exec(typeRep)[1], name]);
+          var f = funcPath([name], typeRep);
+          return f == null && typeof typeRep === 'function' ?
+            implPath([functionName(typeRep), name]) :
+            f;
         } :
         function(x) {
           var isPrototype = x != null &&
@@ -216,15 +244,21 @@
         };
     }
 
-    var name = 'sanctuary-type-classes/' + _name;
+    var version = '6.0.0';  // updated programmatically
     var keys = Object.keys(requirements);
 
-    var typeClass = TypeClass(name, dependencies, function(x) {
-      return keys.every(function(_name) {
-        var arg = requirements[_name] === Constructor ? x.constructor : x;
-        return getBoundMethod(_name)(arg) != null;
-      });
-    });
+    var typeClass = TypeClass(
+      'sanctuary-type-classes/' + _name,
+      'https://github.com/sanctuary-js/sanctuary-type-classes/tree/v' + version
+        + '#' + _name,
+      dependencies,
+      function(x) {
+        return keys.every(function(_name) {
+          var arg = requirements[_name] === Constructor ? x.constructor : x;
+          return getBoundMethod(_name)(arg) != null;
+        });
+      }
+    );
 
     typeClass.methods = keys.reduce(function(methods, _name) {
       methods[_name] = getBoundMethod(_name);
@@ -243,6 +277,45 @@
   //. true
   //. ```
   var Setoid = $('Setoid', [], {equals: Value});
+
+  //# Ord :: TypeClass
+  //.
+  //. `TypeClass` value for [Ord][].
+  //.
+  //. ```javascript
+  //. > Ord.test(0)
+  //. true
+  //.
+  //. > Ord.test(Math.sqrt)
+  //. false
+  //. ```
+  var Ord = $('Ord', [Setoid], {lte: Value});
+
+  //# Semigroupoid :: TypeClass
+  //.
+  //. `TypeClass` value for [Semigroupoid][].
+  //.
+  //. ```javascript
+  //. > Semigroupoid.test(Math.sqrt)
+  //. true
+  //.
+  //. > Semigroupoid.test(0)
+  //. false
+  //. ```
+  var Semigroupoid = $('Semigroupoid', [], {compose: Value});
+
+  //# Category :: TypeClass
+  //.
+  //. `TypeClass` value for [Category][].
+  //.
+  //. ```javascript
+  //. > Category.test(Math.sqrt)
+  //. true
+  //.
+  //. > Category.test(0)
+  //. false
+  //. ```
+  var Category = $('Category', [Semigroupoid], {id: Constructor});
 
   //# Semigroup :: TypeClass
   //.
@@ -317,7 +390,7 @@
   //. > Apply.test([])
   //. true
   //.
-  //. > Apply.test({})
+  //. > Apply.test('')
   //. false
   //. ```
   var Apply = $('Apply', [Functor], {ap: Value});
@@ -434,7 +507,7 @@
   //. > Traversable.test([])
   //. true
   //.
-  //. > Traversable.test({})
+  //. > Traversable.test('')
   //. false
   //. ```
   var Traversable = $('Traversable', [Functor, Foldable], {traverse: Value});
@@ -465,6 +538,19 @@
   //. ```
   var Comonad = $('Comonad', [Extend], {extract: Value});
 
+  //# Contravariant :: TypeClass
+  //.
+  //. `TypeClass` value for [Contravariant][].
+  //.
+  //. ```javascript
+  //. > Contravariant.test(Math.sqrt)
+  //. true
+  //.
+  //. > Contravariant.test([])
+  //. false
+  //. ```
+  var Contravariant = $('Contravariant', [], {contramap: Value});
+
   //  Null$prototype$toString :: Null ~> () -> String
   function Null$prototype$toString() {
     return 'null';
@@ -472,6 +558,11 @@
 
   //  Null$prototype$equals :: Null ~> Null -> Boolean
   function Null$prototype$equals(other) {
+    return true;
+  }
+
+  //  Null$prototype$lte :: Null ~> Null -> Boolean
+  function Null$prototype$lte(other) {
     return true;
   }
 
@@ -485,6 +576,11 @@
     return true;
   }
 
+  //  Undefined$prototype$lte :: Undefined ~> Undefined -> Boolean
+  function Undefined$prototype$lte(other) {
+    return true;
+  }
+
   //  Boolean$prototype$toString :: Boolean ~> () -> String
   function Boolean$prototype$toString() {
     return typeof this === 'object' ?
@@ -494,7 +590,16 @@
 
   //  Boolean$prototype$equals :: Boolean ~> Boolean -> Boolean
   function Boolean$prototype$equals(other) {
-    return typeof other === typeof this && other.valueOf() === this.valueOf();
+    return typeof this === 'object' ?
+      equals(this.valueOf(), other.valueOf()) :
+      this === other;
+  }
+
+  //  Boolean$prototype$lte :: Boolean ~> Boolean -> Boolean
+  function Boolean$prototype$lte(other) {
+    return typeof this === 'object' ?
+      lte(this.valueOf(), other.valueOf()) :
+      this === false || other === true;
   }
 
   //  Number$prototype$toString :: Number ~> () -> String
@@ -506,11 +611,16 @@
 
   //  Number$prototype$equals :: Number ~> Number -> Boolean
   function Number$prototype$equals(other) {
-    return typeof other === 'object' ?
-      typeof this === 'object' &&
-        equals(this.valueOf(), other.valueOf()) :
-      isNaN(other) && isNaN(this) ||
-        other === this && 1 / other === 1 / this;
+    return typeof this === 'object' ?
+      equals(this.valueOf(), other.valueOf()) :
+      isNaN(this) && isNaN(other) || this === other;
+  }
+
+  //  Number$prototype$lte :: Number ~> Number -> Boolean
+  function Number$prototype$lte(other) {
+    return typeof this === 'object' ?
+      lte(this.valueOf(), other.valueOf()) :
+      isNaN(this) && isNaN(other) || this <= other;
   }
 
   //  Date$prototype$toString :: Date ~> () -> String
@@ -522,6 +632,11 @@
   //  Date$prototype$equals :: Date ~> Date -> Boolean
   function Date$prototype$equals(other) {
     return equals(this.valueOf(), other.valueOf());
+  }
+
+  //  Date$prototype$lte :: Date ~> Date -> Boolean
+  function Date$prototype$lte(other) {
+    return lte(this.valueOf(), other.valueOf());
   }
 
   //  RegExp$prototype$equals :: RegExp ~> RegExp -> Boolean
@@ -543,20 +658,21 @@
   function String$prototype$toString() {
     return typeof this === 'object' ?
       'new String(' + toString(this.valueOf()) + ')' :
-      '"' + this.replace(/\\/g, '\\\\')
-                .replace(/[\b]/g, '\\b')  // \b matches word boundary;
-                .replace(/\f/g, '\\f')    // [\b] matches backspace
-                .replace(/\n/g, '\\n')
-                .replace(/\r/g, '\\r')
-                .replace(/\t/g, '\\t')
-                .replace(/\v/g, '\\v')
-                .replace(/\0/g, '\\0')
-                .replace(/"/g, '\\"') + '"';
+      JSON.stringify(this);
   }
 
   //  String$prototype$equals :: String ~> String -> Boolean
   function String$prototype$equals(other) {
-    return typeof other === typeof this && other.valueOf() === this.valueOf();
+    return typeof this === 'object' ?
+      equals(this.valueOf(), other.valueOf()) :
+      this === other;
+  }
+
+  //  String$prototype$lte :: String ~> String -> Boolean
+  function String$prototype$lte(other) {
+    return typeof this === 'object' ?
+      lte(this.valueOf(), other.valueOf()) :
+      this <= other;
   }
 
   //  String$prototype$concat :: String ~> String -> String
@@ -616,6 +732,15 @@
     return true;
   }
 
+  //  Array$prototype$lte :: Array a ~> Array a -> Boolean
+  function Array$prototype$lte(other) {
+    for (var idx = 0; true; idx += 1) {
+      if (idx === this.length) return true;
+      if (idx === other.length) return false;
+      if (!equals(this[idx], other[idx])) return lte(this[idx], other[idx]);
+    }
+  }
+
   //  Array$prototype$concat :: Array a ~> Array a -> Array a
   function Array$prototype$concat(other) {
     return this.concat(other);
@@ -671,7 +796,7 @@
 
   //  Array$prototype$extend :: Array a ~> (Array a -> b) -> Array b
   function Array$prototype$extend(f) {
-    return [f(this)];
+    return this.map(function(_, idx, xs) { return f(xs.slice(idx)); });
   }
 
   //  Arguments$prototype$toString :: Arguments ~> String
@@ -683,6 +808,11 @@
   //  Arguments$prototype$equals :: Arguments ~> Arguments -> Boolean
   function Arguments$prototype$equals(other) {
     return Array$prototype$equals.call(this, other);
+  }
+
+  //  Arguments$prototype$lte :: Arguments ~> Arguments -> Boolean
+  function Arguments$prototype$lte(other) {
+    return Array$prototype$lte.call(this, other);
   }
 
   //  Error$prototype$toString :: Error ~> () -> String
@@ -725,6 +855,21 @@
            keys.every(function(k) { return equals(self[k], other[k]); });
   }
 
+  //  Object$prototype$lte :: StrMap a ~> StrMap a -> Boolean
+  function Object$prototype$lte(other) {
+    var theseKeys = Object.keys(this).sort();
+    var otherKeys = Object.keys(other).sort();
+    while (true) {
+      if (theseKeys.length === 0) return true;
+      if (otherKeys.length === 0) return false;
+      var k = theseKeys.shift();
+      var z = otherKeys.shift();
+      if (k < z) return true;
+      if (k > z) return false;
+      if (!equals(this[k], other[k])) return lte(this[k], other[k]);
+    }
+  }
+
   //  Object$prototype$concat :: StrMap a ~> StrMap a -> StrMap a
   function Object$prototype$concat(other) {
     var result = {};
@@ -740,14 +885,35 @@
     return result;
   }
 
+  //  Object$prototype$ap :: StrMap a ~> StrMap (a -> b) -> StrMap b
+  function Object$prototype$ap(other) {
+    var result = {};
+    for (var k in this) if (k in other) result[k] = other[k](this[k]);
+    return result;
+  }
+
   //  Object$prototype$alt :: StrMap a ~> StrMap a -> StrMap a
   var Object$prototype$alt = Object$prototype$concat;
 
   //  Object$prototype$reduce :: StrMap a ~> ((b, a) -> b, b) -> b
   function Object$prototype$reduce(f, initial) {
-    var result = initial;
-    for (var k in this) result = f(result, this[k]);
-    return result;
+    var self = this;
+    function reducer(acc, k) { return f(acc, self[k]); }
+    return Object.keys(this).sort().reduce(reducer, initial);
+  }
+
+  //  Object$prototype$traverse :: Applicative f => StrMap a ~> (TypeRep f, a -> f b) -> f (StrMap b)
+  function Object$prototype$traverse(typeRep, f) {
+    var self = this;
+    return Object.keys(this).reduce(function(applicative, k) {
+      function set(o) { return function(v) { o[k] = v; return o; }; }
+      return lift2(set, applicative, f(self[k]));
+    }, of(typeRep, {}));
+  }
+
+  //  Function$id :: () -> a -> a
+  function Function$id() {
+    return identity;
   }
 
   //  Function$of :: b -> (a -> b)
@@ -769,6 +935,12 @@
   //  Function$prototype$equals :: Function ~> Function -> Boolean
   function Function$prototype$equals(other) {
     return other === this;
+  }
+
+  //  Function$prototype$compose :: (a -> b) ~> (b -> c) -> (a -> c)
+  function Function$prototype$compose(other) {
+    var semigroupoid = this;
+    return function(x) { return other(semigroupoid(x)); };
   }
 
   //  Function$prototype$map :: (a -> b) ~> (b -> c) -> (a -> c)
@@ -795,36 +967,47 @@
     return function(x) { return f(chain(x))(x); };
   }
 
+  //  Function$prototype$contramap :: (b -> c) ~> (a -> b) -> (a -> c)
+  function Function$prototype$contramap(f) {
+    var contravariant = this;
+    return function(x) { return contravariant(f(x)); };
+  }
+
   /* eslint-disable key-spacing */
   var implementations = {
     Null: {
       prototype: {
         toString:                   Null$prototype$toString,
-        'fantasy-land/equals':      Null$prototype$equals
+        'fantasy-land/equals':      Null$prototype$equals,
+        'fantasy-land/lte':         Null$prototype$lte
       }
     },
     Undefined: {
       prototype: {
         toString:                   Undefined$prototype$toString,
-        'fantasy-land/equals':      Undefined$prototype$equals
+        'fantasy-land/equals':      Undefined$prototype$equals,
+        'fantasy-land/lte':         Undefined$prototype$lte
       }
     },
     Boolean: {
       prototype: {
         toString:                   Boolean$prototype$toString,
-        'fantasy-land/equals':      Boolean$prototype$equals
+        'fantasy-land/equals':      Boolean$prototype$equals,
+        'fantasy-land/lte':         Boolean$prototype$lte
       }
     },
     Number: {
       prototype: {
         toString:                   Number$prototype$toString,
-        'fantasy-land/equals':      Number$prototype$equals
+        'fantasy-land/equals':      Number$prototype$equals,
+        'fantasy-land/lte':         Number$prototype$lte
       }
     },
     Date: {
       prototype: {
         toString:                   Date$prototype$toString,
-        'fantasy-land/equals':      Date$prototype$equals
+        'fantasy-land/equals':      Date$prototype$equals,
+        'fantasy-land/lte':         Date$prototype$lte
       }
     },
     RegExp: {
@@ -837,6 +1020,7 @@
       prototype: {
         toString:                   String$prototype$toString,
         'fantasy-land/equals':      String$prototype$equals,
+        'fantasy-land/lte':         String$prototype$lte,
         'fantasy-land/concat':      String$prototype$concat
       }
     },
@@ -848,6 +1032,7 @@
       prototype: {
         toString:                   Array$prototype$toString,
         'fantasy-land/equals':      Array$prototype$equals,
+        'fantasy-land/lte':         Array$prototype$lte,
         'fantasy-land/concat':      Array$prototype$concat,
         'fantasy-land/map':         Array$prototype$map,
         'fantasy-land/ap':          Array$prototype$ap,
@@ -861,7 +1046,8 @@
     Arguments: {
       prototype: {
         toString:                   Arguments$prototype$toString,
-        'fantasy-land/equals':      Arguments$prototype$equals
+        'fantasy-land/equals':      Arguments$prototype$equals,
+        'fantasy-land/lte':         Arguments$prototype$lte
       }
     },
     Error: {
@@ -876,21 +1062,27 @@
       prototype: {
         toString:                   Object$prototype$toString,
         'fantasy-land/equals':      Object$prototype$equals,
+        'fantasy-land/lte':         Object$prototype$lte,
         'fantasy-land/concat':      Object$prototype$concat,
         'fantasy-land/map':         Object$prototype$map,
+        'fantasy-land/ap':          Object$prototype$ap,
         'fantasy-land/alt':         Object$prototype$alt,
-        'fantasy-land/reduce':      Object$prototype$reduce
+        'fantasy-land/reduce':      Object$prototype$reduce,
+        'fantasy-land/traverse':    Object$prototype$traverse
       }
     },
     Function: {
+      'fantasy-land/id':            Function$id,
       'fantasy-land/of':            Function$of,
       'fantasy-land/chainRec':      Function$chainRec,
       prototype: {
         'fantasy-land/equals':      Function$prototype$equals,
+        'fantasy-land/compose':     Function$prototype$compose,
         'fantasy-land/map':         Function$prototype$map,
         'fantasy-land/promap':      Function$prototype$promap,
         'fantasy-land/ap':          Function$prototype$ap,
-        'fantasy-land/chain':       Function$prototype$chain
+        'fantasy-land/chain':       Function$prototype$chain,
+        'fantasy-land/contramap':   Function$prototype$contramap
       }
     }
   };
@@ -961,7 +1153,7 @@
   //.
   //. ```javascript
   //. > equals(0, -0)
-  //. false
+  //. true
   //.
   //. > equals(NaN, NaN)
   //. true
@@ -977,9 +1169,7 @@
     var $pairs = [];
 
     return function equals(x, y) {
-      if (type(x) !== type(y)) {
-        return false;
-      }
+      if (!sameType(x, y)) return false;
 
       //  This algorithm for comparing circular data structures was
       //  suggested in <http://stackoverflow.com/a/40622794/312785>.
@@ -995,6 +1185,155 @@
       }
     };
   }());
+
+  //# lt :: (a, b) -> Boolean
+  //.
+  //. Returns `true` if its arguments are of the same type and the first is
+  //. less than the second according to the type's [`fantasy-land/lte`][]
+  //. method; `false` otherwise.
+  //.
+  //. This function is derived from [`lte`](#lte).
+  //.
+  //. See also [`gt`](#gt) and [`gte`](#gte).
+  //.
+  //. ```javascript
+  //. > lt(0, 0)
+  //. false
+  //.
+  //. > lt(0, 1)
+  //. true
+  //.
+  //. > lt(1, 0)
+  //. false
+  //. ```
+  function lt(x, y) {
+    return sameType(x, y) && !lte(y, x);
+  }
+
+  //# lte :: (a, b) -> Boolean
+  //.
+  //. Returns `true` if its arguments are of the same type and the first
+  //. is less than or equal to the second according to the type's
+  //. [`fantasy-land/lte`][] method; `false` otherwise.
+  //.
+  //. `fantasy-land/lte` implementations are provided for the following
+  //. built-in types: Null, Undefined, Boolean, Number, Date, String, Array,
+  //. Arguments, and Object.
+  //.
+  //. The algorithm supports circular data structures in the same manner as
+  //. [`equals`](#equals).
+  //.
+  //. See also [`lt`](#lt), [`gt`](#gt), and [`gte`](#gte).
+  //.
+  //. ```javascript
+  //. > lte(0, 0)
+  //. true
+  //.
+  //. > lte(0, 1)
+  //. true
+  //.
+  //. > lte(1, 0)
+  //. false
+  //. ```
+  var lte = (function() {
+    //  $pairs :: Array (Pair Any Any)
+    var $pairs = [];
+
+    return function lte(x, y) {
+      if (!sameType(x, y)) return false;
+
+      //  This algorithm for comparing circular data structures was
+      //  suggested in <http://stackoverflow.com/a/40622794/312785>.
+      if ($pairs.some(function(p) { return p[0] === x && p[1] === y; })) {
+        return equals(x, y);
+      }
+
+      $pairs.push([x, y]);
+      try {
+        return Ord.test(x) && Ord.test(y) && Ord.methods.lte(x)(y);
+      } finally {
+        $pairs.pop();
+      }
+    };
+  }());
+
+  //# gt :: (a, b) -> Boolean
+  //.
+  //. Returns `true` if its arguments are of the same type and the first is
+  //. greater than the second according to the type's [`fantasy-land/lte`][]
+  //. method; `false` otherwise.
+  //.
+  //. This function is derived from [`lte`](#lte).
+  //.
+  //. See also [`lt`](#lt) and [`gte`](#gte).
+  //.
+  //. ```javascript
+  //. > gt(0, 0)
+  //. false
+  //.
+  //. > gt(0, 1)
+  //. false
+  //.
+  //. > gt(1, 0)
+  //. true
+  //. ```
+  function gt(x, y) {
+    return lt(y, x);
+  }
+
+  //# gte :: (a, b) -> Boolean
+  //.
+  //. Returns `true` if its arguments are of the same type and the first
+  //. is greater than or equal to the second according to the type's
+  //. [`fantasy-land/lte`][] method; `false` otherwise.
+  //.
+  //. This function is derived from [`lte`](#lte).
+  //.
+  //. See also [`lt`](#lt) and [`gt`](#gt).
+  //.
+  //. ```javascript
+  //. > gte(0, 0)
+  //. true
+  //.
+  //. > gte(0, 1)
+  //. false
+  //.
+  //. > gte(1, 0)
+  //. true
+  //. ```
+  function gte(x, y) {
+    return lte(y, x);
+  }
+
+  //# compose :: Semigroupoid c => (c j k, c i j) -> c i k
+  //.
+  //. Function wrapper for [`fantasy-land/compose`][].
+  //.
+  //. `fantasy-land/compose` implementations are provided for the following
+  //. built-in types: Function.
+  //.
+  //. ```javascript
+  //. > compose(Math.sqrt, x => x + 1)(99)
+  //. 10
+  //. ```
+  function compose(x, y) {
+    return Semigroupoid.methods.compose(y)(x);
+  }
+
+  //# id :: Category c => TypeRep c -> c
+  //.
+  //. Function wrapper for [`fantasy-land/id`][].
+  //.
+  //. `fantasy-land/id` implementations are provided for the following
+  //. built-in types: Function.
+  //.
+  //. ```javascript
+  //. > id(Function)('foo')
+  //. 'foo'
+  //. ```
+  function id(typeRep) {
+    return Category.methods.id(typeRep)();
+  }
 
   //# concat :: Semigroup a => (a, a) -> a
   //.
@@ -1106,11 +1445,14 @@
   //. Function wrapper for [`fantasy-land/ap`][].
   //.
   //. `fantasy-land/ap` implementations are provided for the following
-  //. built-in types: Array and Function.
+  //. built-in types: Array, Object, and Function.
   //.
   //. ```javascript
   //. > ap([Math.sqrt, x => x * x], [1, 4, 9, 16, 25])
   //. [1, 2, 3, 4, 5, 1, 16, 81, 256, 625]
+  //.
+  //. > ap({a: Math.sqrt, b: x => x * x}, {a: 16, b: 10, c: 1})
+  //. {a: 4, b: 100}
   //.
   //. > ap(s => n => s.slice(0, n), s => Math.ceil(s.length / 2))('Haskell')
   //. 'Hask'
@@ -1291,8 +1633,8 @@
   //.
   //. Filters its second argument in accordance with the given predicate.
   //.
-  //. This function is derived from [`empty`](#empty), [`of`](#of), and
-  //. [`reduce`](#reduce).
+  //. This function is derived from [`concat`](#concat), [`empty`](#empty),
+  //. [`of`](#of), and [`reduce`](#reduce).
   //.
   //. See also [`filterM`](#filterM).
   //.
@@ -1310,12 +1652,12 @@
                   m);
   }
 
-  //# filterM :: (Monad m, Monoid (m a)) => (a -> Boolean, m a) -> m a
+  //# filterM :: (Alternative m, Monad m) => (a -> Boolean, m a) -> m a
   //.
   //. Filters its second argument in accordance with the given predicate.
   //.
-  //. This function is derived from [`empty`](#empty), [`of`](#of), and
-  //. [`chain`](#chain).
+  //. This function is derived from [`of`](#of), [`chain`](#chain), and
+  //. [`zero`](#zero).
   //.
   //. See also [`filter`](#filter).
   //.
@@ -1325,11 +1667,20 @@
   //.
   //. > filterM(x => x % 2 == 1, Cons(1, Cons(2, Cons(3, Nil))))
   //. Cons(1, Cons(3, Nil))
+  //.
+  //. > filterM(x => x % 2 == 1, Nothing)
+  //. Nothing
+  //.
+  //. > filterM(x => x % 2 == 1, Just(0))
+  //. Nothing
+  //.
+  //. > filterM(x => x % 2 == 1, Just(1))
+  //. Just(1)
   //. ```
   function filterM(pred, m) {
     var M = m.constructor;
-    var e = empty(M);
-    return chain(function(x) { return pred(x) ? of(M, x) : e; }, m);
+    var z = zero(M);
+    return chain(function(x) { return pred(x) ? of(M, x) : z; }, m);
   }
 
   //# alt :: Alt f => (f a, f a) -> f a
@@ -1400,7 +1751,7 @@
   //. Function wrapper for [`fantasy-land/traverse`][].
   //.
   //. `fantasy-land/traverse` implementations are provided for the following
-  //. built-in types: Array.
+  //. built-in types: Array and Object.
   //.
   //. See also [`sequence`](#sequence).
   //.
@@ -1440,8 +1791,8 @@
   //. built-in types: Array.
   //.
   //. ```javascript
-  //. > extend(xs => xs.length, ['foo', 'bar', 'baz', 'quux'])
-  //. [4]
+  //. > extend(ss => ss.join(''), ['x', 'y', 'z'])
+  //. ['xyz', 'yz', 'z']
   //. ```
   function extend(f, extend_) {
     return Extend.methods.extend(extend_)(f);
@@ -1459,9 +1810,27 @@
     return Comonad.methods.extract(comonad)();
   }
 
+  //# contramap :: Contravariant f => (b -> a, f a) -> f b
+  //.
+  //. Function wrapper for [`fantasy-land/contramap`][].
+  //.
+  //. `fantasy-land/contramap` implementations are provided for the following
+  //. built-in types: Function.
+  //.
+  //. ```javascript
+  //. > contramap(s => s.length, Math.sqrt)('Sanctuary')
+  //. 3
+  //. ```
+  function contramap(f, contravariant) {
+    return Contravariant.methods.contramap(contravariant)(f);
+  }
+
   return {
     TypeClass: TypeClass,
     Setoid: Setoid,
+    Ord: Ord,
+    Semigroupoid: Semigroupoid,
+    Category: Category,
     Semigroup: Semigroup,
     Monoid: Monoid,
     Functor: Functor,
@@ -1479,8 +1848,15 @@
     Traversable: Traversable,
     Extend: Extend,
     Comonad: Comonad,
+    Contravariant: Contravariant,
     toString: toString,
     equals: equals,
+    lt: lt,
+    lte: lte,
+    gt: gt,
+    gte: gte,
+    compose: compose,
+    id: id,
     concat: concat,
     empty: empty,
     map: map,
@@ -1503,7 +1879,8 @@
     traverse: traverse,
     sequence: sequence,
     extend: extend,
-    extract: extract
+    extract: extract,
+    contramap: contramap
   };
 
 }));
@@ -1513,18 +1890,22 @@
 //. [Applicative]:              https://github.com/fantasyland/fantasy-land#applicative
 //. [Apply]:                    https://github.com/fantasyland/fantasy-land#apply
 //. [Bifunctor]:                https://github.com/fantasyland/fantasy-land#bifunctor
+//. [Category]:                 https://github.com/fantasyland/fantasy-land#category
 //. [Chain]:                    https://github.com/fantasyland/fantasy-land#chain
 //. [ChainRec]:                 https://github.com/fantasyland/fantasy-land#chainrec
 //. [Comonad]:                  https://github.com/fantasyland/fantasy-land#comonad
+//. [Contravariant]:            https://github.com/fantasyland/fantasy-land#contravariant
 //. [Extend]:                   https://github.com/fantasyland/fantasy-land#extend
 //. [FL]:                       https://github.com/fantasyland/fantasy-land
 //. [Foldable]:                 https://github.com/fantasyland/fantasy-land#foldable
 //. [Functor]:                  https://github.com/fantasyland/fantasy-land#functor
 //. [Monad]:                    https://github.com/fantasyland/fantasy-land#monad
 //. [Monoid]:                   https://github.com/fantasyland/fantasy-land#monoid
+//. [Ord]:                      https://github.com/fantasyland/fantasy-land#ord
 //. [Plus]:                     https://github.com/fantasyland/fantasy-land#plus
 //. [Profunctor]:               https://github.com/fantasyland/fantasy-land#profunctor
 //. [Semigroup]:                https://github.com/fantasyland/fantasy-land#semigroup
+//. [Semigroupoid]:             https://github.com/fantasyland/fantasy-land#semigroupoid
 //. [Setoid]:                   https://github.com/fantasyland/fantasy-land#setoid
 //. [Traversable]:              https://github.com/fantasyland/fantasy-land#traversable
 //. [`fantasy-land/alt`]:       https://github.com/fantasyland/fantasy-land#alt-method
@@ -1532,11 +1913,15 @@
 //. [`fantasy-land/bimap`]:     https://github.com/fantasyland/fantasy-land#bimap-method
 //. [`fantasy-land/chain`]:     https://github.com/fantasyland/fantasy-land#chain-method
 //. [`fantasy-land/chainRec`]:  https://github.com/fantasyland/fantasy-land#chainrec-method
+//. [`fantasy-land/compose`]:   https://github.com/fantasyland/fantasy-land#compose-method
 //. [`fantasy-land/concat`]:    https://github.com/fantasyland/fantasy-land#concat-method
+//. [`fantasy-land/contramap`]: https://github.com/fantasyland/fantasy-land#contramap-method
 //. [`fantasy-land/empty`]:     https://github.com/fantasyland/fantasy-land#empty-method
 //. [`fantasy-land/equals`]:    https://github.com/fantasyland/fantasy-land#equals-method
 //. [`fantasy-land/extend`]:    https://github.com/fantasyland/fantasy-land#extend-method
 //. [`fantasy-land/extract`]:   https://github.com/fantasyland/fantasy-land#extract-method
+//. [`fantasy-land/id`]:        https://github.com/fantasyland/fantasy-land#id-method
+//. [`fantasy-land/lte`]:       https://github.com/fantasyland/fantasy-land#lte-method
 //. [`fantasy-land/map`]:       https://github.com/fantasyland/fantasy-land#map-method
 //. [`fantasy-land/of`]:        https://github.com/fantasyland/fantasy-land#of-method
 //. [`fantasy-land/promap`]:    https://github.com/fantasyland/fantasy-land#promap-method

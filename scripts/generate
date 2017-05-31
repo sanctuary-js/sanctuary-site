@@ -38,6 +38,7 @@ const contains          = R.contains;
 const converge          = R.converge;
 const curry3            = S.curry3;
 const either            = S.either;
+const elem              = S.elem;
 const encaseEither      = S.encaseEither;
 const encaseEither2_    = S.encaseEither2_;
 const equals            = S.equals;
@@ -52,7 +53,6 @@ const joinWith          = S.joinWith;
 const justs             = S.justs;
 const lensProp          = R.lensProp;
 const lift2             = S.lift2;
-const lt                = R.lt;
 const map               = S.map;
 const match             = S.match;
 const matchAll          = S.matchAll;
@@ -69,7 +69,7 @@ const repeat            = R.repeat;
 const replace           = R.replace;
 const sequence          = S.sequence;
 const slice_            = R.slice;
-const split             = R.split;
+const splitOnRegex      = S.splitOnRegex;
 const toString          = S.toString;
 const unapply           = R.unapply;
 const unfoldr           = S.unfoldr;
@@ -124,15 +124,6 @@ def('toInputMarkup',
           wrap('<input value="', '">'),
           concat(htmlEncode('>\u00A0'))]));
 
-//    sqrt :: Number -> Either String Number
-const sqrt =
-def('sqrt',
-    {},
-    [$.Number, Either($.String, $.Number)],
-    ifElse(lt(_, 0),
-           K(Left('Cannot represent square root of negative number')),
-           compose(Right, Math.sqrt)));
-
 //    toOutputMarkup :: String -> String
 const toOutputMarkup =
 def('toOutputMarkup',
@@ -141,7 +132,7 @@ def('toOutputMarkup',
     pipe([encaseEither(prop('message'),
                        curry3(vm.runInNewContext,
                               _,
-                              {R: R, S: S_, sqrt: sqrt},
+                              {R, S: S_},
                               {displayErrors: false})),
           either(pipe([concat('! '),
                        htmlEncode,
@@ -159,6 +150,8 @@ def('doctestsToMarkup',
     [$.String, $.String],
     pipe([matchAll(/^> .*(?:\n[.] .*)*/gm),
           map(prop('match')),
+          map(replace(/\[\n[.] */g, '[')),
+          map(replace(/,\n[.] \]/g, ']')),
           map(replace(/^../gm, '')),
           map(replace(/^ +/gm, ' ')),
           map(replace(/\n/g, '')),
@@ -185,11 +178,11 @@ def('substitutions',
                             el('span', 'tight', ':') +
                             el('span', 'tight', ':') +
                             ' ')],
-                         [contains(_, ap([I, htmlEncode], ['=>'])),
+                         [elem(_, ap([I, htmlEncode], ['=>'])),
                           K(el('span', 'arrow', htmlEncode('=>')))],
-                         [contains(_, ap([I, htmlEncode], ['~>'])),
+                         [elem(_, ap([I, htmlEncode], ['~>'])),
                           K(el('span', 'arrow', htmlEncode('~>')))],
-                         [contains(_, ap([I, htmlEncode], ['->'])),
+                         [elem(_, ap([I, htmlEncode], ['->'])),
                           K(el('span', 'arrow',
                                el('span', 'arrow-hyphen', htmlEncode('-')) +
                                htmlEncode('>')))],
@@ -266,7 +259,7 @@ def('customize',
     {},
     [$.String, Either($.String, Fn($.String, Either($.String, $.String)))],
     pipe([readFile,
-          map(split(/\n={79}\n\n/)),
+          map(splitOnRegex(/\n={79}\n\n/g)),
           chain(ifElse(compose(equals(2), prop('length')),
                        Right,
                        K(Left('Expected exactly one separator')))),

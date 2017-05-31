@@ -14,15 +14,15 @@
   var evaluate = S.encaseEither(
     S.prop('message'),
     S.pipe([S.Right,
-            S.chain(replace(/^const ([^ ]*) = (.*)/)('window.$1 = $2')),
-            S.chain(replace(/^function ([^(]*).*/)('window.$1 = $&')),
+            S.chain(replace(/^const ([^ ]*) = (.*)/, 'window.$1 = $2')),
+            S.chain(replace(/^function ([^(]*).*/, 'window.$1 = $&')),
             S.either(S.I, S.concat('return ')),
             function(body) { return new Function(body)(); }])
   );
 
   //  hasClass :: String -> Element -> Boolean
   var hasClass = S.curry2(function(className, el) {
-    return el.nodeType === 1 && S.words(el.className).indexOf(className) >= 0;
+    return el.nodeType === 1 && S.elem(className, S.words(el.className));
   });
 
   //  evaluateForm :: Element -> Undefined
@@ -76,7 +76,7 @@
     if (window.getSelection().isCollapsed) {
       var el = event.target;
       while (el.tagName !== 'INPUT' && el !== document.body) {
-        if (hasClass('examples')(el)) {
+        if (hasClass('examples', el)) {
           var input = el.getElementsByTagName('input')[0];
           input.focus();
           //  Move the caret to the end of the text.
