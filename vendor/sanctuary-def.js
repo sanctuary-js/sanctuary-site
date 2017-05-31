@@ -37,6 +37,30 @@
 //. const env = $.env.concat([Integer, NonZeroInteger]);
 //. ```
 //.
+//. Type constructors such as `List :: Type -> Type` cannot be included in
+//. an environment as they're not of the correct type. One could, though,
+//. use a type constructor to define a fixed number of concrete types:
+//.
+//. ```javascript
+//. //    env :: Array Type
+//. const env = $.env.concat([
+//.   List($.Number),               // :: Type
+//.   List($.String),               // :: Type
+//.   List(List($.Number)),         // :: Type
+//.   List(List($.String)),         // :: Type
+//.   List(List(List($.Number))),   // :: Type
+//.   List(List(List($.String))),   // :: Type
+//. ]);
+//. ```
+//.
+//. Not only would this be tedious, but one could never enumerate all possible
+//. types as there are infinitely many. Instead, one should use [`Unknown`][]:
+//.
+//. ```javascript
+//. //    env :: Array Type
+//. const env = $.env.concat([List($.Unknown)]);
+//. ```
+//.
 //. The next step is to define a `def` function for the environment:
 //.
 //. ```javascript
@@ -213,9 +237,6 @@
   //  K :: a -> b -> a
   function K(x) { return function(y) { return x; }; }
 
-  //  always :: a -> (-> a)
-  function always(x) { return function() { return x; }; }
-
   //  always2 :: a -> (b, c) -> a
   function always2(x) { return function(y, z) { return x; }; }
 
@@ -279,6 +300,13 @@
     return s.slice('('.length, -')'.length);
   }
 
+  //  toMarkdownList :: (String, String, a -> String, Array a) -> String
+  function toMarkdownList(empty, s, f, xs) {
+    return isEmpty(xs) ?
+      empty :
+      Z.reduce(function(s, x) { return s + '  - ' + f(x) + '\n'; }, s, xs);
+  }
+
   //  trimTrailingSpaces :: String -> String
   function trimTrailingSpaces(s) {
     return s.replace(/[ ]+$/gm, '');
@@ -302,6 +330,9 @@
       };
     };
   }
+
+  //  parenthesize :: String -> String
+  var parenthesize = wrap('(')(')');
 
   //  q :: String -> String
   var q = wrap('\u2018')('\u2019');
@@ -374,13 +405,14 @@
   //  typeofEq :: String -> a -> Boolean
   function typeofEq(typeof_) {
     return function(x) {
+      // eslint-disable-next-line valid-typeof
       return typeof x === typeof_;
     };
   }
 
   //  functionUrl :: String -> String
   function functionUrl(name) {
-    var version = '0.9.0';  // updated programmatically
+    var version = '0.12.0';  // updated programmatically
     return 'https://github.com/sanctuary-js/sanctuary-def/tree/v' + version +
            '#' + stripNamespace(name);
   }
@@ -408,15 +440,6 @@
     return BinaryType(name, functionUrl(name), test, _1, _2);
   }
 
-  //  applyParameterizedTypes :: Array Type -> Array Type
-  function applyParameterizedTypes(types) {
-    return Z.map(function(x) {
-      return typeof x === 'function' ?
-        x.apply(null, Z.map(K(Unknown), range(0, x.length))) :
-        x;
-    }, types);
-  }
-
   //. ### Types
   //.
   //. Conceptually, a type is a set of values. One can think of a value of
@@ -431,7 +454,7 @@
   //# AnyFunction :: Type
   //.
   //. Type comprising every Function value.
-  var AnyFunction = NullaryTypeWithUrl('Function', typeEq('Function'));
+  var AnyFunction = NullaryTypeWithUrl('Function', typeofEq('function'));
 
   //# Arguments :: Type
   //.
@@ -553,6 +576,23 @@
     function(x) { return Number_._test(x) && x < 0; }
   );
 
+  //# NonEmpty :: Type -> Type
+  //.
+  //. Constructor for non-empty types. `$.NonEmpty($.String)`, for example, is
+  //. the type comprising every [`String`][] value except `''`.
+  //.
+  //. The given type must satisfy the [Monoid][] and [Setoid][] specifications.
+  var NonEmpty = UnaryType(
+    'sanctuary-def/NonEmpty',
+    functionUrl('NonEmpty'),
+    function(x) {
+      return Z.Monoid.test(x) &&
+             Z.Setoid.test(x) &&
+             !Z.equals(x, Z.empty(x.constructor));
+    },
+    function(monoid) { return [monoid]; }
+  );
+
   //# NonGlobalRegExp :: Type
   //.
   //. Type comprising every [`RegExp`][] value whose `global` flag is `false`.
@@ -598,7 +638,10 @@
   var Nullable = UnaryTypeWithUrl(
     'sanctuary-def/Nullable',
     K(true),
-    function(nullable) { return nullable === null ? [] : [nullable]; }
+    function(nullable) {
+      // eslint-disable-next-line eqeqeq
+      return nullable === null ? [] : [nullable];
+    }
   );
 
   //# Number :: Type
@@ -684,8 +727,7 @@
     'sanctuary-def/StrMap',
     Object_._test,
     function(strMap) {
-      return Z.map(function(k) { return strMap[k]; },
-                   Object.keys(strMap).sort());
+      return Z.reduce(function(xs, x) { return xs.concat([x]); }, [], strMap);
     }
   );
 
@@ -694,6 +736,22 @@
   //. Type comprising every primitive String value.
   var String_ = NullaryTypeWithUrl('String', typeofEq('string'));
 
+  //# Symbol :: Type
+  //.
+  //. Type comprising every Symbol value.
+  var Symbol_ = NullaryTypeWithUrl('Symbol', typeofEq('symbol'));
+
+  //# Type :: Type
+  //.
+  //. Type comprising every `Type` value.
+  var Type = NullaryTypeWithUrl('Type', typeEq('sanctuary-def/Type'));
+
+  //# TypeClass :: Type
+  //.
+  //. Type comprising every [`TypeClass`][] value.
+  var TypeClass =
+  NullaryTypeWithUrl('TypeClass', typeEq('sanctuary-type-classes/TypeClass'));
+
   //# Undefined :: Type
   //.
   //. Type whose sole member is `undefined`.
@@ -701,9 +759,20 @@
 
   //# Unknown :: Type
   //.
-  //. Type used internally to represent missing type information. The type of
-  //. `[]`, for example, is `Array ???`. This type is exported solely for use
-  //. by other Sanctuary packages.
+  //. Type used to represent missing type information. The type of `[]`,
+  //. for example, is `Array ???`.
+  //.
+  //. May be used with type constructors when defining environments. Given a
+  //. type constructor `List :: Type -> Type`, one could use `List($.Unknown)`
+  //. to include an infinite number of types in an environment:
+  //.
+  //.   - `List Number`
+  //.   - `List String`
+  //.   - `List (List Number)`
+  //.   - `List (List String)`
+  //.   - `List (List (List Number))`
+  //.   - `List (List (List String))`
+  //.   - `...`
   var Unknown = new _Type(UNKNOWN, '', '', always2('???'), K(true), [], {});
 
   //# ValidDate :: Type
@@ -726,23 +795,24 @@
   //.
   //. An array of [types][]:
   //.
-  //.   - [`AnyFunction`][]
-  //.   - [`Arguments`][]
-  //.   - [`Array`][]
-  //.   - [`Boolean`][]
-  //.   - [`Date`][]
-  //.   - [`Error`][]
-  //.   - [`Null`][]
-  //.   - [`Number`][]
-  //.   - [`Object`][]
-  //.   - [`RegExp`][]
-  //.   - [`StrMap`][]
-  //.   - [`String`][]
-  //.   - [`Undefined`][]
-  var env = applyParameterizedTypes([
+  //.   - <code><a href="#AnyFunction">AnyFunction</a></code>
+  //.   - <code><a href="#Arguments">Arguments</a></code>
+  //.   - <code><a href="#Array">Array</a>(<a href="#Unknown">Unknown</a>)</code>
+  //.   - <code><a href="#Boolean">Boolean</a></code>
+  //.   - <code><a href="#Date">Date</a></code>
+  //.   - <code><a href="#Error">Error</a></code>
+  //.   - <code><a href="#Null">Null</a></code>
+  //.   - <code><a href="#Number">Number</a></code>
+  //.   - <code><a href="#Object">Object</a></code>
+  //.   - <code><a href="#RegExp">RegExp</a></code>
+  //.   - <code><a href="#StrMap">StrMap</a>(<a href="#Unknown">Unknown</a>)</code>
+  //.   - <code><a href="#String">String</a></code>
+  //.   - <code><a href="#Symbol">Symbol</a></code>
+  //.   - <code><a href="#Undefined">Undefined</a></code>
+  var env = [
     AnyFunction,
     Arguments,
-    Array_,
+    Array_(Unknown),
     Boolean_,
     Date_,
     Error_,
@@ -750,24 +820,11 @@
     Number_,
     Object_,
     RegExp_,
-    StrMap,
+    StrMap(Unknown),
     String_,
+    Symbol_,
     Undefined
-  ]);
-
-  //  Type :: Type
-  var Type = NullaryType(
-    'sanctuary-def/Type',
-    '',
-    typeEq('sanctuary-def/Type')
-  );
-
-  //  TypeClass :: Type
-  var TypeClass = NullaryType(
-    'sanctuary-type-classes/TypeClass',
-    '',
-    typeEq('sanctuary-type-classes/TypeClass')
-  );
+  ];
 
   //  Unchecked :: String -> Type
   function Unchecked(s) { return NullaryType(s, '', K(true)); }
@@ -841,7 +898,6 @@
   function _determineActualTypes(
     loose,          // :: Boolean
     env,            // :: Array Type
-    types,          // :: Array Type
     seen,           // :: Array Object
     values          // :: Array Any
   ) {
@@ -864,15 +920,15 @@
             [] :
           t.type === UNARY ?
             Z.map(fromUnaryType(t),
-                  recur(loose, env, env, seen$, t.types.$1.extractor(value))) :
+                  recur(loose, env, seen$, t.types.$1.extractor(value))) :
           t.type === BINARY ?
             xprod(
               t,
               t.types.$1.type.type === UNKNOWN ?
-                recur(loose, env, env, seen$, t.types.$1.extractor(value)) :
+                recur(loose, env, seen$, t.types.$1.extractor(value)) :
                 [t.types.$1.type],
               t.types.$2.type.type === UNKNOWN ?
-                recur(loose, env, env, seen$, t.types.$2.extractor(value)) :
+                recur(loose, env, seen$, t.types.$2.extractor(value)) :
                 [t.types.$2.type]
             ) :
           // else
@@ -883,7 +939,7 @@
 
     return isEmpty(values) ?
       [Unknown] :
-      or(Z.reduce(refine, types, values), loose ? [Inconsistent] : []);
+      or(Z.reduce(refine, env, values), loose ? [Inconsistent] : []);
   }
 
   //  rejectInconsistent :: Array Type -> Array Type
@@ -893,17 +949,15 @@
     });
   }
 
-  //  determineActualTypesStrict ::
-  //    (Array Type, Array Type, Array Any) -> Array Type
-  function determineActualTypesStrict(env, types, values) {
-    var types$ = _determineActualTypes(false, env, types, [], values);
+  //  determineActualTypesStrict :: (Array Type, Array Any) -> Array Type
+  function determineActualTypesStrict(env, values) {
+    var types$ = _determineActualTypes(false, env, [], values);
     return rejectInconsistent(types$);
   }
 
-  //  determineActualTypesLoose ::
-  //    (Array Type, Array Type, Array Any) -> Array Type
-  function determineActualTypesLoose(env, types, values) {
-    var types$ = _determineActualTypes(true, env, types, [], values);
+  //  determineActualTypesLoose :: (Array Type, Array Any) -> Array Type
+  function determineActualTypesLoose(env, values) {
+    var types$ = _determineActualTypes(true, env, [], values);
     return rejectInconsistent(types$);
   }
 
@@ -960,7 +1014,7 @@
                   t.keys.slice(-typeVar.keys.length).every(function(k) {
                     var xs = t.types[k].extractor(value);
                     return isEmpty(xs) ||
-                           !isEmpty(determineActualTypesStrict(env, env, xs));
+                           !isEmpty(determineActualTypesStrict(env, xs));
                   })
                 );
               }) :
@@ -968,17 +1022,17 @@
               t.types.$1.type.type === UNKNOWN &&
               !isEmpty(xs = t.types.$1.extractor(value)) ?
                 Z.map(fromUnaryType(t),
-                      determineActualTypesStrict(env, env, xs)) :
+                      determineActualTypesStrict(env, xs)) :
                 [t] :
             t.type === BINARY ?
               xprod(t,
                     t.types.$1.type.type === UNKNOWN &&
                     !isEmpty(xs = t.types.$1.extractor(value)) ?
-                      determineActualTypesStrict(env, env, xs) :
+                      determineActualTypesStrict(env, xs) :
                       [t.types.$1.type],
                     t.types.$2.type.type === UNKNOWN &&
                     !isEmpty(xs = t.types.$2.extractor(value)) ?
-                      determineActualTypesStrict(env, env, xs) :
+                      determineActualTypesStrict(env, xs) :
                       [t.types.$2.type]) :
             // else
               [t]
@@ -1095,22 +1149,38 @@
             return isEmpty(expType.keys) || isEmpty(t.keys) ?
               e :
               Z.chain(function(r) {
-                var $1 = expType.types[expType.keys[0]].type;
-                var k = last(t.keys);
-                var innerValues = Z.chain(t.types[k].extractor, values);
-                return Z.reduce(function(e, x) {
-                  return Z.chain(function(r) {
-                    return $1.type === VARIABLE || test(env, $1, x) ?
-                      Right(r) :
-                      Left(function() {
-                        return invalidValue(env,
-                                            typeInfo,
-                                            index,
-                                            Z.concat(propPath, [k]),
-                                            x);
-                      });
-                  }, e);
-                }, Right(r), innerValues);
+                //  The `a` in `Functor f => f a` corresponds to the `a`
+                //  in `Maybe a` but to the `b` in `Either a b`. A type
+                //  variable's $1 will correspond to either $1 or $2 of
+                //  the actual type depending on the actual type's arity.
+                var offset = t.keys.length - expType.keys.length;
+                return expType.keys.reduce(function(r, k, idx) {
+                  var extractor = t.types[t.keys[offset + idx]].extractor;
+                  var innerValues = Z.chain(extractor, values);
+                  return Z.chain(
+                    function(r) {
+                      return recur(env,
+                                   typeInfo,
+                                   r.typeVarMap,
+                                   expType.types[k].type,
+                                   index,
+                                   Z.concat(propPath, [k]),
+                                   innerValues);
+                    },
+                    Z.reduce(function(e, x) {
+                      var t = expType.types[k].type;
+                      return Z.chain(function(r) {
+                        return test(env, t, x) ? Right(r) : Left(function() {
+                          return invalidValue(env,
+                                              typeInfo,
+                                              index,
+                                              Z.concat(propPath, [k]),
+                                              x);
+                        });
+                      }, e);
+                    }, Right(r), innerValues)
+                  );
+                }, Right(r));
               }, e);
           }, Right({typeVarMap: typeVarMap$, types: okTypes}), okTypes);
 
@@ -1204,8 +1274,7 @@
   //. Using types as predicates is useful in other contexts too. One could,
   //. for example, define a [record type][] for each endpoint of a REST API
   //. and validate the bodies of incoming POST requests against these types.
-  function test(_env, t, x) {
-    var env = applyParameterizedTypes(_env);
+  function test(env, t, x) {
     var typeInfo = {name: 'name', constraints: {}, types: [t]};
     return satisfactoryTypes(env, typeInfo, {}, t, 0, [], [x]).isRight;
   }
@@ -1385,7 +1454,7 @@
        String_,
        Function_([Any, Boolean_]),
        Function_([Unchecked('t a'), Array_(Unchecked('a'))]),
-       Function_([Type, Type])],
+       AnyFunction],
       function(name, url, test, _1) {
         return def(stripNamespace(name),
                    {},
@@ -1509,7 +1578,7 @@
        Function_([Any, Boolean_]),
        Function_([Unchecked('t a b'), Array_(Unchecked('a'))]),
        Function_([Unchecked('t a b'), Array_(Unchecked('b'))]),
-       Function_([Type, Type, Type])],
+       AnyFunction],
       function(name, url, test, _1, _2) {
         return def(stripNamespace(name),
                    {},
@@ -1759,7 +1828,7 @@
   var CheckedUnaryTypeVariable =
   def('UnaryTypeVariable',
       {},
-      [String_, Function_([Type, Type])],
+      [String_, AnyFunction],
       function(name) {
         return def(name, {}, [Type, Type], UnaryTypeVariable(name));
       });
@@ -1794,7 +1863,7 @@
   var CheckedBinaryTypeVariable =
   def('BinaryTypeVariable',
       {},
-      [String_, Function_([Type, Type, Type])],
+      [String_, AnyFunction],
       function(name) {
         return def(name, {}, [Type, Type, Type], BinaryTypeVariable(name));
       });
@@ -1857,6 +1926,7 @@
   //. //    Semigroup :: TypeClass
   //. const Semigroup = Z.TypeClass(
   //.   'my-package/Semigroup',
+  //.   'http://example.com/my-package#Semigroup',
   //.   [],
   //.   x => x != null && typeof x.concat === 'function'
   //. );
@@ -1878,6 +1948,8 @@
   //. //   1)  {} :: Object, StrMap ???
   //. //
   //. //   ‘concat’ requires ‘a’ to satisfy the Semigroup type-class constraint; the value at position 1 does not.
+  //. //
+  //. //   See http://example.com/my-package#Semigroup for information about the my-package/Semigroup type class.
   //.
   //. concat(null, null);
   //. // ! TypeError: Type-class constraint violation
@@ -1889,6 +1961,8 @@
   //. //   1)  null :: Null
   //. //
   //. //   ‘concat’ requires ‘a’ to satisfy the Semigroup type-class constraint; the value at position 1 does not.
+  //. //
+  //. //   See http://example.com/my-package#Semigroup for information about the my-package/Semigroup type class.
   //. ```
   //.
   //. Multiple constraints may be placed on a type variable by including
@@ -1929,21 +2003,15 @@
     index,              // :: Integer
     f                   // :: Function
   ) {
-    return function() {
+    var expType = typeInfo.types[index];
+    var numArgsExpected = expType.keys.length - 1;
+    return arity(numArgsExpected, function() {
       var args = slice.call(arguments);
-      var expType = typeInfo.types[index];
-      var numArgsExpected = expType.keys.length - 1;
       if (args.length !== numArgsExpected) {
         throw invalidArgumentsLength(typeInfo, index, numArgsExpected, args);
       }
       function checkValue$(propPath, t, x) {
-        checkValue(env,
-                   typeInfo,
-                   $typeVarMapBox,
-                   index,
-                   propPath,
-                   t,
-                   x);
+        checkValue(env, typeInfo, $typeVarMapBox, index, propPath, t, x);
       }
       init(expType.keys).forEach(function(k, idx) {
         checkValue$([k], expType.types[k].type, args[idx]);
@@ -1953,7 +2021,15 @@
       var k = last(expType.keys);
       checkValue$([k], expType.types[k].type, output);
       return output;
-    };
+    });
+  }
+
+  //  wrapFunctionCond ::
+  //    Array Type -> TypeInfo -> Box TypeVarMap -> Integer -> a -> a
+  function wrapFunctionCond(env, typeInfo, $typeVarMapBox, index, value) {
+    return typeInfo.types[index].type === FUNCTION ?
+      wrapFunction(env, typeInfo, $typeVarMapBox, index, value) :
+      value;
   }
 
   //  wrapFunctions :: ... -> Array Any
@@ -1964,13 +2040,7 @@
     values              // :: Array Any
   ) {
     return values.map(function(value, idx) {
-      return typeInfo.types[idx].type === FUNCTION ?
-        wrapFunction(env,
-                     typeInfo,
-                     $typeVarMapBox,
-                     idx,
-                     value) :
-        value;
+      return wrapFunctionCond(env, typeInfo, $typeVarMapBox, idx, value);
     });
   }
 
@@ -2035,7 +2105,7 @@
   //  showValuesAndTypes :: (Array Type, Array Any, Integer) -> String
   function showValuesAndTypes(env, values, pos) {
     return String(pos) + ')  ' + Z.map(function(x) {
-      var types = determineActualTypesLoose(env, env, [x]);
+      var types = determineActualTypesLoose(env, [x]);
       return Z.toString(x) + ' :: ' + Z.map(showType, types).join(', ');
     }, values).join('\n    ');
   }
@@ -2046,9 +2116,7 @@
     var arity = reprs.length - 1;
     return typeInfo.name + ' :: ' +
              constraintsRepr(typeInfo.constraints, id, K(K(id))) +
-             when(arity === 0,
-                  wrap('(')(')'),
-                  init(reprs).join(' -> ')) +
+             when(arity === 0, parenthesize, init(reprs).join(' -> ')) +
              ' -> ' + last(reprs);
   }
 
@@ -2123,6 +2191,13 @@
     };
   }
 
+  //  see :: (String, { name :: String, url :: String }) -> String
+  function see(label, record) {
+    return record.url &&
+           '\nSee ' + record.url +
+           ' for information about the ' + record.name + ' ' + label + '.\n';
+  }
+
   //  typeClassConstraintViolation :: ... -> Error
   function typeClassConstraintViolation(
     env,            // :: Array Type
@@ -2149,7 +2224,8 @@
       showValuesAndTypes(env, [value], 1) + '\n\n' +
       q(typeInfo.name) + ' requires ' + q(expType.name) + ' to satisfy the ' +
       stripNamespace(typeClass.name) + ' type-class constraint; ' +
-      'the value at position 1 does not.\n'
+      'the value at position 1 does not.\n' +
+      see('type class', typeClass)
     ));
   }
 
@@ -2175,28 +2251,43 @@
         //  Keep X, the position at which the violation was observed.
         k === key ||
         //  Keep positions whose values are incompatible with the values at X.
-        isEmpty(determineActualTypesStrict(env,
-                                           env,
-                                           Z.concat(values, values_)))
+        isEmpty(determineActualTypesStrict(env, Z.concat(values, values_)))
       );
     });
 
+    var underlinedTypeVars =
+    underlineTypeVars(typeInfo,
+                      Z.reduce(function($valuesByPath, k) {
+                        $valuesByPath[k] = valuesByPath[k];
+                        return $valuesByPath;
+                      }, {}, keys));
+
     return new TypeError(trimTrailingSpaces(
-      'Type-variable constraint violation\n\n' +
-      underlineTypeVars(typeInfo,
-                        Z.reduce(function($valuesByPath, k) {
-                          $valuesByPath[k] = valuesByPath[k];
-                          return $valuesByPath;
-                        }, {}, keys)) +
-      Z.reduce(function(st, k) {
-        var values = valuesByPath[k];
-        return isEmpty(values) ? st : {
-          idx: st.idx + 1,
-          s: st.s + '\n' + showValuesAndTypes(env, values, st.idx + 1) + '\n'
-        };
-      }, {idx: 0, s: ''}, keys).s + '\n' +
-      'Since there is no type of which all the above values are ' +
-      'members, the type-variable constraint has been violated.\n'
+      values.length === 1 && isEmpty(determineActualTypesLoose(env, values)) ?
+        'Unrecognized value\n\n' +
+        underlinedTypeVars + '\n' +
+        '1)  ' + Z.toString(values[0]) + ' :: (no types)\n\n' +
+        toMarkdownList(
+          'The environment is empty! ' +
+          'Polymorphic functions require a non-empty environment.\n',
+          'The value at position 1 is not a member of any type in ' +
+          'the environment.\n\n' +
+          'The environment contains the following types:\n\n',
+          showType,
+          env
+        ) :
+      // else
+        'Type-variable constraint violation\n\n' +
+        underlinedTypeVars + '\n' +
+        Z.reduce(function(st, k) {
+          var values = valuesByPath[k];
+          return isEmpty(values) ? st : {
+            idx: st.idx + 1,
+            s: st.s + showValuesAndTypes(env, values, st.idx + 1) + '\n\n'
+          };
+        }, {idx: 0, s: ''}, keys).s +
+        'Since there is no type of which all the above values are ' +
+        'members, the type-variable constraint has been violated.\n'
     ));
   }
 
@@ -2218,8 +2309,7 @@
       showValuesAndTypes(env, [value], 1) + '\n\n' +
       'The value at position 1 is not a member of ' + showTypeQuoted(t) + '.' +
       '\n' +
-      (t.url &&
-       '\nSee ' + t.url + ' for information about the ' + t.name + ' type.\n')
+      see('type', t)
     ));
   }
 
@@ -2261,11 +2351,7 @@
       ) + '\n' +
       'Expected ' + numArgs(numArgsExpected) +
       ' but received ' + numArgs(args.length) +
-      (args.length === 0 ?
-         '.\n' :
-         Z.reduce(function(s, x) { return s + '  - ' + Z.toString(x) + '\n'; },
-                  ':\n\n',
-                  args))
+      toMarkdownList('.\n', ':\n\n', Z.toString, args)
     ));
   }
 
@@ -2285,6 +2371,7 @@
     impl          // :: Function
   ) {
     var n = typeInfo.types.length - 1;
+
     var curried = arity(_indexes.length, function() {
       if (opts.checkTypes) {
         var delta = _indexes.length - arguments.length;
@@ -2331,7 +2418,7 @@
                                         n,
                                         [],
                                         [returnValue]));
-          return returnValue;
+          return wrapFunctionCond(env, typeInfo, [typeVarMap], n, returnValue);
         } else {
           return impl.apply(this, values);
         }
@@ -2339,7 +2426,30 @@
         return curry(opts, typeInfo, typeVarMap, values, indexes, impl);
       }
     });
-    curried.inspect = curried.toString = always(typeSignature(typeInfo));
+
+    curried.inspect = curried.toString = function() {
+      var vReprs = [];
+      var tReprs = [];
+      for (var idx = 0, placeholders = 0; idx < n; idx += 1) {
+        if (_indexes.indexOf(idx) >= 0) {
+          placeholders += 1;
+          tReprs.push(showType(typeInfo.types[idx]));
+        } else {
+          while (placeholders > 0) {
+            vReprs.push('__');
+            placeholders -= 1;
+          }
+          vReprs.push(Z.toString(_values[idx]));
+        }
+      }
+      return typeInfo.name +
+             when(vReprs.length > 0, parenthesize, vReprs.join(', ')) +
+             ' :: ' +
+             constraintsRepr(typeInfo.constraints, id, K(K(id))) +
+             when(n === 0, parenthesize, tReprs.join(' -> ')) +
+             ' -> ' + showType(typeInfo.types[n]);
+    };
+
     return curried;
   }
 
@@ -2350,8 +2460,7 @@
         throw new RangeError(q(def.name) + ' cannot define a function ' +
                              'with arity greater than nine');
       }
-      return curry({checkTypes: opts.checkTypes,
-                    env: applyParameterizedTypes(opts.env)},
+      return curry(opts,
                    {name: name, constraints: constraints, types: expTypes},
                    {},
                    values,
@@ -2362,7 +2471,7 @@
                {},
                [String_,
                 StrMap(Array_(TypeClass)),
-                Array_(Type),
+                NonEmpty(Array_(Type)),
                 AnyFunction,
                 AnyFunction],
                def);
@@ -2371,12 +2480,7 @@
   var create =
   def('create',
       {},
-      [RecordType({checkTypes: Boolean_, env: Array_(Any)}),
-       Function_([String_,
-                  StrMap(Array_(TypeClass)),
-                  Array_(Type),
-                  AnyFunction,
-                  AnyFunction])],
+      [RecordType({checkTypes: Boolean_, env: Array_(Any)}), AnyFunction],
       _create);
 
   //  fromUncheckedUnaryType :: (Type -> Type) -> (Type -> Type)
@@ -2411,6 +2515,7 @@
     NegativeFiniteNumber: NegativeFiniteNumber,
     NegativeInteger: NegativeInteger,
     NegativeNumber: NegativeNumber,
+    NonEmpty: NonEmpty,
     NonGlobalRegExp: NonGlobalRegExp,
     NonZeroFiniteNumber: NonZeroFiniteNumber,
     NonZeroInteger: NonZeroInteger,
@@ -2427,6 +2532,9 @@
     RegexFlags: RegexFlags,
     StrMap: fromUncheckedUnaryType(StrMap),
     String: String_,
+    Symbol: Symbol_,
+    Type: Type,
+    TypeClass: TypeClass,
     Undefined: Undefined,
     Unknown: Unknown,
     ValidDate: ValidDate,
@@ -2447,25 +2555,20 @@
 }));
 
 //. [FL:Semigroup]:         https://github.com/fantasyland/fantasy-land#semigroup
-//. [`AnyFunction`]:        #AnyFunction
-//. [`Arguments`]:          #Arguments
+//. [Monoid]:               https://github.com/fantasyland/fantasy-land#monoid
+//. [Setoid]:               https://github.com/fantasyland/fantasy-land#setoid
 //. [`Array`]:              #Array
 //. [`BinaryType`]:         #BinaryType
-//. [`Boolean`]:            #Boolean
 //. [`Date`]:               #Date
-//. [`Error`]:              #Error
 //. [`FiniteNumber`]:       #FiniteNumber
 //. [`GlobalRegExp`]:       #GlobalRegExp
 //. [`Integer`]:            #Integer
 //. [`NonGlobalRegExp`]:    #NonGlobalRegExp
-//. [`Null`]:               #Null
 //. [`Number`]:             #Number
-//. [`Object`]:             #Object
 //. [`Object.create`]:      https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create
 //. [`Pair`]:               #Pair
 //. [`RegExp`]:             #RegExp
 //. [`RegexFlags`]:         #RegexFlags
-//. [`StrMap`]:             #StrMap
 //. [`String`]:             #String
 //. [`SyntaxError`]:        https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError
 //. [`TypeClass`]:          https://github.com/sanctuary-js/sanctuary-type-classes#TypeClass
@@ -2473,7 +2576,7 @@
 //. [`TypeVariable`]:       #TypeVariable
 //. [`UnaryType`]:          #UnaryType
 //. [`UnaryTypeVariable`]:  #UnaryTypeVariable
-//. [`Undefined`]:          #Undefined
+//. [`Unknown`]:            #Unknown
 //. [`ValidNumber`]:        #ValidNumber
 //. [`env`]:                #env
 //. [arguments]:            https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments

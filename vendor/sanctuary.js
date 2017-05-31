@@ -15,8 +15,8 @@
 //. [![Gitter](https://img.shields.io/gitter/room/badges/shields.svg)](https://gitter.im/sanctuary-js/sanctuary)
 //.
 //. Sanctuary is a JavaScript functional programming library inspired by
-//. Haskell and PureScript. It's stricter than [Ramda][], and provides a
-//. similar suite of functions.
+//. [Haskell][] and [PureScript][]. It's stricter than [Ramda][], and
+//. provides a similar suite of functions.
 //.
 //. Sanctuary promotes programs composed of simple, pure functions. Such
 //. programs are easier to comprehend, test, and maintain &ndash; they are
@@ -167,23 +167,25 @@
 //. silent failures due to type coercion (at worst). For example:
 //.
 //. ```javascript
-//. S.inc('XXX');
+//. S.add(2, true);
 //. // ! TypeError: Invalid value
 //. //
-//. //   inc :: FiniteNumber -> FiniteNumber
-//. //          ^^^^^^^^^^^^
-//. //               1
+//. //   add :: FiniteNumber -> FiniteNumber -> FiniteNumber
+//. //                          ^^^^^^^^^^^^
+//. //                               1
 //. //
-//. //   1)  "XXX" :: String
+//. //   1)  true :: Boolean
 //. //
 //. //   The value at position 1 is not a member of ‘FiniteNumber’.
+//. //
+//. //   See https://github.com/sanctuary-js/sanctuary-def/tree/v0.12.0#FiniteNumber for information about the sanctuary-def/FiniteNumber type.
 //. ```
 //.
 //. Compare this to the behaviour of Ramda's unchecked equivalent:
 //.
 //. ```javascript
-//. R.inc('XXX');
-//. // => NaN
+//. R.add(2, true);
+//. // => 3
 //. ```
 //.
 //. There is a performance cost to run-time type checking. One may wish to
@@ -198,7 +200,7 @@
 //. const {create, env} = require('sanctuary');
 //.
 //. const checkTypes = process.env.NODE_ENV !== 'production';
-//. const S = create({checkTypes: checkTypes, env: env});
+//. const S = create({checkTypes, env});
 //. ```
 //.
 //. ## API
@@ -236,6 +238,20 @@
   //  Thunk :: Type -> Type
   function Thunk(x) { return $.Function([x]); }
 
+  //  flip$ :: ((a, b) -> c) -> b -> a -> c
+  function flip$(f) {
+    return function(x) {
+      return function(y) {
+        return f(y, x);
+      };
+    };
+  }
+
+  //  negativeZero :: Number -> Boolean
+  function negativeZero(n) {
+    return n === 0 && 1 / n === -Infinity;
+  }
+
   //  typeEq :: String -> a -> Boolean
   function typeEq(typeIdent) {
     return function(x) {
@@ -263,24 +279,14 @@
   //  Accessible :: TypeClass
   var Accessible = Z.TypeClass(
     'sanctuary/Accessible',
+    readmeUrl('accessible-pseudotype'),
     [],
     function(x) { return x != null; }
   );
 
-  //  Ord :: TypeClass
-  var Ord = Z.TypeClass(
-    'sanctuary/Ord',
-    [],
-    function(x) {
-      return $.String._test(x) ||
-             $.ValidDate._test(x) ||
-             $.ValidNumber._test(x);
-    }
-  );
-
   //  readmeUrl :: String -> String
   function readmeUrl(id) {
-    var version = '0.12.2';  // updated programmatically
+    var version = '0.13.1';  // updated programmatically
     return 'https://github.com/sanctuary-js/sanctuary/tree/v' + version +
            '#' + id;
   }
@@ -302,6 +308,7 @@
 
   //  :: Type -> Type -> Type
   var p = $.BinaryTypeVariable('p');
+  var s = $.BinaryTypeVariable('s');
 
   //  eitherTypeIdent :: String
   var eitherTypeIdent = 'sanctuary/Either';
@@ -391,39 +398,33 @@
   //. const $ = require('sanctuary-def');
   //. const type = require('sanctuary-type-identifiers');
   //.
-  //. //    identityTypeIdent :: String
-  //. const identityTypeIdent = 'my-package/Identity';
-  //.
   //. //    Identity :: a -> Identity a
-  //. function Identity(x) {
+  //. const Identity = function Identity(x) {
   //.   if (!(this instanceof Identity)) return new Identity(x);
   //.   this.value = x;
-  //. }
+  //. };
   //.
-  //. Identity['@@type'] = identityTypeIdent;
+  //. Identity['@@type'] = 'my-package/Identity@1';
   //.
   //. Identity.prototype['fantasy-land/map'] = function(f) {
   //.   return Identity(f(this.value));
   //. };
   //.
-  //. Identity.prototype['fantasy-land/chain'] = function(f) {
-  //.   return f(this.value);
-  //. };
-  //.
-  //. //    isIdentity :: a -> Boolean
-  //. const isIdentity = x => type(x) === identityTypeIdent;
-  //.
-  //. //    identityToArray :: Identity a -> Array a
-  //. const identityToArray = identity => [identity.value];
-  //.
-  //. //    IdentityType :: Type
-  //. const IdentityType =
-  //. $.UnaryType(identityTypeIdent, isIdentity, identityToArray);
+  //. //    IdentityType :: Type -> Type
+  //. const IdentityType = $.UnaryType(
+  //.   Identity['@@type'],
+  //.   'http://example.com/my-package#Identity',
+  //.   x => type(x) === Identity['@@type'],
+  //.   identity => [identity.value]
+  //. );
   //.
   //. const S = create({
   //.   checkTypes: process.env.NODE_ENV !== 'production',
-  //.   env: env.concat([IdentityType]),
+  //.   env: env.concat([IdentityType($.Unknown)]),
   //. });
+  //.
+  //. S.map(S.sub(1), Identity(43));
+  //. // => Identity(42)
   //. ```
   //.
   //. See also [`env`](#env).
@@ -478,18 +479,29 @@
 
   //. ### Classify
 
-  //# type :: Any -> String
+  //# type :: Any -> { namespace :: Maybe String, name :: String, version :: Integer }
   //.
-  //. Returns the [type identifier][] of the given value.
+  //. Returns the result of parsing the [type identifier][] of the given value.
   //.
   //. ```javascript
   //. > S.type(S.Just(42))
-  //. 'sanctuary/Maybe'
+  //. {namespace: Just('sanctuary'), name: 'Maybe', version: 0}
   //.
   //. > S.type([1, 2, 3])
-  //. 'Array'
+  //. {namespace: Nothing, name: 'Array', version: 0}
   //. ```
-  S.type = def('type', {}, [$.Any, $.String], type);
+  S.type =
+  def('type',
+      {},
+      [$.Any,
+       $.RecordType({namespace: $Maybe($.String),
+                     name: $.String,
+                     version: $.Integer})],
+      function(x) {
+        var r = type.parse(type(x));
+        r.namespace = toMaybe(r.namespace);
+        return r;
+      });
 
   //# is :: TypeRep a -> Any -> Boolean
   //.
@@ -554,15 +566,190 @@
   //.
   //. ```javascript
   //. > S.equals(0, -0)
-  //. false
+  //. true
   //.
   //. > S.equals(NaN, NaN)
   //. true
   //.
   //. > S.equals(S.Just([1, 2, 3]), S.Just([1, 2, 3]))
   //. true
+  //.
+  //. > S.equals(S.Just([1, 2, 3]), S.Just([1, 2, 4]))
+  //. false
   //. ```
   S.equals = def('equals', {a: [Z.Setoid]}, [a, a, $.Boolean], Z.equals);
+
+  //# lt :: Ord a => a -> (a -> Boolean)
+  //.
+  //. Flipped version of [`Z.lt`][] intended for partial application.
+  //.
+  //. See also [`lt_`](#lt_).
+  //.
+  //. ```javascript
+  //. > S.filter(S.lt(3), [1, 2, 3, 4, 5])
+  //. [1, 2]
+  //. ```
+  S.lt = def('lt', {a: [Z.Ord]}, [a, Pred(a)], flip$(Z.lt));
+
+  //# lt_ :: Ord a => a -> a -> Boolean
+  //.
+  //. Curried version of [`Z.lt`][].
+  //.
+  //. See also [`lt`](#lt).
+  //.
+  //. ```javascript
+  //. > S.lt_([1, 2, 3], [1, 2, 3])
+  //. false
+  //.
+  //. > S.lt_([1, 2, 3], [1, 2, 4])
+  //. true
+  //.
+  //. > S.lt_([1, 2, 3], [1, 2])
+  //. false
+  //. ```
+  S.lt_ = def('lt_', {a: [Z.Ord]}, [a, a, $.Boolean], Z.lt);
+
+  //# lte :: Ord a => a -> (a -> Boolean)
+  //.
+  //. Flipped version of [`Z.lte`][] intended for partial application.
+  //.
+  //. See also [`lte_`](#lte_).
+  //.
+  //. ```javascript
+  //. > S.filter(S.lte(3), [1, 2, 3, 4, 5])
+  //. [1, 2, 3]
+  //. ```
+  S.lte = def('lte', {a: [Z.Ord]}, [a, Pred(a)], flip$(Z.lte));
+
+  //# lte_ :: Ord a => a -> a -> Boolean
+  //.
+  //. Curried version of [`Z.lte`][].
+  //.
+  //. See also [`lte`](#lte).
+  //.
+  //. ```javascript
+  //. > S.lte_([1, 2, 3], [1, 2, 3])
+  //. true
+  //.
+  //. > S.lte_([1, 2, 3], [1, 2, 4])
+  //. true
+  //.
+  //. > S.lte_([1, 2, 3], [1, 2])
+  //. false
+  //. ```
+  S.lte_ = def('lte_', {a: [Z.Ord]}, [a, a, $.Boolean], Z.lte);
+
+  //# gt :: Ord a => a -> (a -> Boolean)
+  //.
+  //. Flipped version of [`Z.gt`][] intended for partial application.
+  //.
+  //. See also [`gt_`](#gt_).
+  //.
+  //. ```javascript
+  //. > S.filter(S.gt(3), [1, 2, 3, 4, 5])
+  //. [4, 5]
+  //. ```
+  S.gt = def('gt', {a: [Z.Ord]}, [a, Pred(a)], flip$(Z.gt));
+
+  //# gt_ :: Ord a => a -> a -> Boolean
+  //.
+  //. Curried version of [`Z.gt`][].
+  //.
+  //. See also [`gt`](#gt).
+  //.
+  //. ```javascript
+  //. > S.gt_([1, 2, 3], [1, 2, 3])
+  //. false
+  //.
+  //. > S.gt_([1, 2, 3], [1, 2, 4])
+  //. false
+  //.
+  //. > S.gt_([1, 2, 3], [1, 2])
+  //. true
+  //. ```
+  S.gt_ = def('gt_', {a: [Z.Ord]}, [a, a, $.Boolean], Z.gt);
+
+  //# gte :: Ord a => a -> (a -> Boolean)
+  //.
+  //. Flipped version of [`Z.gte`][] intended for partial application.
+  //.
+  //. See also [`gte_`](#gte_).
+  //.
+  //. ```javascript
+  //. > S.filter(S.gte(3), [1, 2, 3, 4, 5])
+  //. [3, 4, 5]
+  //. ```
+  S.gte = def('gte', {a: [Z.Ord]}, [a, Pred(a)], flip$(Z.gte));
+
+  //# gte_ :: Ord a => a -> a -> Boolean
+  //.
+  //. Curried version of [`Z.gte`][].
+  //.
+  //. See also [`gte`](#gte).
+  //.
+  //. ```javascript
+  //. > S.gte_([1, 2, 3], [1, 2, 3])
+  //. true
+  //.
+  //. > S.gte_([1, 2, 3], [1, 2, 4])
+  //. false
+  //.
+  //. > S.gte_([1, 2, 3], [1, 2])
+  //. true
+  //. ```
+  S.gte_ = def('gte_', {a: [Z.Ord]}, [a, a, $.Boolean], Z.gte);
+
+  //# min :: Ord a => a -> a -> a
+  //.
+  //. Returns the smaller of its two arguments (according to [`Z.lte`][]).
+  //.
+  //. See also [`max`](#max).
+  //.
+  //. ```javascript
+  //. > S.min(10, 2)
+  //. 2
+  //.
+  //. > S.min(new Date('1999-12-31'), new Date('2000-01-01'))
+  //. new Date('1999-12-31')
+  //.
+  //. > S.min('10', '2')
+  //. '10'
+  //. ```
+  function min(x, y) {
+    return Z.lte(x, y) ? x : y;
+  }
+  S.min = def('min', {a: [Z.Ord]}, [a, a, a], min);
+
+  //# max :: Ord a => a -> a -> a
+  //.
+  //. Returns the larger of its two arguments (according to [`Z.lte`][]).
+  //.
+  //. See also [`min`](#min).
+  //.
+  //. ```javascript
+  //. > S.max(10, 2)
+  //. 10
+  //.
+  //. > S.max(new Date('1999-12-31'), new Date('2000-01-01'))
+  //. new Date('2000-01-01')
+  //.
+  //. > S.max('10', '2')
+  //. '2'
+  //. ```
+  function max(x, y) {
+    return Z.lte(x, y) ? y : x;
+  }
+  S.max = def('max', {a: [Z.Ord]}, [a, a, a], max);
+
+  //# id :: Category c => TypeRep c -> c
+  //.
+  //. [Type-safe][sanctuary-def] version of [`Z.id`][].
+  //.
+  //. ```javascript
+  //. > S.id(Function)(42)
+  //. 42
+  //. ```
+  S.id = def('id', {c: [Z.Category]}, [TypeRep(c), c], Z.id);
 
   //# concat :: Semigroup a => a -> a -> a
   //.
@@ -628,7 +815,7 @@
   //.     (b -> c) -> (a -> b) -> (a -> c)
   //.
   //. ```javascript
-  //. > S.map(Math.sqrt, S.inc)(99)
+  //. > S.map(Math.sqrt, S.add(1))(99)
   //. 10
   //. ```
   S.map = def('map', {f: [Z.Functor]}, [Fn(a, b), f(a), f(b)], Z.map);
@@ -655,7 +842,7 @@
   //. Curried version of [`Z.promap`][].
   //.
   //. ```javascript
-  //. > S.promap(Math.abs, S.inc, Math.sqrt)(-100)
+  //. > S.promap(Math.abs, S.add(1), Math.sqrt)(-100)
   //. 11
   //. ```
   S.promap =
@@ -750,6 +937,12 @@
   //.
   //. > S.traverse(S.Maybe, S.parseInt(16), ['A', 'B', 'C', 'X'])
   //. Nothing
+  //.
+  //. > S.traverse(S.Maybe, S.parseInt(16), {a: 'A', b: 'B', c: 'C'})
+  //. Just({a: 10, b: 11, c: 12})
+  //.
+  //. > S.traverse(S.Maybe, S.parseInt(16), {a: 'A', b: 'B', c: 'C', x: 'X'})
+  //. Nothing
   //. ```
   S.traverse =
   def('traverse',
@@ -770,6 +963,12 @@
   //.
   //. > S.sequence(S.Maybe, [S.Just(1), S.Just(2), S.Nothing])
   //. Nothing
+  //.
+  //. > S.sequence(S.Maybe, {a: S.Just(1), b: S.Just(2), c: S.Just(3)})
+  //. Just({a: 1, b: 2, c: 3})
+  //.
+  //. > S.sequence(S.Maybe, {a: S.Just(1), b: S.Just(2), c: S.Nothing})
+  //. Nothing
   //. ```
   S.sequence =
   def('sequence',
@@ -784,6 +983,9 @@
   //. ```javascript
   //. > S.ap([Math.sqrt, x => x * x], [1, 4, 9, 16, 25])
   //. [1, 2, 3, 4, 5, 1, 16, 81, 256, 625]
+  //.
+  //. > S.ap({x: Math.sqrt, y: S.add(1), z: S.sub(1)}, {w: 4, x: 4, y: 4})
+  //. {x: 2, y: 5}
   //.
   //. > S.ap(S.Just(Math.sqrt), S.Just(64))
   //. Just(8)
@@ -983,8 +1185,8 @@
   //. Curried version of [`Z.extend`][].
   //.
   //. ```javascript
-  //. > S.extend(xs => xs.length, ['foo', 'bar', 'baz', 'quux'])
-  //. [4]
+  //. > S.extend(S.joinWith(''), ['x', 'y', 'z'])
+  //. ['xyz', 'yz', 'z']
   //. ```
   S.extend =
   def('extend', {w: [Z.Extend]}, [Fn(w(a), b), w(a), w(b)], Z.extend);
@@ -995,6 +1197,20 @@
   S.extract =
   def('extract', {w: [Z.Comonad]}, [w(a), a], Z.extract);
 
+  //# contramap :: Contravariant f => (b -> a) -> f a -> f b
+  //.
+  //. [Type-safe][sanctuary-def] version of [`Z.contramap`][].
+  //.
+  //. ```javascript
+  //. > S.contramap(s => s.length, Math.sqrt)('Sanctuary')
+  //. 3
+  //. ```
+  S.contramap =
+  def('contramap',
+      {f: [Z.Contravariant]},
+      [Fn(b, a), f(a), f(b)],
+      Z.contramap);
+
   //# filter :: (Applicative f, Foldable f, Monoid (f a)) => (a -> Boolean) -> f a -> f a
   //.
   //. Curried version of [`Z.filter`][].
@@ -1004,20 +1220,14 @@
   //. ```javascript
   //. > S.filter(S.odd, [1, 2, 3, 4, 5])
   //. [1, 3, 5]
-  //.
-  //. > S.filter(S.odd, S.Just(9))
-  //. Just(9)
-  //.
-  //. > S.filter(S.odd, S.Just(4))
-  //. Nothing
   //. ```
   S.filter =
   def('filter',
       {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
-      [Fn(a, $.Boolean), f(a), f(a)],
+      [Pred(a), f(a), f(a)],
       Z.filter);
 
-  //# filterM :: (Monad m, Monoid (m a)) => (a -> Boolean) -> m a -> m a
+  //# filterM :: (Alternative m, Monad m) => (a -> Boolean) -> m a -> m a
   //.
   //. Curried version of [`Z.filterM`][].
   //.
@@ -1035,9 +1245,73 @@
   //. ```
   S.filterM =
   def('filterM',
-      {m: [Z.Monad, Z.Monoid]},
-      [Fn(a, $.Boolean), m(a), m(a)],
+      {m: [Z.Alternative, Z.Monad]},
+      [Pred(a), m(a), m(a)],
       Z.filterM);
+
+  //# takeWhile :: (Foldable f, Alternative f) => (a -> Boolean) -> f a -> f a
+  //.
+  //. Discards the first inner value which does not satisfy the predicate, and
+  //. all subsequent inner values.
+  //.
+  //. ```javascript
+  //. > S.takeWhile(S.odd, [3, 3, 3, 7, 6, 3, 5, 4])
+  //. [3, 3, 3, 7]
+  //.
+  //. > S.takeWhile(S.even, [3, 3, 3, 7, 6, 3, 5, 4])
+  //. []
+  //. ```
+  function Array$takeWhile(pred, xs) {
+    var idx = 0;
+    while (idx < xs.length && pred(xs[idx])) idx += 1;
+    return xs.slice(0, idx);
+  }
+
+  function takeWhile(pred, xs) {
+    if (Array.isArray(xs)) return Array$takeWhile(pred, xs);
+    var done = false;
+    function takeWhileReducer(xs, x) {
+      return !done && pred(x) ? append(x, xs) : (done = true, xs);
+    }
+    return Z.reduce(takeWhileReducer, Z.empty(xs.constructor), xs);
+  }
+  S.takeWhile =
+  def('takeWhile',
+      {f: [Z.Foldable, Z.Alternative]},
+      [Pred(a), f(a), f(a)],
+      takeWhile);
+
+  //# dropWhile :: (Foldable f, Alternative f) => (a -> Boolean) -> f a -> f a
+  //.
+  //. Retains the first inner value which does not satisfy the predicate, and
+  //. all subsequent inner values.
+  //.
+  //. ```javascript
+  //. > S.dropWhile(S.odd, [3, 3, 3, 7, 6, 3, 5, 4])
+  //. [6, 3, 5, 4]
+  //.
+  //. > S.dropWhile(S.even, [3, 3, 3, 7, 6, 3, 5, 4])
+  //. [3, 3, 3, 7, 6, 3, 5, 4]
+  //. ```
+  function Array$dropWhile(pred, xs) {
+    var idx = 0;
+    while (idx < xs.length && pred(xs[idx])) idx += 1;
+    return xs.slice(idx);
+  }
+
+  function dropWhile(pred, xs) {
+    if (Array.isArray(xs)) return Array$dropWhile(pred, xs);
+    var done = false;
+    function dropWhileReducer(xs, x) {
+      return !done && pred(x) ? xs : (done = true, append(x, xs));
+    }
+    return Z.reduce(dropWhileReducer, Z.empty(xs.constructor), xs);
+  }
+  S.dropWhile =
+  def('dropWhile',
+      {f: [Z.Foldable, Z.Alternative]},
+      [Pred(a), f(a), f(a)],
+      dropWhile);
 
   //. ### Combinator
 
@@ -1079,10 +1353,10 @@
   //. function.
   //.
   //. ```javascript
-  //. > S.A(S.inc, 42)
+  //. > S.A(S.add(1), 42)
   //. 43
   //.
-  //. > S.map(S.A(S.__, 100), [S.inc, Math.sqrt])
+  //. > S.map(S.A(S.__, 100), [S.add(1), Math.sqrt])
   //. [101, 10]
   //. ```
   function A(f, x) {
@@ -1097,10 +1371,10 @@
   //. `(&)` function.
   //.
   //. ```javascript
-  //. > S.T(42, S.inc)
+  //. > S.T(42, S.add(1))
   //. 43
   //.
-  //. > S.map(S.T(100), [S.inc, Math.sqrt])
+  //. > S.map(S.T(100), [S.add(1), Math.sqrt])
   //. [101, 10]
   //. ```
   function T(x, f) {
@@ -1235,23 +1509,27 @@
 
   //. ### Composition
 
-  //# compose :: (b -> c) -> (a -> b) -> a -> c
+  //# compose :: Semigroupoid s => s b c -> s a b -> s a c
   //.
-  //. Composes two unary functions, from right to left. Equivalent to Haskell's
-  //. `(.)` function.
+  //. Curried version of [`Z.compose`][].
   //.
-  //. This is the B combinator from combinatory logic.
+  //. When specialized to Function, `compose` composes two unary functions,
+  //. from right to left (this is the B combinator from combinatory logic).
+  //.
+  //. The generalized type signature indicates that `compose` is compatible
+  //. with any [Semigroupoid][].
   //.
   //. See also [`pipe`](#pipe).
   //.
   //. ```javascript
-  //. > S.compose(Math.sqrt, S.inc)(99)
+  //. > S.compose(Math.sqrt, S.add(1))(99)
   //. 10
   //. ```
-  function compose(f, g, x) {
-    return f(g(x));
-  }
-  S.compose = def('compose', {}, [Fn(b, c), Fn(a, b), a, c], compose);
+  S.compose =
+  def('compose',
+      {s: [Z.Semigroupoid]},
+      [s(b, c), s(a, b), s(a, c)],
+      Z.compose);
 
   //# pipe :: [(a -> b), (b -> c), ..., (m -> n)] -> a -> n
   //.
@@ -1263,7 +1541,7 @@
   //. of functions. `pipe([f, g, h], x)` is equivalent to `h(g(f(x)))`.
   //.
   //. ```javascript
-  //. > S.pipe([S.inc, Math.sqrt, S.dec])(99)
+  //. > S.pipe([S.add(1), Math.sqrt, S.sub(1)], 99)
   //. 9
   //. ```
   function pipe(fs, x) {
@@ -1275,6 +1553,8 @@
   //.
   //. Takes a binary function `f`, a unary function `g`, and two
   //. values `x` and `y`. Returns `f(g(x))(g(y))`.
+  //.
+  //. This is the P combinator from combinatory logic.
   //.
   //. See also [`on_`](#on_).
   //.
@@ -1319,6 +1599,20 @@
     this.isNothing = tag === 'Nothing';
     this.isJust = tag === 'Just';
     if (this.isJust) this.value = value;
+
+    //  Add "fantasy-land/concat" method conditionally so that Just('abc')
+    //  satisfies the requirements of Semigroup but Just(123) does not.
+    if (this.isNothing || Z.Semigroup.test(this.value)) {
+      this['fantasy-land/concat'] = Maybe$prototype$concat;
+    }
+
+    if (this.isNothing || Z.Setoid.test(this.value)) {
+      this['fantasy-land/equals'] = Maybe$prototype$equals;
+    }
+
+    if (this.isNothing || Z.Ord.test(this.value)) {
+      this['fantasy-land/lte'] = Maybe$prototype$lte;
+    }
   }
 
   //# Nothing :: Maybe a
@@ -1434,14 +1728,14 @@
   //. ```
   Maybe.prototype.inspect = function() { return this.toString(); };
 
-  //# Maybe#fantasy-land/equals :: Maybe a ~> Maybe a -> Boolean
+  //# Maybe#fantasy-land/equals :: Setoid a => Maybe a ~> Maybe a -> Boolean
   //.
-  //. Takes a value of the same type and returns `true` if:
+  //. Takes a value `m` of the same type and returns `true` if:
   //.
-  //.   - it is Nothing and `this` is Nothing; or
+  //.   - `this` and `m` are both Nothing; or
   //.
-  //.   - it is a Just and `this` is a Just, and their values are equal
-  //.     according to [`equals`](#equals).
+  //.   - `this` and `m` are both Justs, and their values are equal according
+  //.     to [`Z.equals`][].
   //.
   //. ```javascript
   //. > S.equals(S.Nothing, S.Nothing)
@@ -1456,10 +1750,39 @@
   //. > S.equals(S.Just([1, 2, 3]), S.Nothing)
   //. false
   //. ```
-  Maybe.prototype['fantasy-land/equals'] = function(other) {
+  function Maybe$prototype$equals(other) {
     return this.isNothing ? other.isNothing
-                          : other.isJust && Z.equals(other.value, this.value);
-  };
+                          : other.isJust && Z.equals(this.value, other.value);
+  }
+
+  //# Maybe#fantasy-land/lte :: Ord a => Maybe a ~> Maybe a -> Boolean
+  //.
+  //. Takes a value `m` of the same type and returns `true` if:
+  //.
+  //.   - `this` is Nothing; or
+  //.
+  //.   - `this` and `m` are both Justs and the value of `this` is less than
+  //.     or equal to the value of `m` according to [`Z.lte`][].
+  //.
+  //. ```javascript
+  //. > S.lte_(S.Nothing, S.Nothing)
+  //. true
+  //.
+  //. > S.lte_(S.Nothing, S.Just(0))
+  //. true
+  //.
+  //. > S.lte_(S.Just(0), S.Nothing)
+  //. false
+  //.
+  //. > S.lte_(S.Just(0), S.Just(1))
+  //. true
+  //.
+  //. > S.lte_(S.Just(1), S.Just(0))
+  //. false
+  //. ```
+  function Maybe$prototype$lte(other) {
+    return this.isNothing || other.isJust && Z.lte(this.value, other.value);
+  }
 
   //# Maybe#fantasy-land/concat :: Semigroup a => Maybe a ~> Maybe a -> Maybe a
   //.
@@ -1488,11 +1811,11 @@
   //. > S.concat(S.Just([1, 2, 3]), S.Nothing)
   //. Just([1, 2, 3])
   //. ```
-  Maybe.prototype['fantasy-land/concat'] = function(other) {
+  function Maybe$prototype$concat(other) {
     return this.isNothing ?
       other :
       other.isNothing ? this : Just(Z.concat(this.value, other.value));
-  };
+  }
 
   //# Maybe#fantasy-land/map :: Maybe a ~> (a -> b) -> Maybe b
   //.
@@ -1597,10 +1920,11 @@
 
   //# Maybe#fantasy-land/traverse :: Applicative f => Maybe a ~> (TypeRep f, a -> f b) -> f (Maybe b)
   //.
-  //. Takes two functions which both return values of the same [Applicative][],
-  //. (the second of which must be that type's [`of`][] function) and returns:
+  //. Takes the type representative of some [Applicative][] and a function
+  //. which returns a value of that Applicative, and returns:
   //.
-  //.   - the result of applying `of` to `this` if `this` is Nothing; otherwise
+  //.   - the result of applying the type representative's [`of`][] function to
+  //.     `this` if `this` is Nothing; otherwise
   //.
   //.   - the result of mapping [`Just`](#Just) over the result of applying the
   //.     first function to this Just's value.
@@ -1941,6 +2265,21 @@
     this.isLeft = tag === 'Left';
     this.isRight = tag === 'Right';
     this.value = value;
+
+    //  Add "fantasy-land/concat" method conditionally so that Left('abc')
+    //  and Right('abc') satisfy the requirements of Semigroup but Left(123)
+    //  and Right(123) do not.
+    if (Z.Semigroup.test(this.value)) {
+      this['fantasy-land/concat'] = Either$prototype$concat;
+    }
+
+    if (Z.Setoid.test(this.value)) {
+      this['fantasy-land/equals'] = Either$prototype$equals;
+    }
+
+    if (Z.Ord.test(this.value)) {
+      this['fantasy-land/lte'] = Either$prototype$lte;
+    }
   }
 
   //# Left :: a -> Either a b
@@ -2040,15 +2379,12 @@
   //. ```
   Either.prototype.inspect = function() { return this.toString(); };
 
-  //# Either#fantasy-land/equals :: Either a b ~> Either a b -> Boolean
+  //# Either#fantasy-land/equals :: (Setoid a, Setoid b) => Either a b ~> Either a b -> Boolean
   //.
-  //. Takes a value of the same type and returns `true` if:
+  //. Takes a value `e` of the same type and returns `true` if:
   //.
-  //.   - it is a Left and `this` is a Left, and their values are equal
-  //.     according to [`equals`](#equals); or
-  //.
-  //.   - it is a Right and `this` is a Right, and their values are equal
-  //.     according to [`equals`](#equals).
+  //.   - `this` and `e` are both Lefts or both Rights, and their values are
+  //.     equal according to [`Z.equals`][].
   //.
   //. ```javascript
   //. > S.equals(S.Right([1, 2, 3]), S.Right([1, 2, 3]))
@@ -2057,9 +2393,37 @@
   //. > S.equals(S.Right([1, 2, 3]), S.Left([1, 2, 3]))
   //. false
   //. ```
-  Either.prototype['fantasy-land/equals'] = function(other) {
-    return other.isLeft === this.isLeft && Z.equals(other.value, this.value);
-  };
+  function Either$prototype$equals(other) {
+    return this.isLeft === other.isLeft && Z.equals(this.value, other.value);
+  }
+
+  //# Either#fantasy-land/lte :: (Ord a, Ord b) => Either a b ~> Either a b -> Boolean
+  //.
+  //. Takes a value `e` of the same type and returns `true` if:
+  //.
+  //.   - `this` is a Left and `e` is a Right; or
+  //.
+  //.   - `this` and `e` are both Lefts or both Rights, and the value of `this`
+  //.     is less than or equal to the value of `e` according to [`Z.lte`][].
+  //.
+  //. ```javascript
+  //. > S.lte_(S.Left(10), S.Right(0))
+  //. true
+  //.
+  //. > S.lte_(S.Right(0), S.Left(10))
+  //. false
+  //.
+  //. > S.lte_(S.Right(0), S.Right(1))
+  //. true
+  //.
+  //. > S.lte_(S.Right(1), S.Right(0))
+  //. false
+  //. ```
+  function Either$prototype$lte(other) {
+    return this.isLeft === other.isLeft ?
+      Z.lte(this.value, other.value) :
+      this.isLeft;
+  }
 
   //# Either#fantasy-land/concat :: (Semigroup a, Semigroup b) => Either a b ~> Either a b -> Either a b
   //.
@@ -2089,11 +2453,11 @@
   //. > S.concat(S.Right([1, 2, 3]), S.Left('abc'))
   //. Right([1, 2, 3])
   //. ```
-  Either.prototype['fantasy-land/concat'] = function(other) {
+  function Either$prototype$concat(other) {
     return this.isLeft ?
       other.isLeft ? Left(Z.concat(this.value, other.value)) : other :
       other.isLeft ? this : Right(Z.concat(this.value, other.value));
-  };
+  }
 
   //# Either#fantasy-land/map :: Either a b ~> (b -> c) -> Either a c
   //.
@@ -2128,10 +2492,10 @@
   //. left side as well as the right side.
   //.
   //. ```javascript
-  //. > S.bimap(S.toUpper, S.inc, S.Left('abc'))
+  //. > S.bimap(S.toUpper, S.add(1), S.Left('abc'))
   //. Left('ABC')
   //.
-  //. > S.bimap(S.toUpper, S.inc, S.Right(42))
+  //. > S.bimap(S.toUpper, S.add(1), S.Right(42))
   //. Right(43)
   //. ```
   Either.prototype['fantasy-land/bimap'] = function(f, g) {
@@ -2229,10 +2593,11 @@
 
   //# Either#fantasy-land/traverse :: Applicative f => Either a b ~> (TypeRep f, b -> f c) -> f (Either a c)
   //.
-  //. Takes two functions which both return values of the same [Applicative][],
-  //. (the second of which must be that type's [`of`][] function) and returns:
+  //. Takes the type representative of some [Applicative][] and a function
+  //. which returns a value of that Applicative, and returns:
   //.
-  //.   - the result of applying `of` to `this` if `this` is a Left; otherwise
+  //.   - the result of applying the type representative's [`of`][] function to
+  //.     `this` if `this` is a Left; otherwise
   //.
   //.   - the result of mapping [`Right`](#Right) over the result of applying
   //.     the first function to this Right's value.
@@ -2394,6 +2759,23 @@
     }, [], eithers);
   }
   S.rights = def('rights', {}, [$.Array($Either(a, b)), $.Array(b)], rights);
+
+  //# tagBy :: (a -> Boolean) -> a -> Either a a
+  //.
+  //. Takes a predicate and a value, and returns a Right of the value if it
+  //. satisfies the predicate; a Left of the value otherwise.
+  //.
+  //. ```javascript
+  //. > S.tagBy(S.odd, 0)
+  //. Left(0)
+  //
+  //. > S.tagBy(S.odd, 1)
+  //. Right(1)
+  //. ```
+  function tagBy(pred, a) {
+    return pred(a) ? Right(a) : Left(a);
+  }
+  S.tagBy = def('tagBy', {}, [Pred(a), a, $Either(a, a)], tagBy);
 
   //# encaseEither :: (Error -> l) -> (a -> r) -> a -> Either l r
   //.
@@ -2560,6 +2942,8 @@
   //.
   //. Boolean "not".
   //.
+  //. See also [`complement`](#complement).
+  //.
   //. ```javascript
   //. > S.not(false)
   //. true
@@ -2572,6 +2956,25 @@
   }
   S.not = def('not', {}, [$.Boolean, $.Boolean], not);
 
+  //# complement :: (a -> Boolean) -> a -> Boolean
+  //.
+  //. Takes a unary predicate and a value of any type, and returns the logical
+  //. negation of applying the predicate to the value.
+  //.
+  //. See also [`not`](#not).
+  //.
+  //. ```javascript
+  //. > Number.isInteger(42)
+  //. true
+  //.
+  //. > S.complement(Number.isInteger, 42)
+  //. false
+  //. ```
+  function complement(pred, x) {
+    return !pred(x);
+  }
+  S.complement = def('complement', {}, [Pred(a), a, $.Boolean], complement);
+
   //# ifElse :: (a -> Boolean) -> (a -> b) -> (a -> b) -> a -> b
   //.
   //. Takes a unary predicate, a unary "if" function, a unary "else"
@@ -2579,6 +2982,8 @@
   //. applying the "if" function to the value if the value satisfies
   //. the predicate; the result of applying the "else" function to the
   //. value otherwise.
+  //.
+  //. See also [`when`](#when) and [`unless`](#unless).
   //.
   //. ```javascript
   //. > S.ifElse(x => x < 0, Math.abs, Math.sqrt, -1)
@@ -2591,6 +2996,46 @@
     return pred(x) ? f(x) : g(x);
   }
   S.ifElse = def('ifElse', {}, [Pred(a), Fn(a, b), Fn(a, b), a, b], ifElse);
+
+  //# when :: (a -> Boolean) -> (a -> a) -> a -> a
+  //.
+  //. Takes a unary predicate, a unary function, and a value of any type, and
+  //. returns the result of applying the function to the value if the value
+  //. satisfies the predicate; the value otherwise.
+  //.
+  //. See also [`unless`](#unless) and [`ifElse`](#ifElse).
+  //.
+  //. ```javascript
+  //. > S.when(x => x >= 0, Math.sqrt, 16)
+  //. 4
+  //.
+  //. > S.when(x => x >= 0, Math.sqrt, -1)
+  //. -1
+  //. ```
+  function when(pred, f, x) {
+    return ifElse(pred, f, I, x);
+  }
+  S.when = def('when', {}, [Pred(a), Fn(a, a), a, a], when);
+
+  //# unless :: (a -> Boolean) -> (a -> a) -> a -> a
+  //.
+  //. Takes a unary predicate, a unary function, and a value of any type, and
+  //. returns the result of applying the function to the value if the value
+  //. does not satisfy the predicate; the value otherwise.
+  //.
+  //. See also [`when`](#when) and [`ifElse`](#ifElse).
+  //.
+  //. ```javascript
+  //. > S.unless(x => x < 0, Math.sqrt, 16)
+  //. 4
+  //.
+  //. > S.unless(x => x < 0, Math.sqrt, -1)
+  //. -1
+  //. ```
+  function unless(pred, f, x) {
+    return ifElse(pred, I, f, x);
+  }
+  S.unless = def('unless', {}, [Pred(a), Fn(a, a), a, a], unless);
 
   //# allPass :: Array (a -> Boolean) -> a -> Boolean
   //.
@@ -2662,23 +3107,6 @@
   //. It's then apparent that the first argument needn't be a single-character
   //. string; the correspondence between arrays and strings does not hold.
 
-  //# concat :: Semigroup a => a -> a -> a
-  //.
-  //. Concatenates two (homogeneous) arrays, two strings, or two values of any
-  //. other type which satisfies the [Semigroup][] specification.
-  //.
-  //. ```javascript
-  //. > S.concat([1, 2, 3], [4, 5, 6])
-  //. [1, 2, 3, 4, 5, 6]
-  //.
-  //. > S.concat('foo', 'bar')
-  //. 'foobar'
-  //.
-  //. > S.concat(S.Just('foo'), S.Just('bar'))
-  //. Just('foobar')
-  //. ```
-  S.concat = def('concat', {a: [Z.Semigroup]}, [a, a, a], Z.concat);
-
   //# slice :: Integer -> Integer -> List a -> Maybe (List a)
   //.
   //. Returns Just a list containing the elements from the supplied list
@@ -2706,8 +3134,8 @@
   //. ```
   function slice(start, end, xs) {
     var len = xs.length;
-    var fromIdx = Z.equals(start, -0) ? len : start < 0 ? start + len : start;
-    var toIdx = Z.equals(end, -0) ? len : end < 0 ? end + len : end;
+    var fromIdx = negativeZero(start) ? len : start < 0 ? start + len : start;
+    var toIdx = negativeZero(end) ? len : end < 0 ? end + len : end;
 
     return Math.abs(start) <= len && Math.abs(end) <= len && fromIdx <= toIdx ?
       Just(xs.slice(fromIdx, toIdx)) :
@@ -2963,37 +3391,55 @@
 
   //. ### Array
 
-  //# append :: a -> Array a -> Array a
+  //# append :: (Applicative f, Semigroup (f a)) => a -> f a -> f a
   //.
-  //. Takes a value of any type and an array of values of that type, and
-  //. returns the result of appending the value to the array.
+  //. Returns the result of appending the first argument to the second.
   //.
   //. See also [`prepend`](#prepend).
   //.
   //. ```javascript
   //. > S.append(3, [1, 2])
   //. [1, 2, 3]
+  //.
+  //. > S.append([1], S.Nothing)
+  //. Just([1])
+  //.
+  //. > S.append([3], S.Just([1, 2]))
+  //. Just([1, 2, 3])
   //. ```
   function append(x, xs) {
-    return Z.concat(xs, [x]);
+    return Z.concat(xs, Z.of(xs.constructor, x));
   }
-  S.append = def('append', {}, [a, $.Array(a), $.Array(a)], append);
+  S.append =
+  def('append',
+      {f: [Z.Applicative, Z.Semigroup]},
+      [a, f(a), f(a)],
+      append);
 
-  //# prepend :: a -> Array a -> Array a
+  //# prepend :: (Applicative f, Semigroup (f a)) => a -> f a -> f a
   //.
-  //. Takes a value of any type and an array of values of that type, and
-  //. returns the result of prepending the value to the array.
+  //. Returns the result of prepending the first argument to the second.
   //.
   //. See also [`append`](#append).
   //.
   //. ```javascript
   //. > S.prepend(1, [2, 3])
   //. [1, 2, 3]
+  //.
+  //. > S.prepend([1], S.Nothing)
+  //. Just([1])
+  //.
+  //. > S.prepend([1], S.Just([2, 3]))
+  //. Just([1, 2, 3])
   //. ```
   function prepend(x, xs) {
-    return Z.concat([x], xs);
+    return Z.concat(Z.of(xs.constructor, x), xs);
   }
-  S.prepend = def('prepend', {}, [a, $.Array(a), $.Array(a)], prepend);
+  S.prepend =
+  def('prepend',
+      {f: [Z.Applicative, Z.Semigroup]},
+      [a, f(a), f(a)],
+      prepend);
 
   //# joinWith :: String -> Array String -> String
   //.
@@ -3015,11 +3461,48 @@
   S.joinWith =
   def('joinWith', {}, [$.String, $.Array($.String), $.String], joinWith);
 
-  //# find :: (a -> Boolean) -> Array a -> Maybe a
+  //# elem :: (Setoid a, Foldable f) => a -> f a -> Boolean
   //.
-  //. Takes a predicate and an array and returns Just the leftmost element of
-  //. the array which satisfies the predicate; Nothing if none of the array's
-  //. elements satisfies the predicate.
+  //. Takes a value and a structure and returns `true` if the value is an
+  //. element of the structure; `false` otherwise.
+  //.
+  //. See also [`find`](#find).
+  //.
+  //. ```javascript
+  //. > S.elem('c', ['a', 'b', 'c'])
+  //. true
+  //.
+  //. > S.elem('x', ['a', 'b', 'c'])
+  //. false
+  //.
+  //. > S.elem(3, {x: 1, y: 2, z: 3})
+  //. true
+  //.
+  //. > S.elem(8, {x: 1, y: 2, z: 3})
+  //. false
+  //.
+  //. > S.elem(0, S.Just(0))
+  //. true
+  //.
+  //. > S.elem(0, S.Just(1))
+  //. false
+  //.
+  //. > S.elem(0, S.Nothing)
+  //. false
+  //. ```
+  function elem(x, xs) {
+    return Z.reduce(function(b, y) { return b || Z.equals(x, y); }, false, xs);
+  }
+  S.elem =
+  def('elem', {a: [Z.Setoid], f: [Z.Foldable]}, [a, f(a), $.Boolean], elem);
+
+  //# find :: Foldable f => (a -> Boolean) -> f a -> Maybe a
+  //.
+  //. Takes a predicate and a structure and returns Just the leftmost element
+  //. of the structure which satisfies the predicate; Nothing if there is no
+  //. such element.
+  //.
+  //. See also [`elem`](#elem).
   //.
   //. ```javascript
   //. > S.find(n => n < 0, [1, -2, 3, -4, 5])
@@ -3029,17 +3512,15 @@
   //. Nothing
   //. ```
   function find(pred, xs) {
-    var result = Nothing;
-    xs.some(function(x) {
-      var ok = pred(x);
-      if (ok) result = Just(x);
-      return ok;
-    });
-    return result;
+    return Z.reduce(
+      function(m, x) { return m.isJust ? m : pred(x) ? Just(x) : Nothing; },
+      Nothing,
+      xs
+    );
   }
-  S.find = def('find', {}, [Pred(a), $.Array(a), $Maybe(a)], find);
+  S.find = def('find', {f: [Z.Foldable]}, [Pred(a), f(a), $Maybe(a)], find);
 
-  //# pluck :: Accessible a => String -> Array a -> Array b
+  //# pluck :: (Accessible a, Functor f) => String -> f a -> f b
   //.
   //. Combines [`map`](#map) and [`prop`](#prop). `pluck(k, xs)` is equivalent
   //. to `map(prop(k), xs)`.
@@ -3047,19 +3528,21 @@
   //. ```javascript
   //. > S.pluck('x', [{x: 1}, {x: 2}, {x: 3}])
   //. [1, 2, 3]
+  //.
+  //. > S.pluck('x', S.Just({x: 1, y: 2, z: 3}))
+  //. Just(1)
   //. ```
   function pluck(key, xs) {
-    return xs.map(function(x, idx) {
+    return Z.map(function(x) {
       if (key in Object(x)) return x[key];
-      throw new TypeError('‘pluck’ expected object at index ' + idx +
-                          ' to have a property named ‘' + key + '’; ' +
-                          Z.toString(x) + ' does not');
-    });
+      throw new TypeError('‘pluck’ expected object to have a property named ' +
+                          '‘' + key + '’; ' + Z.toString(x) + ' does not');
+    }, xs);
   }
   S.pluck =
   def('pluck',
-      {a: [Accessible]},
-      [$.String, $.Array(a), $.Array(b)],
+      {a: [Accessible], f: [Z.Functor]},
+      [$.String, f(a), f(b)],
       pluck);
 
   //# unfoldr :: (b -> Maybe (Pair a b)) -> b -> Array a
@@ -3109,6 +3592,145 @@
   }
   S.range =
   def('range', {}, [$.Integer, $.Integer, $.Array($.Integer)], range);
+
+  //# groupBy :: (a -> a -> Boolean) -> Array a -> Array (Array a)
+  //.
+  //. Splits its array argument into an array of arrays of equal,
+  //. adjacent elements. Equality is determined by the function
+  //. provided as the first argument. Its behaviour can be surprising
+  //. for functions that aren't reflexive, transitive, and symmetric
+  //. (see [equivalence][] relation).
+  //.
+  //. See also [`groupBy_`](#groupBy_).
+  //.
+  //. Properties:
+  //.
+  //.   - `forall f :: a -> a -> Boolean, xs :: Array a.
+  //.      S.join(S.groupBy(f, xs)) = xs`
+  //.
+  //. ```javascript
+  //. > S.groupBy(S.equals, [1, 1, 2, 1, 1])
+  //. [[1, 1], [2], [1, 1]]
+  //.
+  //. > S.groupBy(x => y => x + y === 0, [2, -3, 3, 3, 3, 4, -4, 4])
+  //. [[2], [-3, 3, 3, 3], [4, -4], [4]]
+  //. ```
+  function groupBy(f, xs) {
+    return groupBy_(uncurry2(f), xs);
+  }
+  S.groupBy =
+  def('groupBy',
+      {},
+      [Fn(a, Pred(a)), $.Array(a), $.Array($.Array(a))],
+      groupBy);
+
+  //# groupBy_ :: ((a, a) -> Boolean) -> Array a -> Array (Array a)
+  //.
+  //. Variant of [`groupBy`](#groupBy) which takes an uncurried function.
+  function groupBy_(f, xs) {
+    if (xs.length === 0) return [];
+    var x0 = xs[0];         // :: a
+    var active = [x0];      // :: Array a
+    var result = [active];  // :: Array (Array a)
+    for (var idx = 1; idx < xs.length; idx += 1) {
+      var x = xs[idx];
+      if (f(x0, x)) active.push(x); else result.push(active = [x0 = x]);
+    }
+    return result;
+  }
+  S.groupBy_ =
+  def('groupBy_',
+      {},
+      [$.Function([a, a, $.Boolean]), $.Array(a), $.Array($.Array(a))],
+      groupBy_);
+
+  //# sort :: (Ord a, Applicative m, Foldable m, Monoid (m a)) => m a -> m a
+  //.
+  //. Performs a [stable sort][] of the elements of the given structure, using
+  //. [`Z.lte`][] for comparisons.
+  //.
+  //. Properties:
+  //.
+  //.   - `S.sort(S.sort(m)) = S.sort(m)` (idempotence)
+  //.
+  //. See also [`sortBy`](#sortBy).
+  //.
+  //. ```javascript
+  //. > S.sort(['foo', 'bar', 'baz'])
+  //. ['bar', 'baz', 'foo']
+  //.
+  //. > S.sort([S.Left(4), S.Right(3), S.Left(2), S.Right(1)])
+  //. [Left(2), Left(4), Right(1), Right(3)]
+  //. ```
+  function sort(m) {
+    return sortBy(I, m);
+  }
+  S.sort =
+  def('sort',
+      {a: [Z.Ord], m: [Z.Applicative, Z.Foldable, Z.Monoid]},
+      [m(a), m(a)],
+      sort);
+
+  //# sortBy :: (Ord b, Applicative m, Foldable m, Monoid (m a)) => (a -> b) -> m a -> m a
+  //.
+  //. Performs a [stable sort][] of the elements of the given structure, using
+  //. [`Z.lte`][] to compare the values produced by applying the given function
+  //. to each element of the structure.
+  //.
+  //. Properties:
+  //.
+  //.   - `S.sortBy(f, S.sortBy(f, m)) = S.sortBy(f, m)` (idempotence)
+  //.
+  //. See also [`sort`](#sort).
+  //.
+  //. ```javascript
+  //. > S.sortBy(S.prop('rank'), [
+  //. .   {rank: 7, suit: 'spades'},
+  //. .   {rank: 5, suit: 'hearts'},
+  //. .   {rank: 2, suit: 'hearts'},
+  //. .   {rank: 5, suit: 'spades'},
+  //. . ])
+  //. [ {rank: 2, suit: 'hearts'},
+  //. . {rank: 5, suit: 'hearts'},
+  //. . {rank: 5, suit: 'spades'},
+  //. . {rank: 7, suit: 'spades'} ]
+  //.
+  //. > S.sortBy(S.prop('suit'), [
+  //. .   {rank: 7, suit: 'spades'},
+  //. .   {rank: 5, suit: 'hearts'},
+  //. .   {rank: 2, suit: 'hearts'},
+  //. .   {rank: 5, suit: 'spades'},
+  //. . ])
+  //. [ {rank: 5, suit: 'hearts'},
+  //. . {rank: 2, suit: 'hearts'},
+  //. . {rank: 7, suit: 'spades'},
+  //. . {rank: 5, suit: 'spades'} ]
+  //. ```
+  function sortBy(f, m) {
+    var rs = Z.reduce(function(xs, x) {
+      var fx = f(x);
+      var lower = 0;
+      var upper = xs.length;
+      while (lower < upper) {
+        var idx = Math.floor((lower + upper) / 2);
+        if (Z.lte(xs[idx].fx, fx)) lower = idx + 1; else upper = idx;
+      }
+      xs.splice(lower, 0, {x: x, fx: fx});
+      return xs;
+    }, [], m);
+
+    var M = m.constructor;
+    var result = Z.empty(M);
+    for (var idx = 0; idx < rs.length; idx += 1) {
+      result = Z.concat(result, Z.of(M, rs[idx].x));
+    }
+    return result;
+  }
+  S.sortBy =
+  def('sortBy',
+      {b: [Z.Ord], m: [Z.Applicative, Z.Foldable, Z.Monoid]},
+      [Fn(a, b), m(a), m(a)],
+      sortBy);
 
   //. ### Object
 
@@ -3304,45 +3926,37 @@
   S.sum =
   def('sum', {f: [Z.Foldable]}, [f($.FiniteNumber), $.FiniteNumber], sum);
 
-  //# sub :: FiniteNumber -> FiniteNumber -> FiniteNumber
+  //# sub :: FiniteNumber -> (FiniteNumber -> FiniteNumber)
+  //.
+  //. Takes a finite number `n` and returns the _subtract `n`_ function.
+  //.
+  //. See also [`sub_`](#sub_).
+  //.
+  //. ```javascript
+  //. > S.map(S.sub(1), [1, 2, 3])
+  //. [0, 1, 2]
+  //. ```
+  S.sub =
+  def('sub',
+      {},
+      [$.FiniteNumber, Fn($.FiniteNumber, $.FiniteNumber)],
+      flip$(sub_));
+
+  //# sub_ :: FiniteNumber -> FiniteNumber -> FiniteNumber
   //.
   //. Returns the difference between two (finite) numbers.
   //.
+  //. See also [`sub`](#sub).
+  //.
   //. ```javascript
-  //. > S.sub(4, 2)
+  //. > S.sub_(4, 2)
   //. 2
   //. ```
-  function sub(x, y) {
+  function sub_(x, y) {
     return x - y;
   }
-  S.sub =
-  def('sub', {}, [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber], sub);
-
-  //# inc :: FiniteNumber -> FiniteNumber
-  //.
-  //. Increments a (finite) number by one.
-  //.
-  //. ```javascript
-  //. > S.inc(1)
-  //. 2
-  //. ```
-  function inc(x) {
-    return x + 1;
-  }
-  S.inc = def('inc', {}, [$.FiniteNumber, $.FiniteNumber], inc);
-
-  //# dec :: FiniteNumber -> FiniteNumber
-  //.
-  //. Decrements a (finite) number by one.
-  //.
-  //. ```javascript
-  //. > S.dec(2)
-  //. 1
-  //. ```
-  function dec(x) {
-    return x - 1;
-  }
-  S.dec = def('dec', {}, [$.FiniteNumber, $.FiniteNumber], dec);
+  S.sub_ =
+  def('sub_', {}, [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber], sub_);
 
   //# mult :: FiniteNumber -> FiniteNumber -> FiniteNumber
   //.
@@ -3433,56 +4047,6 @@
       {f: [Z.Foldable]},
       [f($.FiniteNumber), $Maybe($.FiniteNumber)],
       mean);
-
-  //# min :: Ord a => a -> a -> a
-  //.
-  //. Returns the smaller of its two arguments.
-  //.
-  //. Strings are compared lexicographically. Specifically, the Unicode
-  //. code point value of each character in the first string is compared
-  //. to the value of the corresponding character in the second string.
-  //.
-  //. See also [`max`](#max).
-  //.
-  //. ```javascript
-  //. > S.min(10, 2)
-  //. 2
-  //.
-  //. > S.min(new Date('1999-12-31'), new Date('2000-01-01'))
-  //. new Date('1999-12-31')
-  //.
-  //. > S.min('10', '2')
-  //. '10'
-  //. ```
-  function min(x, y) {
-    return x < y ? x : y;
-  }
-  S.min = def('min', {a: [Ord]}, [a, a, a], min);
-
-  //# max :: Ord a => a -> a -> a
-  //.
-  //. Returns the larger of its two arguments.
-  //.
-  //. Strings are compared lexicographically. Specifically, the Unicode
-  //. code point value of each character in the first string is compared
-  //. to the value of the corresponding character in the second string.
-  //.
-  //. See also [`min`](#min).
-  //.
-  //. ```javascript
-  //. > S.max(10, 2)
-  //. 10
-  //.
-  //. > S.max(new Date('1999-12-31'), new Date('2000-01-01'))
-  //. new Date('2000-01-01')
-  //.
-  //. > S.max('10', '2')
-  //. '2'
-  //. ```
-  function max(x, y) {
-    return x > y ? x : y;
-  }
-  S.max = def('max', {a: [Ord]}, [a, a, a], max);
 
   //. ### Integer
 
@@ -3731,7 +4295,7 @@
   //. Properties:
   //.
   //.   - `forall p :: Pattern, s :: String.
-  //.      S.head(S.matchAll(S.regex("g", p), s)) = S.match(S.regex("", p), s)`
+  //.      S.head(S.matchAll(S.regex('g', p), s)) = S.match(S.regex('', p), s)`
   //.
   //. See also [`matchAll`](#matchAll).
   //.
@@ -3823,6 +4387,50 @@
   }
   S.trim = def('trim', {}, [$.String, $.String], trim);
 
+  //# stripPrefix :: String -> String -> Maybe String
+  //.
+  //. Returns Just the portion of the given string (the second argument) left
+  //. after removing the given prefix (the first argument) if the string starts
+  //. with the prefix; Nothing otherwise.
+  //.
+  //. See also [`stripSuffix`](#stripSuffix).
+  //.
+  //. ```javascript
+  //. > S.stripPrefix('https://', 'https://sanctuary.js.org')
+  //. Just('sanctuary.js.org')
+  //.
+  //. > S.stripPrefix('https://', 'http://sanctuary.js.org')
+  //. Nothing
+  //. ```
+  function stripPrefix(prefix, s) {
+    var idx = prefix.length;
+    return s.slice(0, idx) === prefix ? Just(s.slice(idx)) : Nothing;
+  }
+  S.stripPrefix =
+  def('stripPrefix', {}, [$.String, $.String, $Maybe($.String)], stripPrefix);
+
+  //# stripSuffix :: String -> String -> Maybe String
+  //.
+  //. Returns Just the portion of the given string (the second argument) left
+  //. after removing the given suffix (the first argument) if the string ends
+  //. with the suffix; Nothing otherwise.
+  //.
+  //. See also [`stripPrefix`](#stripPrefix).
+  //.
+  //. ```javascript
+  //. > S.stripSuffix('.md', 'README.md')
+  //. Just('README')
+  //.
+  //. > S.stripSuffix('.md', 'README')
+  //. Nothing
+  //. ```
+  function stripSuffix(suffix, s) {
+    var idx = s.length - suffix.length;  // value may be negative
+    return s.slice(idx) === suffix ? Just(s.slice(0, idx)) : Nothing;
+  }
+  S.stripSuffix =
+  def('stripSuffix', {}, [$.String, $.String, $Maybe($.String)], stripSuffix);
+
   //# words :: String -> Array String
   //.
   //. Takes a string and returns the array of words the string contains
@@ -3896,7 +4504,7 @@
   //. Returns the substrings of its second argument separated by occurrences
   //. of its first argument.
   //.
-  //. See also [`joinWith`](#joinWith).
+  //. See also [`joinWith`](#joinWith) and [`splitOnRegex`](#splitOnRegex).
   //.
   //. ```javascript
   //. > S.splitOn('::', 'foo::bar::baz')
@@ -3907,6 +4515,50 @@
   }
   S.splitOn =
   def('splitOn', {}, [$.String, $.String, $.Array($.String)], splitOn);
+
+  //# splitOnRegex :: GlobalRegExp -> String -> Array String
+  //.
+  //. Takes a pattern and a string, and returns the result of splitting the
+  //. string at every non-overlapping occurrence of the pattern.
+  //.
+  //. Properties:
+  //.
+  //.   - `forall s :: String, t :: String.
+  //.      S.joinWith(s, S.splitOnRegex(S.regex('g', S.regexEscape(s)), t))
+  //.      = t`
+  //.
+  //. See also [`splitOn`](#splitOn).
+  //.
+  //. ```javascript
+  //. > S.splitOnRegex(/[,;][ ]*/g, 'foo, bar, baz')
+  //. ['foo', 'bar', 'baz']
+  //.
+  //. > S.splitOnRegex(/[,;][ ]*/g, 'foo;bar;baz')
+  //. ['foo', 'bar', 'baz']
+  //. ```
+  function splitOnRegex(pattern, s) {
+    return withRegex(pattern, function() {
+      var result = [];
+      var lastIndex = 0;
+      var match;
+      while ((match = pattern.exec(s)) != null) {
+        if (pattern.lastIndex === lastIndex && match[0] === '') {
+          if (pattern.lastIndex === s.length) return result;
+          pattern.lastIndex += 1;
+        } else {
+          result.push(s.slice(lastIndex, match.index));
+          lastIndex = match.index + match[0].length;
+        }
+      }
+      result.push(s.slice(lastIndex));
+      return result;
+    });
+  }
+  S.splitOnRegex =
+  def('splitOnRegex',
+      {},
+      [$.GlobalRegExp, $.String, $.Array($.String)],
+      splitOnRegex);
 
   return S;
 
@@ -3930,15 +4582,16 @@
 //. [Extend]:           v:fantasyland/fantasy-land#extend
 //. [Fantasy Land]:     v:fantasyland/fantasy-land
 //. [Foldable]:         v:fantasyland/fantasy-land#foldable
-//. [Functor]:          v:fantasyland/fantasy-land#functor
+//. [Haskell]:          https://www.haskell.org/
 //. [Maybe]:            #maybe-type
 //. [Monad]:            v:fantasyland/fantasy-land#monad
 //. [Monoid]:           v:fantasyland/fantasy-land#monoid
 //. [Nullable]:         v:sanctuary-js/sanctuary-def#Nullable
-//. [Object#toString]:  https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/toString
+//. [PureScript]:       http://www.purescript.org/
 //. [Ramda]:            http://ramdajs.com/
 //. [RegexFlags]:       v:sanctuary-js/sanctuary-def#RegexFlags
 //. [Semigroup]:        v:fantasyland/fantasy-land#semigroup
+//. [Semigroupoid]:     v:fantasyland/fantasy-land#semigroupoid
 //. [Setoid]:           v:fantasyland/fantasy-land#setoid
 //. [Traversable]:      v:fantasyland/fantasy-land#traversable
 //. [UnaryType]:        v:sanctuary-js/sanctuary-def#UnaryType
@@ -3949,14 +4602,21 @@
 //. [`Z.bimap`]:        v:sanctuary-js/sanctuary-type-classes#bimap
 //. [`Z.chain`]:        v:sanctuary-js/sanctuary-type-classes#chain
 //. [`Z.chainRec`]:     v:sanctuary-js/sanctuary-type-classes#chainRec
+//. [`Z.compose`]:      v:sanctuary-js/sanctuary-type-classes#compose
 //. [`Z.concat`]:       v:sanctuary-js/sanctuary-type-classes#concat
+//. [`Z.contramap`]:    v:sanctuary-js/sanctuary-type-classes#contramap
 //. [`Z.empty`]:        v:sanctuary-js/sanctuary-type-classes#empty
 //. [`Z.equals`]:       v:sanctuary-js/sanctuary-type-classes#equals
 //. [`Z.extend`]:       v:sanctuary-js/sanctuary-type-classes#extend
 //. [`Z.extract`]:      v:sanctuary-js/sanctuary-type-classes#extract
 //. [`Z.filter`]:       v:sanctuary-js/sanctuary-type-classes#filter
 //. [`Z.filterM`]:      v:sanctuary-js/sanctuary-type-classes#filterM
+//. [`Z.gt`]:           v:sanctuary-js/sanctuary-type-classes#gt
+//. [`Z.gte`]:          v:sanctuary-js/sanctuary-type-classes#gte
+//. [`Z.id`]:           v:sanctuary-js/sanctuary-type-classes#id
 //. [`Z.join`]:         v:sanctuary-js/sanctuary-type-classes#join
+//. [`Z.lt`]:           v:sanctuary-js/sanctuary-type-classes#lt
+//. [`Z.lte`]:          v:sanctuary-js/sanctuary-type-classes#lte
 //. [`Z.map`]:          v:sanctuary-js/sanctuary-type-classes#map
 //. [`Z.of`]:           v:sanctuary-js/sanctuary-type-classes#of
 //. [`Z.promap`]:       v:sanctuary-js/sanctuary-type-classes#promap
@@ -3965,8 +4625,10 @@
 //. [`Z.traverse`]:     v:sanctuary-js/sanctuary-type-classes#traverse
 //. [`Z.zero`]:         v:sanctuary-js/sanctuary-type-classes#zero
 //. [`of`]:             v:fantasyland/fantasy-land#of-method
+//. [equivalence]:      https://en.wikipedia.org/wiki/Equivalence_relation
 //. [parseInt]:         https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt
 //. [sanctuary-def]:    v:sanctuary-js/sanctuary-def
+//. [stable sort]:      https://en.wikipedia.org/wiki/Sorting_algorithm#Stability
 //. [thrush]:           https://github.com/raganwald-deprecated/homoiconic/blob/master/2008-10-30/thrush.markdown
 //. [type identifier]:  v:sanctuary-js/sanctuary-type-identifiers
 //.

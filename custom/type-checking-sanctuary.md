@@ -1,27 +1,31 @@
 ```javascript
-S.inc('XXX');
+S.add(2, true);
 // ! TypeError: Invalid value
 //
-//   inc :: FiniteNumber -> FiniteNumber
-//          ^^^^^^^^^^^^
-//               1
+//   add :: FiniteNumber -> FiniteNumber -> FiniteNumber
+//                          ^^^^^^^^^^^^
+//                               1
 //
-//   1)  "XXX" :: String
+//   1)  true :: Boolean
 //
 //   The value at position 1 is not a member of ‘FiniteNumber’.
+//
+//   See https://github.com/sanctuary-js/sanctuary-def/tree/v0.12.0#FiniteNumber for information about the sanctuary-def/FiniteNumber type.
 ```
 
 ===============================================================================
 
 ```javascript
-> S.inc('XXX')
+> S.add(2, true)
 ! Invalid value
 
-inc :: FiniteNumber -> FiniteNumber
-       ^^^^^^^^^^^^
-            1
+add :: FiniteNumber -> FiniteNumber -> FiniteNumber
+                       ^^^^^^^^^^^^
+                            1
 
-1)  "XXX" :: String
+1)  true :: Boolean
 
 The value at position 1 is not a member of ‘FiniteNumber’.
+
+See https://github.com/sanctuary-js/sanctuary-def/tree/v0.12.0#FiniteNumber for information about the sanctuary-def/FiniteNumber type.
 ```
