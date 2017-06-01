@@ -10,7 +10,10 @@ const envvar            = require('envvar');
 const marked            = require('marked');
 const R                 = require('ramda');
 const S_                = require('sanctuary');
+const pkg               = require('sanctuary/package.json');
 const $                 = require('sanctuary-def');
+const Z                 = require('sanctuary-type-classes');
+const type              = require('sanctuary-type-identifiers');
 
 
 const checkTypes        = envvar.boolean('SANCTUARY_CHECK_TYPES', true);
@@ -23,9 +26,11 @@ const I                 = S.I;
 const Just              = S.Just;
 const K                 = S.K;
 const Left              = S.Left;
+const Maybe             = S.MaybeType;
 const Nothing           = S.Nothing;
 const Right             = S.Right;
 const _                 = S.__;
+const allPass           = S.allPass;
 const ap                = S.ap;
 const apply             = R.apply;
 const at                = S.at;
@@ -51,11 +56,13 @@ const is                = S.is;
 const join              = S.join;
 const joinWith          = S.joinWith;
 const justs             = S.justs;
+const keys              = S.keys;
 const lensProp          = R.lensProp;
 const lift2             = S.lift2;
 const map               = S.map;
 const match             = S.match;
 const matchAll          = S.matchAll;
+const maybe_            = S.maybe_;
 const maybeToEither     = S.maybeToEither;
 const of                = S.of;
 const over              = R.over;
@@ -69,7 +76,10 @@ const repeat            = R.repeat;
 const replace           = R.replace;
 const sequence          = S.sequence;
 const slice_            = R.slice;
+const sort              = S.sort;
+const split             = R.split;
 const splitOnRegex      = S.splitOnRegex;
+const test              = S.test;
 const toString          = S.toString;
 const unapply           = R.unapply;
 const unfoldr           = S.unfoldr;
@@ -81,6 +91,19 @@ const green             = '\u001B[32m';
 
 //    Fn :: (Type, Type) -> Type
 const Fn = (x, y) => $.Function([x, y]);
+
+//    a :: Type
+const a = $.TypeVariable('a');
+
+//    fromJust :: Maybe a -> a !
+const fromJust =
+def('fromJust',
+    {},
+    [Maybe(a), a],
+    maybe_(() => { throw new Error('fromJust applied to Nothing'); }, I));
+
+//    j :: Array String -> String
+const j = def('j', {}, [$.Array($.String), $.String], joinWith(''));
 
 //    replace_ :: RegExp -> ([String] -> String) -> String -> String
 const replace_ =
@@ -107,13 +130,61 @@ def('wrap',
     [$.String, $.String, $.String, $.String],
     (before, after, middle) => `${before}${middle}${after}`);
 
-//    el :: String -> String -> String -> String
+//    el :: String -> StrMap String -> String -> String
 const el =
 def('el',
     {},
-    [$.String, $.String, $.String, $.String],
-    (tagName, className, innerHtml) =>
-      `<${tagName} class="${className}">${innerHtml}</${tagName}>`);
+    [$.String, $.StrMap($.String), $.String, $.String],
+    (tagName, attrs, innerHtml) => {
+      const attrsHtml = j(map(k => ` ${k}="${attrs[k]}"`, sort(keys(attrs))));
+      return `<${tagName}${attrsHtml}>${innerHtml}</${tagName}>`;
+    });
+
+//    Version :: Type
+const Version =
+$.NullaryType('sanctuary-site/Version',
+              '',
+              allPass([is(String), test(/^\d+[.]\d+[.]\d+$/)]));
+
+//    dependencyVersion :: String -> Maybe Version
+const dependencyVersion =
+def('dependencyVersion',
+    {},
+    [$.String, Maybe(Version)],
+    get($.test([], Version), _, pkg.dependencies));
+
+//    dependencyUrl :: String -> Maybe String
+const dependencyUrl =
+def('dependencyUrl',
+    {},
+    [$.String, Maybe($.String)],
+    name => map(concat(`https://github.com/sanctuary-js/${name}/tree/v`),
+                dependencyVersion(name)));
+
+//    linkTokens :: String -> String
+const linkTokens = cond([
+  [s => is(Z.TypeClass, Z[s]),
+   s => {
+     const href = fromJust(dependencyUrl('sanctuary-type-classes')) + '#' + s;
+     return el('a', {href}, s);
+   }],
+  [s => {
+     const x = $[s];
+     const pattern = `^${regexEscape(s)} :: (?:Type -> )*Type$`;
+     return $.test([], $.Type, x) ||
+            type(x) === 'Function' && test(regex('', pattern), String(x));
+   },
+   s => {
+     const href = fromJust(dependencyUrl('sanctuary-def')) + '#' + s;
+     return el('a', {href}, s);
+   }],
+  [equals('Accessible'), el('a', {href: '#accessible-pseudotype'})],
+  [equals('Either'),     el('a', {href: '#EitherType'})],
+  [equals('List'),       el('a', {href: '#list'})],
+  [equals('Maybe'),      el('a', {href: '#MaybeType'})],
+  [equals('TypeRep'),    el('a', {href: '#type-representatives'})],
+  [K(true),              I],
+]);
 
 //    toInputMarkup :: String -> String
 const toInputMarkup =
@@ -136,12 +207,10 @@ def('toOutputMarkup',
                               {displayErrors: false})),
           either(pipe([concat('! '),
                        htmlEncode,
-                       wrap('<div class="output" data-error="true">',
-                            '</div>')]),
+                       el('div', {class: 'output', 'data-error': 'true'})]),
                  pipe([toString,
                        htmlEncode,
-                       wrap('<div class="output">',
-                            '</div>')]))]));
+                       el('div', {class: 'output'})]))]));
 
 //    doctestsToMarkup :: String -> String
 const doctestsToMarkup =
@@ -160,7 +229,7 @@ def('doctestsToMarkup',
           map(map(concat('    '))),
           map(unlines),
           map(wrap('  <form>\n', '  </form>\n')),
-          joinWith(''),
+          j,
           wrap('<div class="examples">\n', '</div>\n')]));
 
 //    substitutionPattern :: RegExp
@@ -175,25 +244,25 @@ def('substitutions',
     replace_(substitutionPattern,
              apply(cond([[equals(' :: '),
                           K(' ' +
-                            el('span', 'tight', ':') +
-                            el('span', 'tight', ':') +
+                            el('span', {class: 'tight'}, ':') +
+                            el('span', {class: 'tight'}, ':') +
                             ' ')],
                          [elem(_, ap([I, htmlEncode], ['=>'])),
-                          K(el('span', 'arrow', htmlEncode('=>')))],
+                          K(el('span', {class: 'arrow'}, htmlEncode('=>')))],
                          [elem(_, ap([I, htmlEncode], ['~>'])),
-                          K(el('span', 'arrow', htmlEncode('~>')))],
+                          K(el('span', {class: 'arrow'}, htmlEncode('~>')))],
                          [elem(_, ap([I, htmlEncode], ['->'])),
-                          K(el('span', 'arrow',
-                               el('span', 'arrow-hyphen', htmlEncode('-')) +
-                               htmlEncode('>')))],
+                          K(el('span', {class: 'arrow'},
+                               el('span', {class: 'arrow-hyphen'}, htmlEncode('-'))
+                               + htmlEncode('>')))],
                          [equals('-\u2060>'),
-                          K(el('span', 'arrow',
-                               el('span', 'arrow-hyphen', htmlEncode('-')) +
-                               htmlEncode('\u2060>')))],
+                          K(el('span', {class: 'arrow'},
+                               el('span', {class: 'arrow-hyphen'}, htmlEncode('-'))
+                               + htmlEncode('\u2060>')))],
                          [equals('...'),
-                          K(el('span', 'tight', '.') +
-                            el('span', 'tight', '.') +
-                            el('span', 'tight', '.'))],
+                          K(el('span', {class: 'tight'}, '.') +
+                            el('span', {class: 'tight'}, '.') +
+                            el('span', {class: 'tight'}, '.'))],
                          [K(true),
                           I]]))));
 
@@ -202,7 +271,12 @@ const generate =
 def('generate',
     {},
     [$.String, $.String],
-    pipe([replace(/<h4 name=/g, '<h4 id='),
+    pipe([replace_(regex('g', '<h4 name="(.*)"><code><a href="(.*)">([^ ]*)(.*)</a></code></h4>'),
+                   ([id, href, name, _innerHtml]) =>
+                     el('h4', {id},
+                        el('code', {},
+                           el('a', {href}, name)
+                           + j(map(linkTokens, split(/(\w+)/, _innerHtml)))))),
           replace_(/^```javascript\n(> [\s\S]*?)^```\n/gm,
                    apply(doctestsToMarkup)),
           //  Replace NO-BREAK SPACE characters with SYMBOL FOR SPACE
@@ -289,11 +363,7 @@ def('readme',
           map(replace(/\n$/, ''))]));
 
 //    pad :: Integer -> String
-const pad =
-def('pad',
-    {},
-    [$.Integer, $.String],
-    compose(joinWith(''), repeat('  ')));
+const pad = def('pad', {}, [$.Integer, $.String], compose(j, repeat('  ')));
 
 //    colon :: String
 const colon = regexEscape('<span class="tight">:</span>');
@@ -314,8 +384,11 @@ def('toc',
             const level$ = Number(hN[1]);
             const level$$ = level$ > level ? hN === tagName ? level : level + 1 : level$;
 
+            const pattern = '<a [^>]*>([^<]*)</a>';
             const innerHtml =
-            replace(/^(<code><a [^>]*>)([^ ]*)/, '$1<b>$2</b>', _innerHtml);
+            pipe([replace(regex('', pattern), '<b>$1</b>'),
+                  replace(regex('g', pattern), '$1')],
+                 _innerHtml);
 
             const html$ =
             html + '\n' +
@@ -337,15 +410,15 @@ def('toc',
                   map(prop('groups')),
                   chain(head),
                   join,
-                  map(wrap('<code>', '</code>')),
+                  map(el('code', {})),
                   fromMaybe(innerHtml),
-                  wrap('<a href="#' + id + '">', '</a>')],
+                  el('a', {href: '#' + id})],
                  innerHtml);
 
             return {level: level$$, tagName: hN, html: html$};
           }, {level: 1, tagName: 'h1', html: ''}),
           over(lensProp('level'),
-               compose(joinWith(''),
+               compose(j,
                        unfoldr(level => level > 1 ?
                                  Just(['\n' + pad(2 * level - 1) + '</li>' +
                                        '\n' + pad(2 * level - 2) + '</ul>',
