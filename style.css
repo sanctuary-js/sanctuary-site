@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 0 40px;
-  font: 24px/1.4 "Avenir Next", "Avenir", sans-serif;
+  font: 21px/1.524 "Avenir Next", "Avenir", sans-serif;
   overflow-x: hidden;
 }
 
@@ -37,7 +37,8 @@ a code {
   border-color: #c36;
   background: rgb(250, 230, 245);
   padding: 0 40px;
-  font-size: 75%;
+  font-size: 85.714%;
+  line-height: 1.4;
   color: #c36;
 }
 
@@ -73,21 +74,23 @@ a code {
 }
 
 #css-main {
-  max-width: 36em;
   padding: 0 0 4em;
 }
 
+#css-main p,
+#css-main ol,
+#css-main ul {
+  max-width: 756px;
+}
+
 #tagline {
-  margin: 0 0 2em;
-  font-size: 75%;
+  margin: 0 0 1.524em;
   color: #666;
 }
 
 #toc {
   list-style: none;
   padding-left: 0;
-  font-size: 75%;
-  line-height: 1.5;
 }
 
 #toc ul {
@@ -104,7 +107,7 @@ a code {
 }
 
 #toc code {
-  font-size: 88.889%;
+  font-size: 85.714%;
 }
 
 #toc .arrow-hyphen {
@@ -114,7 +117,7 @@ a code {
 pre {
   margin: 1.334em 0;
   padding: 0;
-  font-size: 75%;
+  font-size: 85.714%;
   line-height: 1.334;
 }
 
@@ -125,7 +128,7 @@ pre {
   border-color: #ada;
   background: #efe;
   padding: 0 40px;
-  font-size: 75%;
+  font-size: 85.714%;
   line-height: 1.334;
   font-family: "Courier", monospace;
   color: #666;
@@ -190,24 +193,27 @@ h3, .h3,
 h4, .h4 {
   margin: 0;
   padding: 1em 0 0;
-  line-height: 1.5;
 }
 
 h1 {
-  font-size: 2em;
+  font-size: 2.286em;
+  line-height: 1.5;
   font-weight: normal;
 }
 
 h2, .h2 {
-  font-size: 1.5em;
+  font-size: 1.524em;
+  line-height: 1.5;
 }
 
 h3, .h3 {
-  font-size: 1.167em;
+  font-size: 1.143em;
+  line-height: 1.5;
 }
 
 h4, .h4 {
   font-size: 1em;
+  line-height: 1.524;
 }
 
 h1 small {
