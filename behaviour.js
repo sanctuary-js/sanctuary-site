@@ -33,7 +33,7 @@
     S.either(
       function(s) {
         output.setAttribute('data-error', 'true');
-        output.textContent = '! ' + s;
+        output.innerHTML = '! ' + R.replace(/\n/g, '<br>', s);
       },
       function(x) {
         output.setAttribute('data-error', 'false');
