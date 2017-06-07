@@ -1,11 +1,16 @@
 dependencies:
+  pre:
+    - curl https://yarnpkg.com/install.sh | bash
   override:
-    - rm -rf node_modules
     - make setup
+  cache_directories:
+    - ~/.cache/yarn
 
 machine:
   node:
     version: 6.1.0
+  environment:
+    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
 
 test:
   override:
