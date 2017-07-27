@@ -6,7 +6,9 @@ body {
 }
 
 code {
-  font-family: "Courier", monospace;
+  font-size: 90.476%;
+  line-height: 1.685;
+  font-family: "Fira Code", "Courier", monospace;
   color: #c36;
 }
 
@@ -106,19 +108,18 @@ a code {
   content: "\2013";
 }
 
-#toc code {
-  font-size: 85.714%;
-}
-
-#toc .arrow-hyphen {
-  top: -0.05em;
+#toc code b {
+  font-weight: 500;
 }
 
 pre {
   margin: 1.334em 0;
   padding: 0;
-  font-size: 85.714%;
   line-height: 1.334;
+}
+
+pre code {
+  line-height: 1.474;
 }
 
 .examples {
@@ -128,9 +129,10 @@ pre {
   border-color: #ada;
   background: #efe;
   padding: 0 40px;
-  font-size: 85.714%;
-  line-height: 1.334;
-  font-family: "Courier", monospace;
+  font-size: 76.191%;
+  line-height: 1.5;
+  font-family: "Fira Code", "Courier", monospace;
+  font-variant-ligatures: none;
   color: #666;
 }
 
@@ -150,16 +152,18 @@ pre {
 }
 
 .examples form {
-  margin: 1.334em 0;
+  margin: 1.5em 0;
 }
 
 .examples input {
   display: inline;
+  margin: 0;
   width: 8888px;
   border: none;
   background: none;
   padding: 0;
   font: inherit;
+  font-weight: 500;
   color: #080;
   outline: none;
 }
@@ -171,20 +175,6 @@ pre {
 
 .examples .output[data-error="true"] {
   color: #c36;
-}
-
-.tight + .tight {
-  margin-left: -0.2em;
-}
-
-.arrow {
-  position: relative;
-  top: 0.1em;
-}
-
-.arrow-hyphen {
-  position: relative;
-  top: -0.1em;
 }
 
 h1,
@@ -222,7 +212,12 @@ h1 small {
 }
 
 h4 code {
+  font-weight: 500;
   color: #333;
+}
+
+h4 code a:first-child {
+  font-weight: 700;
 }
 
 p {

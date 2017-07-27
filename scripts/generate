@@ -16,7 +16,6 @@ const S_                = require('sanctuary');
 const pkg               = require('sanctuary/package.json');
 const $                 = require('sanctuary-def');
 const Z                 = require('sanctuary-type-classes');
-const type              = require('sanctuary-type-identifiers');
 
 
 const checkTypes        = envvar.boolean('SANCTUARY_CHECK_TYPES', true);
@@ -46,15 +45,14 @@ const contains          = R.contains;
 const converge          = R.converge;
 const curry3            = S.curry3;
 const either            = S.either;
-const elem              = S.elem;
 const encaseEither      = S.encaseEither;
 const encaseEither2_    = S.encaseEither2_;
 const equals            = S.equals;
 const flip_             = S.flip_;
-const fromMaybe         = S.fromMaybe;
 const get               = S.get;
-const head              = S.head;
+const has               = R.has;
 const ifElse            = S.ifElse;
+const init              = R.init;
 const is                = S.is;
 const join              = S.join;
 const joinWith          = S.joinWith;
@@ -63,7 +61,6 @@ const keys              = S.keys;
 const lensProp          = R.lensProp;
 const lift2             = S.lift2;
 const map               = S.map;
-const match             = S.match;
 const matchAll          = S.matchAll;
 const maybe_            = S.maybe_;
 const maybeToEither     = S.maybeToEither;
@@ -74,13 +71,12 @@ const pipe              = S.pipe;
 const prop              = S.prop;
 const reduce            = S.reduce;
 const regex             = S.regex;
-const regexEscape       = S.regexEscape;
 const repeat            = R.repeat;
 const replace           = R.replace;
 const sequence          = S.sequence;
 const slice_            = R.slice;
 const sort              = S.sort;
-const split             = R.split;
+const splitOn           = S.splitOn;
 const splitOnRegex      = S.splitOnRegex;
 const test              = S.test;
 const toString          = S.toString;
@@ -108,7 +104,7 @@ def('fromJust',
 //    j :: Array String -> String
 const j = def('j', {}, [$.Array($.String), $.String], joinWith(''));
 
-//    replace_ :: RegExp -> ([String] -> String) -> String -> String
+//    replace_ :: RegExp -> (Array String -> String) -> String -> String
 const replace_ =
 def('replace_',
     {},
@@ -164,30 +160,59 @@ def('dependencyUrl',
     name => map(concat(`https://github.com/sanctuary-js/${name}/tree/v`),
                 dependencyVersion(name)));
 
+//    externalLink :: String -> String -> String
+const externalLink =
+def('externalLink',
+    {},
+    [$.String, $.String, $.String],
+    (name, s) => el('a', {href: fromJust(dependencyUrl(name)) + '#' + s}, s));
+
 //    linkTokens :: String -> String
 const linkTokens = cond([
-  [s => is(Z.TypeClass, Z[s]),
-   s => {
-     const href = fromJust(dependencyUrl('sanctuary-type-classes')) + '#' + s;
-     return el('a', {href}, s);
-   }],
-  [s => {
-     const x = $[s];
-     const pattern = `^${regexEscape(s)} :: (?:Type -> )*Type$`;
-     return $.test([], $.Type, x) ||
-            type(x) === 'Function' && test(regex('', pattern), String(x));
-   },
-   s => {
-     const href = fromJust(dependencyUrl('sanctuary-def')) + '#' + s;
-     return el('a', {href}, s);
-   }],
+  [test(/^[a-z]$/),      I],
+  [equals(''),           I],
+  [equals('=>'),         I],
+  [equals('~>'),         I],
+  [equals('-\u2060>'),   K('->')],
   [equals('Accessible'), el('a', {href: '#accessible-pseudotype'})],
   [equals('Either'),     el('a', {href: '#EitherType'})],
   [equals('List'),       el('a', {href: '#list'})],
   [equals('Maybe'),      el('a', {href: '#MaybeType'})],
   [equals('TypeRep'),    el('a', {href: '#type-representatives'})],
+  [has(_, $),            externalLink('sanctuary-def')],
+  [has(_, Z),            externalLink('sanctuary-type-classes')],
   [K(true),              I],
 ]);
+
+//    headingToMarkup :: String -> String -> String -> String
+const headingToMarkup =
+def('headingToMarkup',
+    {},
+    [$.String, $.String, $.String, $.String],
+    (id, href, html) => {
+      const [s, t] = reduce(
+        ([s, t, ctx]) => c =>
+          c === ' ' && ctx === '' ?
+            [s + el('a', {href}, t) + c, '', ctx] :
+          c === ':' && (ctx === '' || ctx.endsWith('{')) ?
+            [s + c, '', ctx + ';'] :
+          c === ':' && (ctx === ';' || ctx.endsWith('{;')) ?
+            [s + c, '', init(ctx) + ':'] :
+          c === '(' || c === '[' || c === '{' ?
+            [s + linkTokens(t) + c, '', ctx + c] :
+          c === ')' || c === ']' || c === '}' ?
+            [s + linkTokens(t) + c, '', init(ctx.replace(/:$/, ''))] :
+          c === ',' ?
+            [s + linkTokens(t) + c, '', ctx.replace(/:$/, '')] :
+          c === ' ' || c === '\u00A0' || c === '?' ?
+            [s + (ctx.endsWith('{') ? I : linkTokens)(t) + c, '', ctx] :
+          // else
+            [s, t + c, ctx],
+        ['', '', ''],
+        splitOn('', html)
+      );
+      return el('h4', {id}, el('code', {}, s + linkTokens(t)));
+    });
 
 //    toInputMarkup :: String -> String
 const toInputMarkup =
@@ -235,51 +260,13 @@ def('doctestsToMarkup',
           j,
           wrap('<div class="examples">\n', '</div>\n')]));
 
-//    substitutionPattern :: RegExp
-const substitutionPattern =
-/(<pre>[\s\S]*?<[/]pre>|<div class="examples">[\s\S]*?^<[/]div>| :: |(?:=|~|-\u2060?)(?:&gt;|>)|[.][.][.])/gm;
-
-//    substitutions :: String -> String
-const substitutions =
-def('substitutions',
-    {},
-    [$.String, $.String],
-    replace_(substitutionPattern,
-             apply(cond([[equals(' :: '),
-                          K(' ' +
-                            el('span', {class: 'tight'}, ':') +
-                            el('span', {class: 'tight'}, ':') +
-                            ' ')],
-                         [elem(_, ap([I, htmlEncode], ['=>'])),
-                          K(el('span', {class: 'arrow'}, htmlEncode('=>')))],
-                         [elem(_, ap([I, htmlEncode], ['~>'])),
-                          K(el('span', {class: 'arrow'}, htmlEncode('~>')))],
-                         [elem(_, ap([I, htmlEncode], ['->'])),
-                          K(el('span', {class: 'arrow'},
-                               el('span', {class: 'arrow-hyphen'}, htmlEncode('-'))
-                               + htmlEncode('>')))],
-                         [equals('-\u2060>'),
-                          K(el('span', {class: 'arrow'},
-                               el('span', {class: 'arrow-hyphen'}, htmlEncode('-'))
-                               + htmlEncode('\u2060>')))],
-                         [equals('...'),
-                          K(el('span', {class: 'tight'}, '.') +
-                            el('span', {class: 'tight'}, '.') +
-                            el('span', {class: 'tight'}, '.'))],
-                         [K(true),
-                          I]]))));
-
 //    generate :: String -> String
 const generate =
 def('generate',
     {},
     [$.String, $.String],
-    pipe([replace_(regex('g', '<h4 name="(.*)"><code><a href="(.*)">([^ ]*)(.*)</a></code></h4>'),
-                   ([id, href, name, _innerHtml]) =>
-                     el('h4', {id},
-                        el('code', {},
-                           el('a', {href}, name)
-                           + j(map(linkTokens, split(/(\w+)/, _innerHtml)))))),
+    pipe([replace_(regex('g', '<h4 name="(.*)"><code><a href="(.*)">(.*)</a></code></h4>'),
+                   apply(headingToMarkup)),
           replace_(/^```javascript\n(> [\s\S]*?)^```\n/gm,
                    apply(doctestsToMarkup)),
           //  Replace NO-BREAK SPACE characters with SYMBOL FOR SPACE
@@ -289,8 +276,7 @@ def('generate',
           replace(/\u2420/g, '\u00A0'),
           replace(/\n\n(?=\n<[/]code><[/]pre>)/g, ''),
           replace(/(?=<(h[2-6]) id="([^"]*)")/g,
-                  '<a class="pilcrow $1" href="#$2">\u00B6</a>\n'),
-          substitutions]));
+                  '<a class="pilcrow $1" href="#$2">\u00B6</a>\n')]));
 
 //    readFile :: String -> Either String String
 const readFile =
@@ -368,13 +354,6 @@ def('readme',
 //    pad :: Integer -> String
 const pad = def('pad', {}, [$.Integer, $.String], compose(j, repeat('  ')));
 
-//    colon :: String
-const colon = regexEscape('<span class="tight">:</span>');
-
-//    codeLink :: RegExp
-const codeLink =
-regex('', '^<code><a href="[^"]*">(.*? ' + colon + colon + ' .*)</a></code>$');
-
 //    toc :: String -> String
 const toc =
 def('toc',
@@ -409,14 +388,7 @@ def('toc',
                pad(2 * level$$ - 1) + '</li>\n' +
                pad(2 * level$$ - 1) + '<li>\n' +
                pad(2 * level$$ - 0)) +
-            pipe([match(codeLink),
-                  map(prop('groups')),
-                  chain(head),
-                  join,
-                  map(el('code', {})),
-                  fromMaybe(innerHtml),
-                  el('a', {href: '#' + id})],
-                 innerHtml);
+            el('a', {href: '#' + id}, innerHtml);
 
             return {level: level$$, tagName: hN, html: html$};
           }, {level: 1, tagName: 'h1', html: ''}),
@@ -447,6 +419,7 @@ def('toDocument',
                        location.hash);
     }
   </script>
+  <link rel="stylesheet" href="https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css">
   <link rel="stylesheet" href="style.css">
   <link rel="shortcut icon" href="favicon.png">
   <link rel="mask-icon" href="mask-icon.svg" color="#080">
