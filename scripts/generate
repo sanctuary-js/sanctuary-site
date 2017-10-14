@@ -446,6 +446,7 @@ def('toDocument',
   </script>
   <link rel="stylesheet" href="style.css">
   <link rel="shortcut icon" href="favicon.png">
+  <link rel="mask-icon" href="mask-icon.svg" color="#080">
 </head>
 <body spellcheck="false">
   <div id="css-header">

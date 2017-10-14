@@ -5,7 +5,7 @@
     "ramda": "0.24.0",
     "sanctuary": "0.13.2",
     "sanctuary-def": "0.12.1",
-    "sanctuary-logo": "1.0.0",
+    "sanctuary-logo": "1.1.0",
     "sanctuary-type-classes": "6.0.0",
     "sanctuary-type-identifiers": "2.0.1"
   },
