@@ -4,7 +4,7 @@ NPM = npm
 CUSTOM = $(shell find custom -name '*.md' | sort)
 VENDOR = ramda sanctuary sanctuary-def sanctuary-type-classes sanctuary-type-identifiers
 VENDOR_CHECKS = $(patsubst %,check-%-version,$(VENDOR))
-FILES = favicon.png index.html $(patsubst %,vendor/%.js,$(VENDOR))
+FILES = favicon.png index.html mask-icon.svg $(patsubst %,vendor/%.js,$(VENDOR))
 
 
 .PHONY: all
@@ -15,6 +15,9 @@ favicon.png: node_modules/sanctuary-logo/sanctuary-favicon.png
 
 index.html: scripts/generate node_modules/sanctuary/README.md $(CUSTOM)
 	'$<' node_modules/sanctuary
+
+mask-icon.svg: node_modules/sanctuary-logo/sanctuary-mask-icon.svg
+	cp '$<' '$@'
 
 vendor/ramda.js: node_modules/ramda/dist/ramda.js
 	cp '$<' '$@'
