@@ -1,4 +1,4 @@
-ESLINT = node_modules/.bin/eslint
+ESLINT = node_modules/.bin/eslint --report-unused-disable-directives
 NPM = npm
 
 CUSTOM = $(shell find custom -name '*.md' | sort)
@@ -38,19 +38,8 @@ clean:
 
 .PHONY: lint
 lint:
-	$(ESLINT) \
-	  --config node_modules/sanctuary-style/eslint-es6.json \
-	  --env es6 \
-	  --env node \
-	  --rule 'indent: [off]' \
-	  --rule 'max-len: [off]' \
-	  --rule 'prefer-template: [off]' \
-	  -- scripts/generate
-	$(ESLINT) \
-	  --config node_modules/sanctuary-style/eslint-es3.json \
-	  --env es3 \
-	  --env browser \
-	  -- behaviour.js
+	$(ESLINT) --config node_modules/sanctuary-style/eslint-es6.json -- scripts/generate
+	$(ESLINT) -- behaviour.js
 	make clean
 	make
 	git diff --exit-code

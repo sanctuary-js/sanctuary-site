@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+/* eslint-env node */
+/* eslint indent: ["off"], max-len: ["off"], prefer-template: ["off"] */
+
 'use strict';
 
 const fs                = require('fs');
