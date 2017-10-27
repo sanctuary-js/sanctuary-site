@@ -11,8 +11,8 @@
   },
   "devDependencies": {
     "envvar": "1.1.x",
-    "eslint": "3.19.x",
+    "eslint": "4.9.x",
     "marked": "0.3.5",
-    "sanctuary-style": "0.5.x"
+    "sanctuary-style": "1.0.x"
   }
 }
