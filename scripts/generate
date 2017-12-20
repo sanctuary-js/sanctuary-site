@@ -17,10 +17,13 @@ const pkg               = require('sanctuary/package.json');
 const $                 = require('sanctuary-def');
 const Z                 = require('sanctuary-type-classes');
 
+const List              = require('../adt/List');
+const Sum               = require('../adt/Sum');
+
 
 const checkTypes        = envvar.boolean('SANCTUARY_CHECK_TYPES', true);
-const {create, env}     = S_;
-const S                 = create({checkTypes, env});
+const env               = Z.concat(S_.env, [List.Type($.Unknown), Sum.Type]);
+const S                 = S_.create({checkTypes, env});
 const def               = $.create({checkTypes, env});
 
 const Either            = S.EitherType;
@@ -31,7 +34,6 @@ const Left              = S.Left;
 const Maybe             = S.MaybeType;
 const Nothing           = S.Nothing;
 const Right             = S.Right;
-const _                 = S.__;
 const allPass           = S.allPass;
 const ap                = S.ap;
 const apply             = R.apply;
@@ -43,12 +45,12 @@ const concat            = S.concat;
 const cond              = R.cond;
 const contains          = R.contains;
 const converge          = R.converge;
-const curry3            = S.curry3;
+const curry2            = S.curry2;
 const either            = S.either;
 const encaseEither      = S.encaseEither;
-const encaseEither2_    = S.encaseEither2_;
+const encaseEither2     = S.encaseEither2;
 const equals            = S.equals;
-const flip_             = S.flip_;
+const flip              = S.flip;
 const get               = S.get;
 const has               = R.has;
 const ifElse            = S.ifElse;
@@ -150,7 +152,7 @@ const dependencyVersion =
 def('dependencyVersion',
     {},
     [$.String, Maybe(Version)],
-    get($.test([], Version), _, pkg.dependencies));
+    name => get($.test([], Version), name, pkg.dependencies));
 
 //    dependencyUrl :: String -> Maybe String
 const dependencyUrl =
@@ -174,13 +176,12 @@ const linkTokens = cond([
   [equals('=>'),         I],
   [equals('~>'),         I],
   [equals('-\u2060>'),   K('->')],
-  [equals('Accessible'), el('a', {href: '#accessible-pseudotype'})],
   [equals('Either'),     el('a', {href: '#EitherType'})],
   [equals('List'),       el('a', {href: '#list'})],
   [equals('Maybe'),      el('a', {href: '#MaybeType'})],
   [equals('TypeRep'),    el('a', {href: '#type-representatives'})],
-  [has(_, $),            externalLink('sanctuary-def')],
-  [has(_, Z),            externalLink('sanctuary-type-classes')],
+  [flip(has, $),         externalLink('sanctuary-def')],
+  [flip(has, Z),         externalLink('sanctuary-type-classes')],
   [K(true),              I],
 ]);
 
@@ -223,16 +224,22 @@ def('toInputMarkup',
           wrap('<input value="', '">'),
           concat(htmlEncode('>\u00A0'))]));
 
+//    $context :: ContextifiedSandbox
+const $context = (() => {
+  const {Nil, Cons} = List;
+  const S = S_.create({checkTypes: true, env});
+  return vm.createContext({$, Cons, List, Nil, R, S, Sum});
+})();
+
 //    toOutputMarkup :: String -> String
 const toOutputMarkup =
 def('toOutputMarkup',
     {},
     [$.String, $.String],
     pipe([encaseEither(prop('message'),
-                       curry3(vm.runInNewContext,
-                              _,
-                              {R, S: S_},
-                              {displayErrors: false})),
+                       code => vm.runInContext(code,
+                                               $context,
+                                               {displayErrors: false})),
           either(pipe([concat('! '),
                        htmlEncode,
                        el('div', {class: 'output', 'data-error': 'true'})]),
@@ -272,7 +279,7 @@ def('generate',
           //  Replace NO-BREAK SPACE characters with SYMBOL FOR SPACE
           //  characters to work around chjj/marked#363.
           replace(/\u00A0/g, '\u2420'),
-          flip_(marked, {pedantic: true}),
+          s => marked(s, {pedantic: true}),
           replace(/\u2420/g, '\u00A0'),
           replace(/\n\n(?=\n<[/]code><[/]pre>)/g, ''),
           replace(/(?=<(h[2-6]) id="([^"]*)")/g,
@@ -283,7 +290,7 @@ const readFile =
 def('readFile',
     {},
     [$.String, Either($.String, $.String)],
-    encaseEither(prop('message'), flip_(fs.readFileSync, 'utf8')));
+    encaseEither(prop('message'), s => fs.readFileSync(s, 'utf8')));
 
 //    writeFile :: String -> String -> Either String String
 const writeFile =
@@ -292,14 +299,14 @@ def('writeFile',
     [$.String, $.String, Either($.String, $.String)],
     converge(map,
              [compose_(K, K),
-              encaseEither2_(prop('message'), fs.writeFileSync)]));
+              encaseEither2(prop('message'), curry2(fs.writeFileSync))]));
 
 //    version :: String -> Either String String
 const version =
 def('version',
     {},
     [$.String, Either($.String, $.String)],
-    pipe([flip_(path.join, 'package.json'),
+    pipe([s => path.join(s, 'package.json'),
           readFile,
           chain(encaseEither(prop('message'), JSON.parse)),
           map(get(is(String), 'version')),
@@ -310,7 +317,7 @@ const description =
 def('description',
     {},
     [$.String, Either($.String, $.String)],
-    pipe([flip_(path.join, 'package.json'),
+    pipe([s => path.join(s, 'package.json'),
           readFile,
           chain(encaseEither(prop('message'), JSON.parse)),
           map(get(is(String), 'description')),
@@ -337,7 +344,7 @@ const readme =
 def('readme',
     {},
     [$.String, Either($.String, $.String)],
-    pipe([flip_(path.join, 'README.md'),
+    pipe([s => path.join(s, 'README.md'),
           readFile,
           ap(customize('custom/preamble.md')),
           join,
@@ -443,11 +450,16 @@ ${content}
   <script src="vendor/sanctuary-type-identifiers.js"></script>
   <script src="vendor/sanctuary-type-classes.js"></script>
   <script src="vendor/sanctuary-def.js"></script>
+  <script src="adt/List.js"></script>
+  <script src="adt/Sum.js"></script>
   <script src="vendor/sanctuary.js"></script>
   <script>
     window.Z = window.sanctuaryTypeClasses;
     window.$ = window.sanctuaryDef;
-    window.S = window.sanctuary;
+    window.Nil = window.List.Nil;
+    window.Cons = window.List.Cons;
+    window.env = window.sanctuary.env.concat([List.Type($.Unknown), Sum.Type]);
+    window.S = window.sanctuary.create({checkTypes: true, env: env});
   </script>
   <script src="behaviour.js"></script>
 </body>
