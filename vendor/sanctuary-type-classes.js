@@ -30,39 +30,41 @@
 //.
 //. ## Type-class hierarchy
 //.
+/* eslint-disable max-len */
 //. <pre>
-//:  Setoid   Semigroupoid  Semigroup   Foldable        Functor      Contravariant
-//: (equals)    (compose)    (concat)   (reduce)         (map)        (contramap)
-//:     |           |           |           \         / | | | | \
-//:     |           |           |            \       /  | | | |  \
-//:     |           |           |             \     /   | | | |   \
-//:     |           |           |              \   /    | | | |    \
-//:     |           |           |               \ /     | | | |     \
-//:    Ord      Category     Monoid         Traversable | | | |      \
-//:   (lte)       (id)       (empty)        (traverse)  / | | \       \
-//:                                                    /  | |  \       \
-//:                                                   /   / \   \       \
-//:                                           Profunctor /   \ Bifunctor \
-//:                                            (promap) /     \ (bimap)   \
-//:                                                    /       \           \
-//:                                                   /         \           \
-//:                                                 Alt        Apply      Extend
-//:                                                (alt)        (ap)     (extend)
-//:                                                 /           / \           \
-//:                                                /           /   \           \
-//:                                               /           /     \           \
-//:                                              /           /       \           \
-//:                                             /           /         \           \
-//:                                           Plus    Applicative    Chain      Comonad
-//:                                          (zero)       (of)      (chain)    (extract)
-//:                                             \         / \         / \
-//:                                              \       /   \       /   \
-//:                                               \     /     \     /     \
-//:                                                \   /       \   /       \
-//:                                                 \ /         \ /         \
-//:                                             Alternative    Monad     ChainRec
-//:                                                                     (chainRec)
+//.  Setoid   Semigroupoid  Semigroup   Foldable        Functor      Contravariant
+//. (equals)    (compose)    (concat)   (reduce)         (map)        (contramap)
+//.     |           |           |           \         / | | | | \
+//.     |           |           |            \       /  | | | |  \
+//.     |           |           |             \     /   | | | |   \
+//.     |           |           |              \   /    | | | |    \
+//.     |           |           |               \ /     | | | |     \
+//.    Ord      Category     Monoid         Traversable | | | |      \
+//.   (lte)       (id)       (empty)        (traverse)  / | | \       \
+//.                             |                      /  | |  \       \
+//.                             |                     /   / \   \       \
+//.                             |             Profunctor /   \ Bifunctor \
+//.                             |              (promap) /     \ (bimap)   \
+//.                             |                      /       \           \
+//.                           Group                   /         \           \
+//.                          (invert)               Alt        Apply      Extend
+//.                                                (alt)        (ap)     (extend)
+//.                                                 /           / \           \
+//.                                                /           /   \           \
+//.                                               /           /     \           \
+//.                                              /           /       \           \
+//.                                             /           /         \           \
+//.                                           Plus    Applicative    Chain      Comonad
+//.                                          (zero)       (of)      (chain)    (extract)
+//.                                             \         / \         / \
+//.                                              \       /   \       /   \
+//.                                               \     /     \     /     \
+//.                                                \   /       \   /       \
+//.                                                 \ /         \ /         \
+//.                                             Alternative    Monad     ChainRec
+//.                                                                     (chainRec)
 //. </pre>
+/* eslint-enable max-len */
 //.
 //. ## API
 
@@ -95,6 +97,11 @@
     return function(y) {
       return x;
     };
+  }
+
+  //  forEachKey :: (StrMap a, StrMap a ~> String -> Undefined) -> Undefined
+  function forEachKey(strMap, f) {
+    Object.keys(strMap).forEach(f, strMap);
   }
 
   //  has :: (String, Object) -> Boolean
@@ -214,7 +221,7 @@
   }
 
   //  functionName :: Function -> String
-  var functionName = 'name' in function f() {} ?
+  var functionName = has('name', function f() {}) ?
     function functionName(f) { return f.name; } :
     /* istanbul ignore next */
     function functionName(f) {
@@ -244,7 +251,7 @@
         };
     }
 
-    var version = '6.0.0';  // updated programmatically
+    var version = '7.1.1';  // updated programmatically
     var keys = Object.keys(requirements);
 
     var typeClass = TypeClass(
@@ -342,6 +349,19 @@
   //. false
   //. ```
   var Monoid = $('Monoid', [Semigroup], {empty: Constructor});
+
+  //# Group :: TypeClass
+  //.
+  //. `TypeClass` value for [Group][].
+  //.
+  //. ```javascript
+  //. > Group.test(Sum(0))
+  //. true
+  //.
+  //. > Group.test('')
+  //. false
+  //. ```
+  var Group = $('Group', [Monoid], {invert: Value});
 
   //# Functor :: TypeClass
   //.
@@ -873,22 +893,25 @@
   //  Object$prototype$concat :: StrMap a ~> StrMap a -> StrMap a
   function Object$prototype$concat(other) {
     var result = {};
-    for (var k in this) result[k] = this[k];
-    for (k in other) result[k] = other[k];
+    function assign(k) { result[k] = this[k]; }
+    forEachKey(this, assign);
+    forEachKey(other, assign);
     return result;
   }
 
   //  Object$prototype$map :: StrMap a ~> (a -> b) -> StrMap b
   function Object$prototype$map(f) {
     var result = {};
-    for (var k in this) result[k] = f(this[k]);
+    forEachKey(this, function(k) { result[k] = f(this[k]); });
     return result;
   }
 
   //  Object$prototype$ap :: StrMap a ~> StrMap (a -> b) -> StrMap b
   function Object$prototype$ap(other) {
     var result = {};
-    for (var k in this) if (k in other) result[k] = other[k](this[k]);
+    forEachKey(this, function(k) {
+      if (has(k, other)) result[k] = other[k](this[k]);
+    });
     return result;
   }
 
@@ -906,7 +929,12 @@
   function Object$prototype$traverse(typeRep, f) {
     var self = this;
     return Object.keys(this).reduce(function(applicative, k) {
-      function set(o) { return function(v) { o[k] = v; return o; }; }
+      function set(o) {
+        return function(v) {
+          var singleton = {}; singleton[k] = v;
+          return Object$prototype$concat.call(o, singleton);
+        };
+      }
       return lift2(set, applicative, f(self[k]));
     }, of(typeRep, {}));
   }
@@ -1305,6 +1333,50 @@
     return lte(y, x);
   }
 
+  //# min :: Ord a => (a, a) -> a
+  //.
+  //. Returns the smaller of its two arguments.
+  //.
+  //. This function is derived from [`lte`](#lte).
+  //.
+  //. See also [`max`](#max).
+  //.
+  //. ```javascript
+  //. > min(10, 2)
+  //. 2
+  //.
+  //. > min(new Date('1999-12-31'), new Date('2000-01-01'))
+  //. new Date('1999-12-31')
+  //.
+  //. > min('10', '2')
+  //. '10'
+  //. ```
+  function min(x, y) {
+    return lte(x, y) ? x : y;
+  }
+
+  //# max :: Ord a => (a, a) -> a
+  //.
+  //. Returns the larger of its two arguments.
+  //.
+  //. This function is derived from [`lte`](#lte).
+  //.
+  //. See also [`min`](#min).
+  //.
+  //. ```javascript
+  //. > max(10, 2)
+  //. 10
+  //.
+  //. > max(new Date('1999-12-31'), new Date('2000-01-01'))
+  //. new Date('2000-01-01')
+  //.
+  //. > max('10', '2')
+  //. '2'
+  //. ```
+  function max(x, y) {
+    return lte(x, y) ? y : x;
+  }
+
   //# compose :: Semigroupoid c => (c j k, c i j) -> c i k
   //.
   //. Function wrapper for [`fantasy-land/compose`][].
@@ -1381,6 +1453,18 @@
   //. ```
   function empty(typeRep) {
     return Monoid.methods.empty(typeRep)();
+  }
+
+  //# invert :: Group g => g -> g
+  //.
+  //. Function wrapper for [`fantasy-land/invert`][].
+  //.
+  //. ```javascript
+  //. invert(Sum(5))
+  //. Sum(-5)
+  //. ```
+  function invert(group) {
+    return Group.methods.invert(group)();
   }
 
   //# map :: Functor f => (a -> b, f a) -> f b
@@ -1568,6 +1652,44 @@
     return Applicative.methods.of(typeRep)(x);
   }
 
+  //# append :: (Applicative f, Semigroup (f a)) => (a, f a) -> f a
+  //.
+  //. Returns the result of appending the first argument to the second.
+  //.
+  //. This function is derived from [`concat`](#concat) and [`of`](#of).
+  //.
+  //. See also [`prepend`](#prepend).
+  //.
+  //. ```javascript
+  //. > append(3, [1, 2])
+  //. [1, 2, 3]
+  //.
+  //. > append(3, Cons(1, Cons(2, Nil)))
+  //. Cons(1, Cons(2, Cons(3, Nil)))
+  //. ```
+  function append(x, xs) {
+    return concat(xs, of(xs.constructor, x));
+  }
+
+  //# prepend :: (Applicative f, Semigroup (f a)) => (a, f a) -> f a
+  //.
+  //. Returns the result of prepending the first argument to the second.
+  //.
+  //. This function is derived from [`concat`](#concat) and [`of`](#of).
+  //.
+  //. See also [`append`](#append).
+  //.
+  //. ```javascript
+  //. > prepend(1, [2, 3])
+  //. [1, 2, 3]
+  //.
+  //. > prepend(1, Cons(2, Cons(3, Nil)))
+  //. Cons(1, Cons(2, Cons(3, Nil)))
+  //. ```
+  function prepend(x, xs) {
+    return concat(of(xs.constructor, x), xs);
+  }
+
   //# chain :: Chain m => (a -> m b, m a) -> m b
   //.
   //. Function wrapper for [`fantasy-land/chain`][].
@@ -1646,6 +1768,8 @@
   //. Cons(1, Cons(3, Nil))
   //. ```
   function filter(pred, m) {
+    //  Fast path for arrays.
+    if (Array.isArray(m)) return m.filter(function(x) { return pred(x); });
     var M = m.constructor;
     return reduce(function(m, x) { return pred(x) ? concat(m, of(M, x)) : m; },
                   empty(M),
@@ -1746,6 +1870,209 @@
     return Foldable.methods.reduce(foldable)(f, x);
   }
 
+  //# size :: Foldable f => f a -> Integer
+  //.
+  //. Returns the number of elements of the given structure.
+  //.
+  //. This function is derived from [`reduce`](#reduce).
+  //.
+  //. ```javascript
+  //. > size([])
+  //. 0
+  //.
+  //. > size(['foo', 'bar', 'baz'])
+  //. 3
+  //.
+  //. > size(Nil)
+  //. 0
+  //.
+  //. > size(Cons('foo', Cons('bar', Cons('baz', Nil))))
+  //. 3
+  //. ```
+  function size(foldable) {
+    //  Fast path for arrays.
+    if (Array.isArray(foldable)) return foldable.length;
+    return reduce(function(n, _) { return n + 1; }, 0, foldable);
+  }
+
+  //# elem :: (Setoid a, Foldable f) => (a, f a) -> Boolean
+  //.
+  //. Takes a value and a structure and returns `true` if the
+  //. value is an element of the structure; `false` otherwise.
+  //.
+  //. This function is derived from [`equals`](#equals) and
+  //. [`reduce`](#reduce).
+  //.
+  //. ```javascript
+  //. > elem('c', ['a', 'b', 'c'])
+  //. true
+  //.
+  //. > elem('x', ['a', 'b', 'c'])
+  //. false
+  //.
+  //. > elem(3, {x: 1, y: 2, z: 3})
+  //. true
+  //.
+  //. > elem(8, {x: 1, y: 2, z: 3})
+  //. false
+  //.
+  //. > elem(0, Just(0))
+  //. true
+  //.
+  //. > elem(0, Just(1))
+  //. false
+  //.
+  //. > elem(0, Nothing)
+  //. false
+  //. ```
+  function elem(x, foldable) {
+    return reduce(function(b, y) { return b || equals(x, y); },
+                  false,
+                  foldable);
+  }
+
+  //# reverse :: (Applicative f, Foldable f, Monoid (f a)) => f a -> f a
+  //.
+  //. Reverses the elements of the given structure.
+  //.
+  //. This function is derived from [`concat`](#concat), [`empty`](#empty),
+  //. [`of`](#of), and [`reduce`](#reduce).
+  //.
+  //. ```javascript
+  //. > reverse([1, 2, 3])
+  //. [3, 2, 1]
+  //.
+  //. > reverse(Cons(1, Cons(2, Cons(3, Nil))))
+  //. Cons(3, Cons(2, Cons(1, Nil)))
+  //. ```
+  function reverse(foldable) {
+    //  Fast path for arrays.
+    if (Array.isArray(foldable)) return foldable.slice().reverse();
+    var F = foldable.constructor;
+    return reduce(function(xs, x) { return concat(of(F, x), xs); },
+                  empty(F),
+                  foldable);
+  }
+
+  //# sort :: (Ord a, Applicative f, Foldable f, Monoid (f a)) => f a -> f a
+  //.
+  //. Performs a [stable sort][] of the elements of the given structure,
+  //. using [`lte`](#lte) for comparisons.
+  //.
+  //. This function is derived from [`lte`](#lte), [`concat`](#concat),
+  //. [`empty`](#empty), [`of`](#of), and [`reduce`](#reduce).
+  //.
+  //. See also [`sortBy`](#sortBy).
+  //.
+  //. ```javascript
+  //. > sort(['foo', 'bar', 'baz'])
+  //. ['bar', 'baz', 'foo']
+  //.
+  //. > sort([Just(2), Nothing, Just(1)])
+  //. [Nothing, Just(1), Just(2)]
+  //.
+  //. > sort(Cons('foo', Cons('bar', Cons('baz', Nil))))
+  //. Cons('bar', Cons('baz', Cons('foo', Nil)))
+  //. ```
+  function sort(foldable) {
+    return sortBy(identity, foldable);
+  }
+
+  //# sortBy :: (Ord b, Applicative f, Foldable f, Monoid (f a)) => (a -> b, f a) -> f a
+  //.
+  //. Performs a [stable sort][] of the elements of the given structure,
+  //. using [`lte`](#lte) to compare the values produced by applying the
+  //. given function to each element of the structure.
+  //.
+  //. This function is derived from [`lte`](#lte), [`concat`](#concat),
+  //. [`empty`](#empty), [`of`](#of), and [`reduce`](#reduce).
+  //.
+  //. See also [`sort`](#sort).
+  //.
+  //. ```javascript
+  //. > sortBy(s => s.length, ['red', 'green', 'blue'])
+  //. ['red', 'blue', 'green']
+  //.
+  //. > sortBy(s => s.length, ['black', 'white'])
+  //. ['black', 'white']
+  //.
+  //. > sortBy(s => s.length, ['white', 'black'])
+  //. ['white', 'black']
+  //.
+  //. > sortBy(s => s.length, Cons('red', Cons('green', Cons('blue', Nil))))
+  //. Cons('red', Cons('blue', Cons('green', Nil)))
+  //. ```
+  function sortBy(f, foldable) {
+    var rs = reduce(function(xs, x) {
+      var fx = f(x);
+      var lower = 0;
+      var upper = xs.length;
+      while (lower < upper) {
+        var idx = Math.floor((lower + upper) / 2);
+        if (lte(xs[idx].fx, fx)) lower = idx + 1; else upper = idx;
+      }
+      xs.splice(lower, 0, {x: x, fx: fx});
+      return xs;
+    }, [], foldable);
+
+    var F = foldable.constructor;
+    var result = empty(F);
+    for (var idx = 0; idx < rs.length; idx += 1) {
+      result = concat(result, of(F, rs[idx].x));
+    }
+    return result;
+  }
+
+  //# takeWhile :: (Applicative f, Foldable f, Monoid (f a)) => (a -> Boolean, f a) -> f a
+  //.
+  //. Discards the first inner value which does not satisfy the predicate, and
+  //. all subsequent inner values.
+  //.
+  //. This function is derived from [`concat`](#concat), [`empty`](#empty),
+  //. [`of`](#of), and [`reduce`](#reduce).
+  //.
+  //. See also [`dropWhile`](#dropWhile).
+  //.
+  //. ```javascript
+  //. > takeWhile(s => /x/.test(s), ['xy', 'xz', 'yx', 'yz', 'zx', 'zy'])
+  //. ['xy', 'xz', 'yx']
+  //.
+  //. > takeWhile(s => /y/.test(s), ['xy', 'xz', 'yx', 'yz', 'zx', 'zy'])
+  //. ['xy']
+  //.
+  //. > takeWhile(s => /z/.test(s), ['xy', 'xz', 'yx', 'yz', 'zx', 'zy'])
+  //. []
+  //. ```
+  function takeWhile(pred, foldable) {
+    var take = true;
+    return filter(function(x) { return take = take && pred(x); }, foldable);
+  }
+
+  //# dropWhile :: (Applicative f, Foldable f, Monoid (f a)) => (a -> Boolean, f a) -> f a
+  //.
+  //. Retains the first inner value which does not satisfy the predicate, and
+  //. all subsequent inner values.
+  //.
+  //. This function is derived from [`concat`](#concat), [`empty`](#empty),
+  //. [`of`](#of), and [`reduce`](#reduce).
+  //.
+  //. See also [`takeWhile`](#takeWhile).
+  //.
+  //. ```javascript
+  //. > dropWhile(s => /x/.test(s), ['xy', 'xz', 'yx', 'yz', 'zx', 'zy'])
+  //. ['yz', 'zx', 'zy']
+  //.
+  //. > dropWhile(s => /y/.test(s), ['xy', 'xz', 'yx', 'yz', 'zx', 'zy'])
+  //. ['xz', 'yx', 'yz', 'zx', 'zy']
+  //.
+  //. > dropWhile(s => /z/.test(s), ['xy', 'xz', 'yx', 'yz', 'zx', 'zy'])
+  //. ['xy', 'xz', 'yx', 'yz', 'zx', 'zy']
+  //. ```
+  function dropWhile(pred, foldable) {
+    var take = false;
+    return filter(function(x) { return take = take || !pred(x); }, foldable);
+  }
+
   //# traverse :: (Applicative f, Traversable t) => (TypeRep f, a -> f b, t a) -> f (t b)
   //.
   //. Function wrapper for [`fantasy-land/traverse`][].
@@ -1833,6 +2160,7 @@
     Category: Category,
     Semigroup: Semigroup,
     Monoid: Monoid,
+    Group: Group,
     Functor: Functor,
     Bifunctor: Bifunctor,
     Profunctor: Profunctor,
@@ -1855,10 +2183,13 @@
     lte: lte,
     gt: gt,
     gte: gte,
+    min: min,
+    max: max,
     compose: compose,
     id: id,
     concat: concat,
     empty: empty,
+    invert: invert,
     map: map,
     bimap: bimap,
     promap: promap,
@@ -1868,6 +2199,8 @@
     apFirst: apFirst,
     apSecond: apSecond,
     of: of,
+    append: append,
+    prepend: prepend,
     chain: chain,
     join: join,
     chainRec: chainRec,
@@ -1876,6 +2209,13 @@
     alt: alt,
     zero: zero,
     reduce: reduce,
+    size: size,
+    elem: elem,
+    reverse: reverse,
+    sort: sort,
+    sortBy: sortBy,
+    takeWhile: takeWhile,
+    dropWhile: dropWhile,
     traverse: traverse,
     sequence: sequence,
     extend: extend,
@@ -1899,6 +2239,7 @@
 //. [FL]:                       https://github.com/fantasyland/fantasy-land
 //. [Foldable]:                 https://github.com/fantasyland/fantasy-land#foldable
 //. [Functor]:                  https://github.com/fantasyland/fantasy-land#functor
+//. [Group]:                    https://github.com/fantasyland/fantasy-land#group
 //. [Monad]:                    https://github.com/fantasyland/fantasy-land#monad
 //. [Monoid]:                   https://github.com/fantasyland/fantasy-land#monoid
 //. [Ord]:                      https://github.com/fantasyland/fantasy-land#ord
@@ -1921,6 +2262,7 @@
 //. [`fantasy-land/extend`]:    https://github.com/fantasyland/fantasy-land#extend-method
 //. [`fantasy-land/extract`]:   https://github.com/fantasyland/fantasy-land#extract-method
 //. [`fantasy-land/id`]:        https://github.com/fantasyland/fantasy-land#id-method
+//. [`fantasy-land/invert`]:    https://github.com/fantasyland/fantasy-land#invert-method
 //. [`fantasy-land/lte`]:       https://github.com/fantasyland/fantasy-land#lte-method
 //. [`fantasy-land/map`]:       https://github.com/fantasyland/fantasy-land#map-method
 //. [`fantasy-land/of`]:        https://github.com/fantasyland/fantasy-land#of-method
@@ -1928,4 +2270,5 @@
 //. [`fantasy-land/reduce`]:    https://github.com/fantasyland/fantasy-land#reduce-method
 //. [`fantasy-land/traverse`]:  https://github.com/fantasyland/fantasy-land#traverse-method
 //. [`fantasy-land/zero`]:      https://github.com/fantasyland/fantasy-land#zero-method
+//. [stable sort]:              https://en.wikipedia.org/wiki/Sorting_algorithm#Stability
 //. [type-classes]:             https://github.com/sanctuary-js/sanctuary-def#type-classes

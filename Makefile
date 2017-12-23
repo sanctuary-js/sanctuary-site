@@ -39,7 +39,7 @@ clean:
 .PHONY: lint
 lint:
 	$(ESLINT) --config node_modules/sanctuary-style/eslint-es6.json -- scripts/generate
-	$(ESLINT) -- behaviour.js
+	$(ESLINT) -- behaviour.js adt/List.js adt/Sum.js
 	make clean
 	make
 	git diff --exit-code

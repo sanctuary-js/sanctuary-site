@@ -280,6 +280,13 @@
     return result;
   }
 
+  //  singleton :: (String, a) -> StrMap a
+  function singleton(k, v) {
+    var result = {};
+    result[k] = v;
+    return result;
+  }
+
   //  strRepeat :: (String, Integer) -> String
   function strRepeat(s, times) {
     return Array(times + 1).join(s);
@@ -412,7 +419,7 @@
 
   //  functionUrl :: String -> String
   function functionUrl(name) {
-    var version = '0.12.1';  // updated programmatically
+    var version = '0.14.0';  // updated programmatically
     return 'https://github.com/sanctuary-js/sanctuary-def/tree/v' + version +
            '#' + stripNamespace(name);
   }
@@ -603,6 +610,15 @@
     function(x) { return RegExp_._test(x) && !x.global; }
   );
 
+  //# NonNegativeInteger :: Type
+  //.
+  //. Type comprising every non-negative [`Integer`][] value (including `-0`).
+  //. Also known as the set of natural numbers under ISO 80000-2:2009.
+  var NonNegativeInteger = NullaryTypeWithUrl(
+    'sanctuary-def/NonNegativeInteger',
+    function(x) { return Integer._test(x) && x >= 0; }
+  );
+
   //# NonZeroFiniteNumber :: Type
   //.
   //. Type comprising every [`FiniteNumber`][] value except `0` and `-0`.
@@ -773,7 +789,8 @@
   //.   - `List (List (List Number))`
   //.   - `List (List (List String))`
   //.   - `...`
-  var Unknown = new _Type(UNKNOWN, '', '', always2('???'), K(true), [], {});
+  var Unknown =
+  new _Type(UNKNOWN, '', '', always2('Unknown'), K(true), [], {});
 
   //# ValidDate :: Type
   //.
@@ -795,20 +812,20 @@
   //.
   //. An array of [types][]:
   //.
-  //.   - <code><a href="#AnyFunction">AnyFunction</a></code>
-  //.   - <code><a href="#Arguments">Arguments</a></code>
-  //.   - <code><a href="#Array">Array</a>(<a href="#Unknown">Unknown</a>)</code>
-  //.   - <code><a href="#Boolean">Boolean</a></code>
-  //.   - <code><a href="#Date">Date</a></code>
-  //.   - <code><a href="#Error">Error</a></code>
-  //.   - <code><a href="#Null">Null</a></code>
-  //.   - <code><a href="#Number">Number</a></code>
-  //.   - <code><a href="#Object">Object</a></code>
-  //.   - <code><a href="#RegExp">RegExp</a></code>
-  //.   - <code><a href="#StrMap">StrMap</a>(<a href="#Unknown">Unknown</a>)</code>
-  //.   - <code><a href="#String">String</a></code>
-  //.   - <code><a href="#Symbol">Symbol</a></code>
-  //.   - <code><a href="#Undefined">Undefined</a></code>
+  //.   - <code>[AnyFunction](#AnyFunction)</code>
+  //.   - <code>[Arguments](#Arguments)</code>
+  //.   - <code>[Array](#Array)([Unknown](#Unknown))</code>
+  //.   - <code>[Boolean](#Boolean)</code>
+  //.   - <code>[Date](#Date)</code>
+  //.   - <code>[Error](#Error)</code>
+  //.   - <code>[Null](#Null)</code>
+  //.   - <code>[Number](#Number)</code>
+  //.   - <code>[Object](#Object)</code>
+  //.   - <code>[RegExp](#RegExp)</code>
+  //.   - <code>[StrMap](#StrMap)([Unknown](#Unknown))</code>
+  //.   - <code>[String](#String)</code>
+  //.   - <code>[Symbol](#Symbol)</code>
+  //.   - <code>[Undefined](#Undefined)</code>
   var env = [
     AnyFunction,
     Arguments,
@@ -894,15 +911,24 @@
     }
   }
 
+  //  expandUnknown :: ... -> Array Type
+  function expandUnknown(
+    env,            // :: Array Type
+    seen,           // :: Array Object
+    value,          // :: Any
+    r               // :: { extractor :: a -> Array b, type :: Type }
+  ) {
+    return r.type.type === UNKNOWN ?
+      _determineActualTypes(env, seen, r.extractor(value)) :
+      [r.type];
+  }
+
   //  _determineActualTypes :: ... -> Array Type
   function _determineActualTypes(
-    loose,          // :: Boolean
     env,            // :: Array Type
     seen,           // :: Array Object
     values          // :: Array Any
   ) {
-    var recur = _determineActualTypes;
-
     function refine(types, value) {
       var seen$;
       if (typeof value === 'object' && value != null ||
@@ -920,17 +946,11 @@
             [] :
           t.type === UNARY ?
             Z.map(fromUnaryType(t),
-                  recur(loose, env, seen$, t.types.$1.extractor(value))) :
+                  expandUnknown(env, seen$, value, t.types.$1)) :
           t.type === BINARY ?
-            xprod(
-              t,
-              t.types.$1.type.type === UNKNOWN ?
-                recur(loose, env, seen$, t.types.$1.extractor(value)) :
-                [t.types.$1.type],
-              t.types.$2.type.type === UNKNOWN ?
-                recur(loose, env, seen$, t.types.$2.extractor(value)) :
-                [t.types.$2.type]
-            ) :
+            xprod(t,
+                  expandUnknown(env, seen$, value, t.types.$1),
+                  expandUnknown(env, seen$, value, t.types.$2)) :
           // else
             [t]
         );
@@ -939,26 +959,27 @@
 
     return isEmpty(values) ?
       [Unknown] :
-      or(Z.reduce(refine, env, values), loose ? [Inconsistent] : []);
+      or(Z.reduce(refine, env, values), [Inconsistent]);
   }
 
-  //  rejectInconsistent :: Array Type -> Array Type
-  function rejectInconsistent(types) {
-    return types.filter(function(t) {
-      return t.type !== INCONSISTENT && t.type !== UNKNOWN;
-    });
+  //  isConsistent :: Type -> Boolean
+  function isConsistent(t) {
+    return t.type === UNARY   ? isConsistent(t.types.$1.type) :
+           t.type === BINARY  ? isConsistent(t.types.$1.type) &&
+                                isConsistent(t.types.$2.type) :
+           /* else */           t.type !== INCONSISTENT;
   }
 
   //  determineActualTypesStrict :: (Array Type, Array Any) -> Array Type
   function determineActualTypesStrict(env, values) {
-    var types$ = _determineActualTypes(false, env, [], values);
-    return rejectInconsistent(types$);
+    return _determineActualTypes(env, [], values)
+           .filter(isConsistent);
   }
 
   //  determineActualTypesLoose :: (Array Type, Array Any) -> Array Type
   function determineActualTypesLoose(env, values) {
-    var types$ = _determineActualTypes(true, env, [], values);
-    return rejectInconsistent(types$);
+    return _determineActualTypes(env, [], values)
+           .filter(function(t) { return t.type !== INCONSISTENT; });
   }
 
   //  TypeInfo = { name :: String
@@ -997,6 +1018,8 @@
       $typeVarMap[typeVar.name].valuesByPath[key] = [];
     }
 
+    var isNullaryTypeVar = isEmpty(typeVar.keys);
+
     values.forEach(function(value) {
       $typeVarMap[typeVar.name].valuesByPath[key].push(value);
       $typeVarMap[typeVar.name].types = Z.chain(
@@ -1006,34 +1029,25 @@
           return (
             invalid ?
               [] :
-            typeVar.keys.length > 0 ?
-              [t].filter(function(t) {
-                return (
-                  t.type !== RECORD &&
-                  t.keys.length >= typeVar.keys.length &&
-                  t.keys.slice(-typeVar.keys.length).every(function(k) {
-                    var xs = t.types[k].extractor(value);
-                    return isEmpty(xs) ||
-                           !isEmpty(determineActualTypesStrict(env, xs));
-                  })
-                );
-              }) :
             t.type === UNARY ?
+              isNullaryTypeVar &&
               t.types.$1.type.type === UNKNOWN &&
               !isEmpty(xs = t.types.$1.extractor(value)) ?
                 Z.map(fromUnaryType(t),
                       determineActualTypesStrict(env, xs)) :
                 [t] :
             t.type === BINARY ?
-              xprod(t,
-                    t.types.$1.type.type === UNKNOWN &&
-                    !isEmpty(xs = t.types.$1.extractor(value)) ?
-                      determineActualTypesStrict(env, xs) :
-                      [t.types.$1.type],
-                    t.types.$2.type.type === UNKNOWN &&
-                    !isEmpty(xs = t.types.$2.extractor(value)) ?
-                      determineActualTypesStrict(env, xs) :
-                      [t.types.$2.type]) :
+              isNullaryTypeVar ?
+                xprod(t,
+                      t.types.$1.type.type === UNKNOWN &&
+                      !isEmpty(xs = t.types.$1.extractor(value)) ?
+                        determineActualTypesStrict(env, xs) :
+                        [t.types.$1.type],
+                      t.types.$2.type.type === UNKNOWN &&
+                      !isEmpty(xs = t.types.$2.extractor(value)) ?
+                        determineActualTypesStrict(env, xs) :
+                        [t.types.$2.type]) :
+                [t] :
             // else
               [t]
           );
@@ -1059,13 +1073,12 @@
             return function(propPath) {
               var indexedPropPath = Z.concat([index], propPath);
               return function(s) {
-                if (t.type === VARIABLE) {
+                if (paths.some(isPrefix(indexedPropPath))) {
                   var key = JSON.stringify(indexedPropPath);
-                  var exists = hasOwnProperty.call(valuesByPath, key);
-                  return (exists && !isEmpty(valuesByPath[key]) ? f : _)(s);
-                } else {
-                  return unless(paths.some(isPrefix(indexedPropPath)), _, s);
+                  if (!hasOwnProperty.call(valuesByPath, key)) return s;
+                  if (!isEmpty(valuesByPath[key])) return f(s);
                 }
+                return _(s);
               };
             };
           };
@@ -1154,7 +1167,7 @@
                 //  variable's $1 will correspond to either $1 or $2 of
                 //  the actual type depending on the actual type's arity.
                 var offset = t.keys.length - expType.keys.length;
-                return expType.keys.reduce(function(r, k, idx) {
+                return expType.keys.reduce(function(e, k, idx) {
                   var extractor = t.types[t.keys[offset + idx]].extractor;
                   var innerValues = Z.chain(extractor, values);
                   return Z.chain(
@@ -1171,14 +1184,21 @@
                       var t = expType.types[k].type;
                       return Z.chain(function(r) {
                         return test(env, t, x) ? Right(r) : Left(function() {
-                          return invalidValue(env,
-                                              typeInfo,
-                                              index,
-                                              Z.concat(propPath, [k]),
-                                              x);
+                          var propPath$ = Z.concat(propPath, [k]);
+                          return t.type === VARIABLE ?
+                            typeVarConstraintViolation(
+                              env,
+                              typeInfo,
+                              index,
+                              propPath$,
+                              singleton(JSON.stringify(Z.concat([index],
+                                                                propPath$)),
+                                        [x])
+                            ) :
+                            invalidValue(env, typeInfo, index, propPath$, x);
                         });
                       }, e);
-                    }, Right(r), innerValues)
+                    }, e, innerValues)
                   );
                 }, Right(r));
               }, e);
@@ -1868,6 +1888,26 @@
         return def(name, {}, [Type, Type, Type], BinaryTypeVariable(name));
       });
 
+  //# Thunk :: Type -> Type
+  //.
+  //. `$.Thunk(T)` is shorthand for `$.Function([T])`, the type comprising
+  //. every nullary function (thunk) which returns a value of type `T`.
+  var Thunk =
+  def('Thunk',
+      {},
+      [Type, Type],
+      function(t) { return Function_([t]); });
+
+  //# Predicate :: Type -> Type
+  //.
+  //. `$.Predicate(T)` is shorthand for `$.Function([T, $.Boolean])`, the type
+  //. comprising every predicate function which takes a value of type `T`.
+  var Predicate =
+  def('Predicate',
+      {},
+      [Type, Type],
+      function(t) { return Function_([t, Boolean_]); });
+
   //. ### Type classes
   //.
   //. `concatS`, defined earlier, is a function which concatenates two strings.
@@ -2088,11 +2128,30 @@
     };
   }
 
-  //  showType :: Type -> String
-  function showType(t) {
-    return unless(t.type === FUNCTION || t.type === RECORD || isEmpty(t.keys),
-                  stripOutermostParens,
-                  String(t));
+  //  typeVarNames :: Type -> Array String
+  function typeVarNames(t) {
+    return Z.concat(
+      t.type === VARIABLE ? [t.name] : [],
+      Z.chain(function(k) { return typeVarNames(t.types[k].type); }, t.keys)
+    );
+  }
+
+  //  showTypeWith :: TypeInfo -> Type -> String
+  function showTypeWith(typeInfo) {
+    var names = Z.chain(typeVarNames, typeInfo.types);
+    return function(t) {
+      var code = 'a'.charCodeAt(0);
+      return unless(
+        t.type === FUNCTION || t.type === RECORD || isEmpty(t.keys),
+        stripOutermostParens,
+        String(t).replace(/\bUnknown\b/g, function() {
+          // eslint-disable-next-line no-plusplus
+          do var name = String.fromCharCode(code++);
+          while (names.indexOf(name) >= 0);
+          return name;
+        })
+      );
+    };
   }
 
   //  showTypeQuoted :: Type -> String
@@ -2102,8 +2161,14 @@
                     String(t)));
   }
 
-  //  showValuesAndTypes :: (Array Type, Array Any, Integer) -> String
-  function showValuesAndTypes(env, values, pos) {
+  //  showValuesAndTypes :: ... -> String
+  function showValuesAndTypes(
+    env,            // :: Array Type
+    typeInfo,       // :: TypeInfo
+    values,         // :: Array Any
+    pos             // :: Integer
+  ) {
+    var showType = showTypeWith(typeInfo);
     return String(pos) + ')  ' + Z.map(function(x) {
       var types = determineActualTypesLoose(env, [x]);
       return Z.toString(x) + ' :: ' + Z.map(showType, types).join(', ');
@@ -2112,7 +2177,7 @@
 
   //  typeSignature :: TypeInfo -> String
   function typeSignature(typeInfo) {
-    var reprs = Z.map(showType, typeInfo.types);
+    var reprs = Z.map(showTypeWith(typeInfo), typeInfo.types);
     var arity = reprs.length - 1;
     return typeInfo.name + ' :: ' +
              constraintsRepr(typeInfo.constraints, id, K(K(id))) +
@@ -2142,8 +2207,8 @@
   function underline(
     typeInfo,               // :: TypeInfo
     underlineConstraint,    // :: String -> TypeClass -> String -> String
-    formatType5             // :: Integer -> (String -> String) -> Type ->
-                            //      PropPath -> String -> String
+    formatType5
+    // :: Integer -> (String -> String) -> Type -> PropPath -> String -> String
   ) {
     var st = typeInfo.types.reduce(function(st, t, index) {
       var formatType4 = formatType5(index);
@@ -2222,7 +2287,7 @@
                 },
                 formatType6(Z.concat([index], propPath))) +
       '\n' +
-      showValuesAndTypes(env, [value], 1) + '\n\n' +
+      showValuesAndTypes(env, typeInfo, [value], 1) + '\n\n' +
       q(typeInfo.name) + ' requires ' + q(expType.name) + ' to satisfy the ' +
       stripNamespace(typeClass.name) + ' type-class constraint; ' +
       'the value at position 1 does not.\n' +
@@ -2274,7 +2339,7 @@
           'The value at position 1 is not a member of any type in ' +
           'the environment.\n\n' +
           'The environment contains the following types:\n\n',
-          showType,
+          showTypeWith(typeInfo),
           env
         ) :
       // else
@@ -2284,7 +2349,9 @@
           var values = valuesByPath[k];
           return isEmpty(values) ? st : {
             idx: st.idx + 1,
-            s: st.s + showValuesAndTypes(env, values, st.idx + 1) + '\n\n'
+            s: st.s +
+               showValuesAndTypes(env, typeInfo, values, st.idx + 1) +
+               '\n\n'
           };
         }, {idx: 0, s: ''}, keys).s +
         'Since there is no type of which all the above values are ' +
@@ -2307,7 +2374,7 @@
                 K(K(_)),
                 formatType6(Z.concat([index], propPath))) +
       '\n' +
-      showValuesAndTypes(env, [value], 1) + '\n\n' +
+      showValuesAndTypes(env, typeInfo, [value], 1) + '\n\n' +
       'The value at position 1 is not a member of ' + showTypeQuoted(t) + '.' +
       '\n' +
       see('type', t)
@@ -2428,6 +2495,7 @@
       }
     });
 
+    var showType = showTypeWith(typeInfo);
     curried.inspect = curried.toString = function() {
       var vReprs = [];
       var tReprs = [];
@@ -2518,6 +2586,7 @@
     NegativeNumber: NegativeNumber,
     NonEmpty: NonEmpty,
     NonGlobalRegExp: NonGlobalRegExp,
+    NonNegativeInteger: NonNegativeInteger,
     NonZeroFiniteNumber: NonZeroFiniteNumber,
     NonZeroInteger: NonZeroInteger,
     NonZeroValidNumber: NonZeroValidNumber,
@@ -2550,7 +2619,9 @@
     RecordType: CheckedRecordType,
     TypeVariable: CheckedTypeVariable,
     UnaryTypeVariable: CheckedUnaryTypeVariable,
-    BinaryTypeVariable: CheckedBinaryTypeVariable
+    BinaryTypeVariable: CheckedBinaryTypeVariable,
+    Thunk: Thunk,
+    Predicate: Predicate
   };
 
 }));

@@ -110,10 +110,11 @@
 //. the `map` method takes an implicit argument `x` in addition to the explicit
 //. argument `y`. The type of the value upon which a method is invoked appears
 //. at the beginning of the signature, separated from the arguments and return
-//. value by a squiggly arrow (`~>`). The type of the `map` method of the Maybe
-//. type is written `Maybe a ~> (a -> b) -> Maybe b`. One could read this as:
+//. value by a squiggly arrow (`~>`). The type of the `fantasy-land/map` method
+//. of the Maybe type is written `Maybe a ~> (a -> b) -> Maybe b`. One could
+//. read this as:
 //.
-//. _When the `map` method is invoked on a value of type `Maybe a`
+//. _When the `fantasy-land/map` method is invoked on a value of type `Maybe a`
 //. (for any type `a`) with an argument of type `a -> b` (for any type `b`),
 //. it returns a value of type `Maybe b`._
 //.
@@ -127,23 +128,6 @@
 //. Functor type class. Type-class constraints appear at the beginning of a
 //. type signature, separated from the rest of the signature by a fat arrow
 //. (`=>`).
-//.
-//. ### Accessible pseudotype
-//.
-//. What is the type of values which support property access? In other words,
-//. what is the type of which every value except `null` and `undefined` is a
-//. member? Object is close, but `Object.create(null)` produces a value which
-//. supports property access but which is not a member of the Object type.
-//.
-//. Sanctuary uses the Accessible pseudotype to represent the set of values
-//. which support property access.
-//.
-//. ### Integer pseudotype
-//.
-//. The Integer pseudotype represents integers in the range (-2^53 .. 2^53).
-//. It is a pseudotype because each Integer is represented by a Number value.
-//. Sanctuary's run-time type checking asserts that a valid Number value is
-//. provided wherever an Integer value is required.
 //.
 //. ### Type representatives
 //.
@@ -178,7 +162,7 @@
 //. //
 //. //   The value at position 1 is not a member of ‘FiniteNumber’.
 //. //
-//. //   See https://github.com/sanctuary-js/sanctuary-def/tree/v0.12.0#FiniteNumber for information about the sanctuary-def/FiniteNumber type.
+//. //   See v:sanctuary-js/sanctuary-def#FiniteNumber for information about the sanctuary-def/FiniteNumber type.
 //. ```
 //.
 //. Compare this to the behaviour of Ramda's unchecked equivalent:
@@ -232,12 +216,6 @@
   //  Fn :: (Type, Type) -> Type
   function Fn(x, y) { return $.Function([x, y]); }
 
-  //  Pred :: Type -> Type
-  function Pred(x) { return Fn(x, $.Boolean); }
-
-  //  Thunk :: Type -> Type
-  function Thunk(x) { return $.Function([x]); }
-
   //  flip$ :: ((a, b) -> c) -> b -> a -> c
   function flip$(f) {
     return function(x) {
@@ -247,9 +225,9 @@
     };
   }
 
-  //  negativeZero :: Number -> Boolean
-  function negativeZero(n) {
-    return n === 0 && 1 / n === -Infinity;
+  //  toObject :: a -> Object
+  function toObject(x) {
+    return x == null ? Object.create(null) : Object(x);
   }
 
   //  typeEq :: String -> a -> Boolean
@@ -266,27 +244,9 @@
     };
   }
 
-  //  uncurry3 :: (a -> b -> c -> d) -> ((a, b, c) -> d)
-  function uncurry3(f) {
-    return function(x, y, z) {
-      return f(x)(y)(z);
-    };
-  }
-
-  //  unsafeHead :: Array a -> a?
-  function unsafeHead(xs) { return xs[0]; }
-
-  //  Accessible :: TypeClass
-  var Accessible = Z.TypeClass(
-    'sanctuary/Accessible',
-    readmeUrl('accessible-pseudotype'),
-    [],
-    function(x) { return x != null; }
-  );
-
   //  readmeUrl :: String -> String
   function readmeUrl(id) {
-    var version = '0.13.2';  // updated programmatically
+    var version = '0.14.0';  // updated programmatically
     return 'https://github.com/sanctuary-js/sanctuary/tree/v' + version +
            '#' + id;
   }
@@ -297,6 +257,7 @@
   var c = $.TypeVariable('c');
   var d = $.TypeVariable('d');
   var e = $.TypeVariable('e');
+  var g = $.TypeVariable('g');
   var l = $.TypeVariable('l');
   var r = $.TypeVariable('r');
 
@@ -361,6 +322,7 @@
     $.GlobalRegExp,
     $.NonGlobalRegExp,
     $.Integer,
+    $.NonNegativeInteger,
     $Maybe($.Unknown),
     $.Pair($.Unknown, $.Unknown),
     $.RegexFlags,
@@ -375,6 +337,12 @@
   function createSanctuary(opts) {
 
   /* eslint-disable indent */
+
+  //  checkTypes :: Boolean
+  var checkTypes = opts.checkTypes;
+
+  //  env :: Array Type
+  var env = opts.env;
 
   var S = {};
 
@@ -429,10 +397,10 @@
   //.
   //. See also [`env`](#env).
   S.create =
-  $.create({checkTypes: opts.checkTypes, env: defaultEnv})('create',
-                                                           {},
-                                                           [Options, $.Object],
-                                                           createSanctuary);
+  $.create({checkTypes: checkTypes, env: defaultEnv})('create',
+                                                      {},
+                                                      [Options, $.Object],
+                                                      createSanctuary);
 
   //# env :: Array Type
   //.
@@ -440,7 +408,18 @@
   //. custom environment in conjunction with [`create`](#create).
   S.env = defaultEnv;
 
-  var def = $.create(opts);
+  /* istanbul ignore if */
+  if (typeof __doctest !== 'undefined') {
+    /* eslint-disable no-unused-vars */
+    var _List = require('./test/internal/List');
+    var Cons = _List.Cons;
+    var Nil = _List.Nil;
+    var Sum = require('./test/internal/Sum');
+    /* eslint-enable no-unused-vars */
+    env = Z.concat(env, [_List.Type($.Unknown), Sum.Type]);
+  }
+
+  var def = $.create({checkTypes: checkTypes, env: env});
 
   //. ### Placeholder
   //.
@@ -479,7 +458,7 @@
 
   //. ### Classify
 
-  //# type :: Any -> { namespace :: Maybe String, name :: String, version :: Integer }
+  //# type :: Any -> { namespace :: Maybe String, name :: String, version :: NonNegativeInteger }
   //.
   //. Returns the result of parsing the [type identifier][] of the given value.
   //.
@@ -496,7 +475,7 @@
       [$.Any,
        $.RecordType({namespace: $Maybe($.String),
                      name: $.String,
-                     version: $.Integer})],
+                     version: $.NonNegativeInteger})],
       function(x) {
         var r = type.parse(type(x));
         r.namespace = toMaybe(r.namespace);
@@ -505,9 +484,9 @@
 
   //# is :: TypeRep a -> Any -> Boolean
   //.
-  //. Takes a [type representative](#type-representatives) and a value of
-  //. any type and returns `true` if the given value is of the specified
-  //. type; `false` otherwise. Subtyping is not respected.
+  //. Takes a [type representative](#type-representatives) and a value of any
+  //. type and returns `true` [iff][] the given value is of the specified type.
+  //. Subtyping is not respected.
   //.
   //. ```javascript
   //. > S.is(Number, 42)
@@ -581,7 +560,8 @@
 
   //# lt :: Ord a => a -> (a -> Boolean)
   //.
-  //. Flipped version of [`Z.lt`][] intended for partial application.
+  //. Returns `true` [iff][] the *second* argument is less than the first
+  //. according to [`Z.lt`][]. The arguments must be provided one at a time.
   //.
   //. See also [`lt_`](#lt_).
   //.
@@ -589,11 +569,12 @@
   //. > S.filter(S.lt(3), [1, 2, 3, 4, 5])
   //. [1, 2]
   //. ```
-  S.lt = def('lt', {a: [Z.Ord]}, [a, Pred(a)], flip$(Z.lt));
+  S.lt = def('lt', {a: [Z.Ord]}, [a, $.Predicate(a)], flip$(Z.lt));
 
   //# lt_ :: Ord a => a -> a -> Boolean
   //.
-  //. Curried version of [`Z.lt`][].
+  //. Returns `true` [iff][] the first argument is less than the second
+  //. according to [`Z.lt`][].
   //.
   //. See also [`lt`](#lt).
   //.
@@ -611,7 +592,9 @@
 
   //# lte :: Ord a => a -> (a -> Boolean)
   //.
-  //. Flipped version of [`Z.lte`][] intended for partial application.
+  //. Returns `true` [iff][] the *second* argument is less than or equal to
+  //. the first according to [`Z.lte`][]. The arguments must be provided one
+  //. at a time.
   //.
   //. See also [`lte_`](#lte_).
   //.
@@ -619,11 +602,12 @@
   //. > S.filter(S.lte(3), [1, 2, 3, 4, 5])
   //. [1, 2, 3]
   //. ```
-  S.lte = def('lte', {a: [Z.Ord]}, [a, Pred(a)], flip$(Z.lte));
+  S.lte = def('lte', {a: [Z.Ord]}, [a, $.Predicate(a)], flip$(Z.lte));
 
   //# lte_ :: Ord a => a -> a -> Boolean
   //.
-  //. Curried version of [`Z.lte`][].
+  //. Returns `true` [iff][] the first argument is less than or equal to the
+  //. second according to [`Z.lte`][].
   //.
   //. See also [`lte`](#lte).
   //.
@@ -641,7 +625,8 @@
 
   //# gt :: Ord a => a -> (a -> Boolean)
   //.
-  //. Flipped version of [`Z.gt`][] intended for partial application.
+  //. Returns `true` [iff][] the *second* argument is greater than the first
+  //. according to [`Z.gt`][]. The arguments must be provided one at a time.
   //.
   //. See also [`gt_`](#gt_).
   //.
@@ -649,11 +634,12 @@
   //. > S.filter(S.gt(3), [1, 2, 3, 4, 5])
   //. [4, 5]
   //. ```
-  S.gt = def('gt', {a: [Z.Ord]}, [a, Pred(a)], flip$(Z.gt));
+  S.gt = def('gt', {a: [Z.Ord]}, [a, $.Predicate(a)], flip$(Z.gt));
 
   //# gt_ :: Ord a => a -> a -> Boolean
   //.
-  //. Curried version of [`Z.gt`][].
+  //. Returns `true` [iff][] the first argument is greater than the second
+  //. according to [`Z.gt`][].
   //.
   //. See also [`gt`](#gt).
   //.
@@ -671,7 +657,9 @@
 
   //# gte :: Ord a => a -> (a -> Boolean)
   //.
-  //. Flipped version of [`Z.gte`][] intended for partial application.
+  //. Returns `true` [iff][] the *second* argument is greater than or equal
+  //. to the first according to [`Z.gte`][]. The arguments must be provided
+  //. one at a time.
   //.
   //. See also [`gte_`](#gte_).
   //.
@@ -679,11 +667,12 @@
   //. > S.filter(S.gte(3), [1, 2, 3, 4, 5])
   //. [3, 4, 5]
   //. ```
-  S.gte = def('gte', {a: [Z.Ord]}, [a, Pred(a)], flip$(Z.gte));
+  S.gte = def('gte', {a: [Z.Ord]}, [a, $.Predicate(a)], flip$(Z.gte));
 
   //# gte_ :: Ord a => a -> a -> Boolean
   //.
-  //. Curried version of [`Z.gte`][].
+  //. Returns `true` [iff][] the first argument is greater than or equal to
+  //. the second according to [`Z.gte`][].
   //.
   //. See also [`gte`](#gte).
   //.
@@ -715,10 +704,7 @@
   //. > S.min('10', '2')
   //. '10'
   //. ```
-  function min(x, y) {
-    return Z.lte(x, y) ? x : y;
-  }
-  S.min = def('min', {a: [Z.Ord]}, [a, a, a], min);
+  S.min = def('min', {a: [Z.Ord]}, [a, a, a], Z.min);
 
   //# max :: Ord a => a -> a -> a
   //.
@@ -736,10 +722,7 @@
   //. > S.max('10', '2')
   //. '2'
   //. ```
-  function max(x, y) {
-    return Z.lte(x, y) ? y : x;
-  }
-  S.max = def('max', {a: [Z.Ord]}, [a, a, a], max);
+  S.max = def('max', {a: [Z.Ord]}, [a, a, a], Z.max);
 
   //# id :: Category c => TypeRep c -> c
   //.
@@ -767,6 +750,9 @@
   //.
   //. > S.concat(S.Just([1, 2, 3]), S.Just([4, 5, 6]))
   //. Just([1, 2, 3, 4, 5, 6])
+  //.
+  //. > S.concat(Sum(18), Sum(24))
+  //. Sum(42)
   //. ```
   S.concat = def('concat', {a: [Z.Semigroup]}, [a, a, a], Z.concat);
 
@@ -783,8 +769,21 @@
   //.
   //. > S.empty(Object)
   //. {}
+  //.
+  //. > S.empty(Sum)
+  //. Sum(0)
   //. ```
   S.empty = def('empty', {a: [Z.Monoid]}, [TypeRep(a), a], Z.empty);
+
+  //# invert :: Group g => g -> g
+  //.
+  //. [Type-safe][sanctuary-def] version of [`Z.invert`][].
+  //.
+  //. ```javascript
+  //. > S.invert(Sum(5))
+  //. Sum(-5)
+  //. ```
+  S.invert = def('invert', {g: [Z.Group]}, [g, g], Z.invert);
 
   //# map :: Functor f => (a -> b) -> f a -> f b
   //.
@@ -897,8 +896,6 @@
   //. value if the Foldable is empty; the result of the final application
   //. otherwise.
   //.
-  //. See also [`reduce_`](#reduce_).
-  //.
   //. ```javascript
   //. > S.reduce(S.add, 0, [1, 2, 3, 4, 5])
   //. 15
@@ -911,15 +908,6 @@
   }
   S.reduce =
   def('reduce', {f: [Z.Foldable]}, [Fn(a, Fn(b, a)), a, f(b), a], reduce);
-
-  //# reduce_ :: Foldable f => ((b, a) -> b) -> b -> f a -> b
-  //.
-  //. Variant of [`reduce`](#reduce) which takes an uncurried binary function.
-  S.reduce_ =
-  def('reduce_',
-      {f: [Z.Foldable]},
-      [$.Function([a, b, a]), a, f(b), a],
-      Z.reduce);
 
   //# traverse :: (Applicative f, Traversable t) => TypeRep f -> (a -> f b) -> t a -> f (t b)
   //.
@@ -952,7 +940,8 @@
 
   //# sequence :: (Applicative f, Traversable t) => TypeRep f -> t (f a) -> f (t a)
   //.
-  //. Curried version of [`Z.sequence`][].
+  //. Curried version of [`Z.sequence`][]. Inverts the given `t (f a)`
+  //. to produce an `f (t a)`.
   //.
   //. ```javascript
   //. > S.sequence(Array, S.Just([1, 2, 3]))
@@ -1213,7 +1202,8 @@
 
   //# filter :: (Applicative f, Foldable f, Monoid (f a)) => (a -> Boolean) -> f a -> f a
   //.
-  //. Curried version of [`Z.filter`][].
+  //. Curried version of [`Z.filter`][]. Filters its second argument in
+  //. accordance with the given predicate.
   //.
   //. See also [`filterM`](#filterM).
   //.
@@ -1224,12 +1214,13 @@
   S.filter =
   def('filter',
       {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
-      [Pred(a), f(a), f(a)],
+      [$.Predicate(a), f(a), f(a)],
       Z.filter);
 
   //# filterM :: (Alternative m, Monad m) => (a -> Boolean) -> m a -> m a
   //.
-  //. Curried version of [`Z.filterM`][].
+  //. Curried version of [`Z.filterM`][]. Filters its second argument in
+  //. accordance with the given predicate.
   //.
   //. See also [`filter`](#filter).
   //.
@@ -1246,7 +1237,7 @@
   S.filterM =
   def('filterM',
       {m: [Z.Alternative, Z.Monad]},
-      [Pred(a), m(a), m(a)],
+      [$.Predicate(a), m(a), m(a)],
       Z.filterM);
 
   //# takeWhile :: (Foldable f, Alternative f) => (a -> Boolean) -> f a -> f a
@@ -1261,25 +1252,11 @@
   //. > S.takeWhile(S.even, [3, 3, 3, 7, 6, 3, 5, 4])
   //. []
   //. ```
-  function Array$takeWhile(pred, xs) {
-    var idx = 0;
-    while (idx < xs.length && pred(xs[idx])) idx += 1;
-    return xs.slice(0, idx);
-  }
-
-  function takeWhile(pred, xs) {
-    if (Array.isArray(xs)) return Array$takeWhile(pred, xs);
-    var done = false;
-    function takeWhileReducer(xs, x) {
-      return !done && pred(x) ? append(x, xs) : (done = true, xs);
-    }
-    return Z.reduce(takeWhileReducer, Z.empty(xs.constructor), xs);
-  }
   S.takeWhile =
   def('takeWhile',
       {f: [Z.Foldable, Z.Alternative]},
-      [Pred(a), f(a), f(a)],
-      takeWhile);
+      [$.Predicate(a), f(a), f(a)],
+      Z.takeWhile);
 
   //# dropWhile :: (Foldable f, Alternative f) => (a -> Boolean) -> f a -> f a
   //.
@@ -1293,25 +1270,11 @@
   //. > S.dropWhile(S.even, [3, 3, 3, 7, 6, 3, 5, 4])
   //. [3, 3, 3, 7, 6, 3, 5, 4]
   //. ```
-  function Array$dropWhile(pred, xs) {
-    var idx = 0;
-    while (idx < xs.length && pred(xs[idx])) idx += 1;
-    return xs.slice(idx);
-  }
-
-  function dropWhile(pred, xs) {
-    if (Array.isArray(xs)) return Array$dropWhile(pred, xs);
-    var done = false;
-    function dropWhileReducer(xs, x) {
-      return !done && pred(x) ? xs : (done = true, append(x, xs));
-    }
-    return Z.reduce(dropWhileReducer, Z.empty(xs.constructor), xs);
-  }
   S.dropWhile =
   def('dropWhile',
       {f: [Z.Foldable, Z.Alternative]},
-      [Pred(a), f(a), f(a)],
-      dropWhile);
+      [$.Predicate(a), f(a), f(a)],
+      Z.dropWhile);
 
   //. ### Combinator
 
@@ -1499,14 +1462,6 @@
   }
   S.flip = def('flip', {}, [Fn(a, Fn(b, c)), b, a, c], flip);
 
-  //# flip_ :: ((a, b) -> c) -> b -> a -> c
-  //.
-  //. Variant of [`flip`](#flip) which takes an uncurried binary function.
-  function flip_(f, x, y) {
-    return f(y, x);
-  }
-  S.flip_ = def('flip_', {}, [$.Function([a, b, c]), b, a, c], flip_);
-
   //. ### Composition
 
   //# compose :: Semigroupoid s => s b c -> s a b -> s a c
@@ -1556,31 +1511,21 @@
   //.
   //. This is the P combinator from combinatory logic.
   //.
-  //. See also [`on_`](#on_).
-  //.
   //. ```javascript
   //. > S.on(S.concat, S.reverse, [1, 2, 3], [4, 5, 6])
   //. [3, 2, 1, 6, 5, 4]
   //. ```
   function on(f, g, x, y) {
-    return on_(uncurry2(f), g, x, y);
+    return f(g(x))(g(y));
   }
   S.on = def('on', {}, [Fn(b, Fn(b, c)), Fn(a, b), a, a, c], on);
-
-  //# on_ :: ((b, b) -> c) -> (a -> b) -> a -> a -> c
-  //.
-  //. Variant of [`on`](#on) which takes an uncurried binary function.
-  function on_(f, g, x, y) {
-    return f(g(x), g(y));
-  }
-  S.on_ = def('on_', {}, [$.Function([b, b, c]), Fn(a, b), a, a, c], on_);
 
   //. ### Maybe type
   //.
   //. The Maybe type represents optional values: a value of type `Maybe a` is
   //. either a Just whose value is of type `a` or Nothing (with no value).
   //.
-  //. The Maybe type satisfies the [Setoid][], [Monoid][], [Monad][],
+  //. The Maybe type satisfies the [Ord][], [Monoid][], [Monad][],
   //. [Alternative][], [Traversable][], and [Extend][] specifications.
 
   //# MaybeType :: Type -> Type
@@ -1647,6 +1592,9 @@
   //.
   //. Returns Nothing.
   //.
+  //. It is idiomatic to use [`empty`](#empty) rather than use this function
+  //. directly.
+  //.
   //. ```javascript
   //. > S.empty(S.Maybe)
   //. Nothing
@@ -1657,6 +1605,9 @@
   //.
   //. Takes a value of any type and returns a Just with the given value.
   //.
+  //. It is idiomatic to use [`of`](#of) rather than use this function
+  //. directly.
+  //.
   //. ```javascript
   //. > S.of(S.Maybe, 42)
   //. Just(42)
@@ -1666,6 +1617,9 @@
   //# Maybe.fantasy-land/zero :: () -> Maybe a
   //.
   //. Returns Nothing.
+  //.
+  //. It is idiomatic to use [`zero`](#zero) rather than use this function
+  //. directly.
   //.
   //. ```javascript
   //. > S.zero(S.Maybe)
@@ -1737,6 +1691,9 @@
   //.   - `this` and `m` are both Justs, and their values are equal according
   //.     to [`Z.equals`][].
   //.
+  //. It is idiomatic to use [`equals`](#equals) rather than use this method
+  //. directly.
+  //.
   //. ```javascript
   //. > S.equals(S.Nothing, S.Nothing)
   //. true
@@ -1763,6 +1720,9 @@
   //.
   //.   - `this` and `m` are both Justs and the value of `this` is less than
   //.     or equal to the value of `m` according to [`Z.lte`][].
+  //.
+  //. It is idiomatic to use [`lte`](#lte) or [`lte_`](#lte_) rather than use
+  //. this method directly.
   //.
   //. ```javascript
   //. > S.lte_(S.Nothing, S.Nothing)
@@ -1798,6 +1758,9 @@
   //.
   //. Otherwise, this method returns the Just.
   //.
+  //. It is idiomatic to use [`concat`](#concat) rather than use this method
+  //. directly.
+  //.
   //. ```javascript
   //. > S.concat(S.Nothing, S.Nothing)
   //. Nothing
@@ -1823,6 +1786,9 @@
   //. it returns a Just whose value is the result of applying the function
   //. to this Just's value.
   //.
+  //. It is idiomatic to use [`map`](#map) rather than use this method
+  //. directly.
+  //.
   //. ```javascript
   //. > S.map(Math.sqrt, S.Nothing)
   //. Nothing
@@ -1839,6 +1805,8 @@
   //. Takes a Maybe and returns Nothing unless `this` is a Just *and* the
   //. argument is a Just, in which case it returns a Just whose value is
   //. the result of applying the given Just's value to this Just's value.
+  //.
+  //. It is idiomatic to use [`ap`](#ap) rather than use this method directly.
   //.
   //. ```javascript
   //. > S.ap(S.Nothing, S.Nothing)
@@ -1862,6 +1830,9 @@
   //. Takes a function and returns `this` if `this` is Nothing; otherwise
   //. it returns the result of applying the function to this Just's value.
   //.
+  //. It is idiomatic to use [`chain`](#chain) rather than use this method
+  //. directly.
+  //.
   //. ```javascript
   //. > S.chain(S.parseFloat, S.Nothing)
   //. Nothing
@@ -1880,6 +1851,9 @@
   //.
   //. Chooses between `this` and the other Maybe provided as an argument.
   //. Returns `this` if `this` is a Just; the other Maybe otherwise.
+  //.
+  //. It is idiomatic to use [`alt`](#alt) rather than use this method
+  //. directly.
   //.
   //. ```javascript
   //. > S.alt(S.Nothing, S.Nothing)
@@ -1907,11 +1881,14 @@
   //.   - the result of applying the function to the initial value and this
   //.     Just's value.
   //.
+  //. It is idiomatic to use [`reduce`](#reduce) rather than use this method
+  //. directly.
+  //.
   //. ```javascript
-  //. > S.reduce_(Math.pow, 10, S.Nothing)
+  //. > S.reduce(S.curry2(Math.pow), 10, S.Nothing)
   //. 10
   //.
-  //. > S.reduce_(Math.pow, 10, S.Just(3))
+  //. > S.reduce(S.curry2(Math.pow), 10, S.Just(3))
   //. 1000
   //. ```
   Maybe.prototype['fantasy-land/reduce'] = function(f, x) {
@@ -1929,6 +1906,9 @@
   //.   - the result of mapping [`Just`](#Just) over the result of applying the
   //.     first function to this Just's value.
   //.
+  //. It is idiomatic to use [`traverse`](#traverse) rather than use this
+  //. method directly.
+  //.
   //. ```javascript
   //. > S.traverse(Array, S.words, S.Nothing)
   //. [Nothing]
@@ -1945,6 +1925,9 @@
   //. Takes a function and returns `this` if `this` is Nothing; otherwise
   //. it returns a Just whose value is the result of applying the function
   //. to `this`.
+  //.
+  //. It is idiomatic to use [`extend`](#extend) rather than use this method
+  //. directly.
   //.
   //. ```javascript
   //. > S.extend(x => x.value + 1, S.Nothing)
@@ -2026,7 +2009,7 @@
   function fromMaybe_(thunk, maybe) {
     return maybe.isJust ? maybe.value : thunk();
   }
-  S.fromMaybe_ = def('fromMaybe_', {}, [Thunk(a), $Maybe(a), a], fromMaybe_);
+  S.fromMaybe_ = def('fromMaybe_', {}, [$.Thunk(a), $Maybe(a), a], fromMaybe_);
 
   //# maybeToNullable :: Maybe a -> Nullable a
   //.
@@ -2102,7 +2085,7 @@
   function maybe_(thunk, f, maybe) {
     return maybe.isJust ? f(maybe.value) : thunk();
   }
-  S.maybe_ = def('maybe_', {}, [Thunk(b), Fn(a, b), $Maybe(a), b], maybe_);
+  S.maybe_ = def('maybe_', {}, [$.Thunk(b), Fn(a, b), $Maybe(a), b], maybe_);
 
   //# justs :: Array (Maybe a) -> Array a
   //.
@@ -2171,54 +2154,27 @@
   //# encase2 :: (a -> b -> c) -> a -> b -> Maybe c
   //.
   //. Binary version of [`encase`](#encase).
-  //.
-  //. See also [`encase2_`](#encase2_).
   function encase2(f, x, y) {
-    return encase2_(uncurry2(f), x, y);
-  }
-  S.encase2 = def('encase2', {}, [Fn(a, Fn(b, c)), a, b, $Maybe(c)], encase2);
-
-  //# encase2_ :: ((a, b) -> c) -> a -> b -> Maybe c
-  //.
-  //. Variant of [`encase2`](#encase2) which takes an uncurried binary
-  //. function.
-  function encase2_(f, x, y) {
     try {
-      return Just(f(x, y));
+      return Just(f(x)(y));
     } catch (err) {
       return Nothing;
     }
   }
-  S.encase2_ =
-  def('encase2_', {}, [$.Function([a, b, c]), a, b, $Maybe(c)], encase2_);
+  S.encase2 = def('encase2', {}, [Fn(a, Fn(b, c)), a, b, $Maybe(c)], encase2);
 
   //# encase3 :: (a -> b -> c -> d) -> a -> b -> c -> Maybe d
   //.
   //. Ternary version of [`encase`](#encase).
-  //.
-  //. See also [`encase3_`](#encase3_).
   function encase3(f, x, y, z) {
-    return encase3_(uncurry3(f), x, y, z);
-  }
-  S.encase3 =
-  def('encase3', {}, [Fn(a, Fn(b, Fn(c, d))), a, b, c, $Maybe(d)], encase3);
-
-  //# encase3_ :: ((a, b, c) -> d) -> a -> b -> c -> Maybe d
-  //.
-  //. Variant of [`encase3`](#encase3) which takes an uncurried ternary
-  //. function.
-  function encase3_(f, x, y, z) {
     try {
-      return Just(f(x, y, z));
+      return Just(f(x)(y)(z));
     } catch (err) {
       return Nothing;
     }
   }
-  S.encase3_ =
-  def('encase3_',
-      {},
-      [$.Function([a, b, c, d]), a, b, c, $Maybe(d)],
-      encase3_);
+  S.encase3 =
+  def('encase3', {}, [Fn(a, Fn(b, Fn(c, d))), a, b, c, $Maybe(d)], encase3);
 
   //# maybeToEither :: a -> Maybe b -> Either a b
   //.
@@ -2246,7 +2202,7 @@
   //. `Either a b` is either a Left whose value is of type `a` or a Right whose
   //. value is of type `b`.
   //.
-  //. The Either type satisfies the [Setoid][], [Semigroup][], [Monad][],
+  //. The Either type satisfies the [Ord][], [Semigroup][], [Monad][],
   //. [Alt][], [Traversable][], [Extend][], and [Bifunctor][] specifications.
 
   //# EitherType :: Type -> Type -> Type
@@ -2317,6 +2273,9 @@
   //.
   //. Takes a value of any type and returns a Right with the given value.
   //.
+  //. It is idiomatic to use [`of`](#of) rather than use this function
+  //. directly.
+  //.
   //. ```javascript
   //. > S.of(S.Either, 42)
   //. Right(42)
@@ -2386,6 +2345,9 @@
   //.   - `this` and `e` are both Lefts or both Rights, and their values are
   //.     equal according to [`Z.equals`][].
   //.
+  //. It is idiomatic to use [`equals`](#equals) rather than use this method
+  //. directly.
+  //.
   //. ```javascript
   //. > S.equals(S.Right([1, 2, 3]), S.Right([1, 2, 3]))
   //. true
@@ -2405,6 +2367,9 @@
   //.
   //.   - `this` and `e` are both Lefts or both Rights, and the value of `this`
   //.     is less than or equal to the value of `e` according to [`Z.lte`][].
+  //.
+  //. It is idiomatic to use [`lte`](#lte) or [`lte_`](#lte_) rather than use
+  //. this method directly.
   //.
   //. ```javascript
   //. > S.lte_(S.Left(10), S.Right(0))
@@ -2440,6 +2405,9 @@
   //.
   //. Otherwise, this method returns the Right.
   //.
+  //. It is idiomatic to use [`concat`](#concat) rather than use this method
+  //. directly.
+  //.
   //. ```javascript
   //. > S.concat(S.Left('abc'), S.Left('def'))
   //. Left('abcdef')
@@ -2464,6 +2432,9 @@
   //. Takes a function and returns `this` if `this` is a Left; otherwise it
   //. returns a Right whose value is the result of applying the function to
   //. this Right's value.
+  //.
+  //. It is idiomatic to use [`map`](#map) rather than use this method
+  //. directly.
   //.
   //. See also [`Either#fantasy-land/bimap`][].
   //.
@@ -2491,6 +2462,9 @@
   //. Similar to [`Either#fantasy-land/map`][], but supports mapping over the
   //. left side as well as the right side.
   //.
+  //. It is idiomatic to use [`bimap`](#bimap) rather than use this method
+  //. directly.
+  //.
   //. ```javascript
   //. > S.bimap(S.toUpper, S.add(1), S.Left('abc'))
   //. Left('ABC')
@@ -2507,6 +2481,8 @@
   //. Takes an Either and returns a Left unless `this` is a Right *and* the
   //. argument is a Right, in which case it returns a Right whose value is
   //. the result of applying the given Right's value to this Right's value.
+  //.
+  //. It is idiomatic to use [`ap`](#ap) rather than use this method directly.
   //.
   //. ```javascript
   //. > S.ap(S.Left('No such function'), S.Left('Cannot divide by zero'))
@@ -2529,6 +2505,9 @@
   //.
   //. Takes a function and returns `this` if `this` is a Left; otherwise
   //. it returns the result of applying the function to this Right's value.
+  //.
+  //. It is idiomatic to use [`chain`](#chain) rather than use this method
+  //. directly.
   //.
   //. ```javascript
   //. > global.sqrt = n =>
@@ -2553,6 +2532,9 @@
   //.
   //. Chooses between `this` and the other Either provided as an argument.
   //. Returns `this` if `this` is a Right; the other Either otherwise.
+  //.
+  //. It is idiomatic to use [`alt`](#alt) rather than use this method
+  //. directly.
   //.
   //. ```javascript
   //. > S.alt(S.Left('A'), S.Left('B'))
@@ -2580,11 +2562,14 @@
   //.   - the result of applying the function to the initial value and this
   //.     Right's value.
   //.
+  //. It is idiomatic to use [`reduce`](#reduce) rather than use this method
+  //. directly.
+  //.
   //. ```javascript
-  //. > S.reduce_(Math.pow, 10, S.Left('Cannot divide by zero'))
+  //. > S.reduce(S.curry2(Math.pow), 10, S.Left('Cannot divide by zero'))
   //. 10
   //.
-  //. > S.reduce_(Math.pow, 10, S.Right(3))
+  //. > S.reduce(S.curry2(Math.pow), 10, S.Right(3))
   //. 1000
   //. ```
   Either.prototype['fantasy-land/reduce'] = function(f, x) {
@@ -2602,6 +2587,9 @@
   //.   - the result of mapping [`Right`](#Right) over the result of applying
   //.     the first function to this Right's value.
   //.
+  //. It is idiomatic to use [`traverse`](#traverse) rather than use this
+  //. method directly.
+  //.
   //. ```javascript
   //. > S.traverse(Array, S.words, S.Left('Request failed'))
   //. [Left('Request failed')]
@@ -2618,6 +2606,9 @@
   //. Takes a function and returns `this` if `this` is a Left; otherwise it
   //. returns a Right whose value is the result of applying the function to
   //. `this`.
+  //.
+  //. It is idiomatic to use [`extend`](#extend) rather than use this method
+  //. directly.
   //.
   //. ```javascript
   //. > S.extend(x => x.value + 1, S.Left('Cannot divide by zero'))
@@ -2775,7 +2766,7 @@
   function tagBy(pred, a) {
     return pred(a) ? Right(a) : Left(a);
   }
-  S.tagBy = def('tagBy', {}, [Pred(a), a, $Either(a, a)], tagBy);
+  S.tagBy = def('tagBy', {}, [$.Predicate(a), a, $Either(a, a)], tagBy);
 
   //# encaseEither :: (Error -> l) -> (a -> r) -> a -> Either l r
   //.
@@ -2813,10 +2804,12 @@
   //# encaseEither2 :: (Error -> l) -> (a -> b -> r) -> a -> b -> Either l r
   //.
   //. Binary version of [`encaseEither`](#encaseEither).
-  //.
-  //. See also [`encaseEither2_`](#encaseEither2_).
   function encaseEither2(f, g, x, y) {
-    return encaseEither2_(f, uncurry2(g), x, y);
+    try {
+      return Right(g(x)(y));
+    } catch (err) {
+      return Left(f(err));
+    }
   }
   S.encaseEither2 =
   def('encaseEither2',
@@ -2824,53 +2817,21 @@
       [Fn($.Error, l), Fn(a, Fn(b, r)), a, b, $Either(l, r)],
       encaseEither2);
 
-  //# encaseEither2_ :: (Error -> l) -> ((a, b) -> r) -> a -> b -> Either l r
-  //.
-  //. Variant of [`encaseEither2`](#encaseEither2) which takes an uncurried
-  //. binary function.
-  function encaseEither2_(f, g, x, y) {
-    try {
-      return Right(g(x, y));
-    } catch (err) {
-      return Left(f(err));
-    }
-  }
-  S.encaseEither2_ =
-  def('encaseEither2_',
-      {},
-      [Fn($.Error, l), $.Function([a, b, r]), a, b, $Either(l, r)],
-      encaseEither2_);
-
   //# encaseEither3 :: (Error -> l) -> (a -> b -> c -> r) -> a -> b -> c -> Either l r
   //.
   //. Ternary version of [`encaseEither`](#encaseEither).
-  //.
-  //. See also [`encaseEither3_`](#encaseEither3_).
   function encaseEither3(f, g, x, y, z) {
-    return encaseEither3_(f, uncurry3(g), x, y, z);
+    try {
+      return Right(g(x)(y)(z));
+    } catch (err) {
+      return Left(f(err));
+    }
   }
   S.encaseEither3 =
   def('encaseEither3',
       {},
       [Fn($.Error, l), Fn(a, Fn(b, Fn(c, r))), a, b, c, $Either(l, r)],
       encaseEither3);
-
-  //# encaseEither3_ :: (Error -> l) -> ((a, b, c) -> r) -> a -> b -> c -> Either l r
-  //.
-  //. Variant of [`encaseEither3`](#encaseEither3) which takes an uncurried
-  //. ternary function.
-  function encaseEither3_(f, g, x, y, z) {
-    try {
-      return Right(g(x, y, z));
-    } catch (err) {
-      return Left(f(err));
-    }
-  }
-  S.encaseEither3_ =
-  def('encaseEither3_',
-      {},
-      [Fn($.Error, l), $.Function([a, b, c, r]), a, b, c, $Either(l, r)],
-      encaseEither3_);
 
   //# eitherToMaybe :: Either a b -> Maybe b
   //.
@@ -2973,7 +2934,8 @@
   function complement(pred, x) {
     return !pred(x);
   }
-  S.complement = def('complement', {}, [Pred(a), a, $.Boolean], complement);
+  S.complement =
+  def('complement', {}, [$.Predicate(a), a, $.Boolean], complement);
 
   //# ifElse :: (a -> Boolean) -> (a -> b) -> (a -> b) -> a -> b
   //.
@@ -2995,7 +2957,8 @@
   function ifElse(pred, f, g, x) {
     return pred(x) ? f(x) : g(x);
   }
-  S.ifElse = def('ifElse', {}, [Pred(a), Fn(a, b), Fn(a, b), a, b], ifElse);
+  S.ifElse =
+  def('ifElse', {}, [$.Predicate(a), Fn(a, b), Fn(a, b), a, b], ifElse);
 
   //# when :: (a -> Boolean) -> (a -> a) -> a -> a
   //.
@@ -3015,7 +2978,7 @@
   function when(pred, f, x) {
     return ifElse(pred, f, I, x);
   }
-  S.when = def('when', {}, [Pred(a), Fn(a, a), a, a], when);
+  S.when = def('when', {}, [$.Predicate(a), Fn(a, a), a, a], when);
 
   //# unless :: (a -> Boolean) -> (a -> a) -> a -> a
   //.
@@ -3035,14 +2998,14 @@
   function unless(pred, f, x) {
     return ifElse(pred, I, f, x);
   }
-  S.unless = def('unless', {}, [Pred(a), Fn(a, a), a, a], unless);
+  S.unless = def('unless', {}, [$.Predicate(a), Fn(a, a), a, a], unless);
 
-  //# allPass :: Array (a -> Boolean) -> a -> Boolean
+  //# allPass :: Foldable f => f (a -> Boolean) -> a -> Boolean
   //.
-  //. Takes an array of unary predicates and a value of any type
-  //. and returns `true` if all the predicates pass; `false` otherwise.
-  //. None of the subsequent predicates will be evaluated after the
-  //. first failed predicate.
+  //. Takes a structure containing zero or more predicates, and a value
+  //. of any type. Returns `true` [iff][] the value satisfies all of the
+  //. predicates. None of the subsequent predicates will be applied after
+  //. the first predicate not satisfied.
   //.
   //. ```javascript
   //. > S.allPass([S.test(/q/), S.test(/u/), S.test(/i/)], 'quiessence')
@@ -3052,16 +3015,20 @@
   //. false
   //. ```
   function allPass(preds, x) {
-    return preds.every(function(p) { return p(x); });
+    return Z.reduce(function(b, p) { return b && p(x); }, true, preds);
   }
-  S.allPass = def('allPass', {}, [$.Array(Pred(a)), a, $.Boolean], allPass);
+  S.allPass =
+  def('allPass',
+      {f: [Z.Foldable]},
+      [f($.Predicate(a)), a, $.Boolean],
+      allPass);
 
-  //# anyPass :: Array (a -> Boolean) -> a -> Boolean
+  //# anyPass :: Foldable f => f (a -> Boolean) -> a -> Boolean
   //.
-  //. Takes an array of unary predicates and a value of any type
-  //. and returns `true` if any of the predicates pass; `false` otherwise.
-  //. None of the subsequent predicates will be evaluated after the
-  //. first passed predicate.
+  //. Takes a structure containing zero or more predicates, and a value
+  //. of any type. Returns `true` [iff][] the value satisfies any of the
+  //. predicates. None of the subsequent predicates will be applied after
+  //. the first predicate satisfied.
   //.
   //. ```javascript
   //. > S.anyPass([S.test(/q/), S.test(/u/), S.test(/i/)], 'incandescent')
@@ -3071,9 +3038,13 @@
   //. false
   //. ```
   function anyPass(preds, x) {
-    return preds.some(function(p) { return p(x); });
+    return Z.reduce(function(b, p) { return b || p(x); }, false, preds);
   }
-  S.anyPass = def('anyPass', {}, [$.Array(Pred(a)), a, $.Boolean], anyPass);
+  S.anyPass =
+  def('anyPass',
+      {f: [Z.Foldable]},
+      [f($.Predicate(a)), a, $.Boolean],
+      anyPass);
 
   //. ### List
   //.
@@ -3088,24 +3059,7 @@
   //.
   //.     'abc' :: String, List String, List (List String), ...
   //.
-  //. Every member of `String` is also a member of `List String`! This
-  //. affects the interpretation of type signatures. Consider the type of
-  //. [`indexOf`](#indexOf):
-  //.
-  //.     a -> List a -> Maybe Integer
-  //.
-  //. Assume the second argument is `'hello' :: List String`. `a` must then be
-  //. replaced with `String`:
-  //.
-  //.     String -> List String -> Maybe Integer
-  //.
-  //. Since `List String` and `String` are interchangeable, the former can be
-  //. replaced with the latter:
-  //.
-  //.     String -> String -> Maybe Integer
-  //.
-  //. It's then apparent that the first argument needn't be a single-character
-  //. string; the correspondence between arrays and strings does not hold.
+  //. Every member of `String` is also a member of `List String`!
 
   //# slice :: Integer -> Integer -> List a -> Maybe (List a)
   //.
@@ -3116,15 +3070,15 @@
   //. Accepts negative indices, which indicate an offset from the end of
   //. the list.
   //.
+  //. See also [`take`](#take), [`drop`](#drop), [`takeLast`](#takeLast),
+  //. and [`dropLast`](#dropLast).
+  //.
   //. ```javascript
   //. > S.slice(1, 3, ['a', 'b', 'c', 'd', 'e'])
   //. Just(['b', 'c'])
   //.
-  //. > S.slice(-2, -0, ['a', 'b', 'c', 'd', 'e'])
-  //. Just(['d', 'e'])
-  //.
-  //. > S.slice(2, -0, ['a', 'b', 'c', 'd', 'e'])
-  //. Just(['c', 'd', 'e'])
+  //. > S.slice(-3, -1, ['a', 'b', 'c', 'd', 'e'])
+  //. Just(['c', 'd'])
   //.
   //. > S.slice(1, 6, ['a', 'b', 'c', 'd', 'e'])
   //. Nothing
@@ -3134,8 +3088,8 @@
   //. ```
   function slice(start, end, xs) {
     var len = xs.length;
-    var fromIdx = negativeZero(start) ? len : start < 0 ? start + len : start;
-    var toIdx = negativeZero(end) ? len : end < 0 ? end + len : end;
+    var fromIdx = start < 0 ? start + len : start;
+    var toIdx = end < 0 ? end + len : end;
 
     return Math.abs(start) <= len && Math.abs(end) <= len && fromIdx <= toIdx ?
       Just(xs.slice(fromIdx, toIdx)) :
@@ -3161,7 +3115,8 @@
   //. Just('d')
   //. ```
   function at(n, xs) {
-    return Z.map(unsafeHead, slice(n, n === -1 ? -0 : n + 1, xs));
+    var idx = n < 0 ? xs.length + n : n;
+    return idx < 0 || idx >= xs.length ? Nothing : Just(xs[idx]);
   }
   S.at = def('at', {}, [$.Integer, List(a), $Maybe(a)], at);
 
@@ -3213,7 +3168,7 @@
   //. Nothing
   //. ```
   function tail(xs) {
-    return slice(1, -0, xs);
+    return xs.length > 0 ? Just(xs.slice(1)) : Nothing;
   }
   S.tail = def('tail', {}, [List(a), $Maybe(List(a))], tail);
 
@@ -3231,7 +3186,7 @@
   //. Nothing
   //. ```
   function init(xs) {
-    return slice(0, -1, xs);
+    return xs.length > 0 ? Just(xs.slice(0, -1)) : Nothing;
   }
   S.init = def('init', {}, [List(a), $Maybe(List(a))], init);
 
@@ -3252,7 +3207,7 @@
   //. Nothing
   //. ```
   function take(n, xs) {
-    return n < 0 || 1 / n < 0 ? Nothing : slice(0, n, xs);
+    return n < 0 || n > xs.length ? Nothing : Just(xs.slice(0, n));
   }
   S.take = def('take', {}, [$.Integer, List(a), $Maybe(List(a))], take);
 
@@ -3273,7 +3228,7 @@
   //. Nothing
   //. ```
   function takeLast(n, xs) {
-    return n < 0 || 1 / n < 0 ? Nothing : slice(-n, -0, xs);
+    return n < 0 || n > xs.length ? Nothing : Just(xs.slice(xs.length - n));
   }
   S.takeLast =
   def('takeLast', {}, [$.Integer, List(a), $Maybe(List(a))], takeLast);
@@ -3295,7 +3250,7 @@
   //. Nothing
   //. ```
   function drop(n, xs) {
-    return n < 0 || 1 / n < 0 ? Nothing : slice(n, -0, xs);
+    return n < 0 || n > xs.length ? Nothing : Just(xs.slice(n));
   }
   S.drop = def('drop', {}, [$.Integer, List(a), $Maybe(List(a))], drop);
 
@@ -3316,80 +3271,37 @@
   //. Nothing
   //. ```
   function dropLast(n, xs) {
-    return n < 0 || 1 / n < 0 ? Nothing : slice(0, -n, xs);
+    return n < 0 || n > xs.length ? Nothing : Just(xs.slice(0, xs.length - n));
   }
   S.dropLast =
   def('dropLast', {}, [$.Integer, List(a), $Maybe(List(a))], dropLast);
 
-  //# reverse :: List a -> List a
-  //.
-  //. Returns the elements of the given list in reverse order.
-  //.
-  //. ```javascript
-  //. > S.reverse([1, 2, 3])
-  //. [3, 2, 1]
-  //.
-  //. > S.reverse('abc')
-  //. 'cba'
-  //. ```
-  function reverse(xs) {
-    return $.String._test(xs) ? xs.split('').reverse().join('')
-                              : xs.slice().reverse();
-  }
-  S.reverse = def('reverse', {}, [List(a), List(a)], reverse);
-
-  //# indexOf :: a -> List a -> Maybe Integer
-  //.
-  //. Takes a value of any type and a list, and returns Just the index
-  //. of the first occurrence of the value in the list, if applicable;
-  //. Nothing otherwise.
-  //.
-  //. ```javascript
-  //. > S.indexOf('a', ['b', 'a', 'n', 'a', 'n', 'a'])
-  //. Just(1)
-  //.
-  //. > S.indexOf('x', ['b', 'a', 'n', 'a', 'n', 'a'])
-  //. Nothing
-  //.
-  //. > S.indexOf('an', 'banana')
-  //. Just(1)
-  //.
-  //. > S.indexOf('ax', 'banana')
-  //. Nothing
-  //. ```
-  function indexOf(x, xs) {
-    var idx = xs.indexOf(x);
-    return idx >= 0 ? Just(idx) : Nothing;
-  }
-  S.indexOf = def('indexOf', {}, [a, List(a), $Maybe($.Integer)], indexOf);
-
-  //# lastIndexOf :: a -> List a -> Maybe Integer
-  //.
-  //. Takes a value of any type and a list, and returns Just the index
-  //. of the last occurrence of the value in the list, if applicable;
-  //. Nothing otherwise.
-  //.
-  //. ```javascript
-  //. > S.lastIndexOf('a', ['b', 'a', 'n', 'a', 'n', 'a'])
-  //. Just(5)
-  //.
-  //. > S.lastIndexOf('x', ['b', 'a', 'n', 'a', 'n', 'a'])
-  //. Nothing
-  //.
-  //. > S.lastIndexOf('an', 'banana')
-  //. Just(3)
-  //.
-  //. > S.lastIndexOf('ax', 'banana')
-  //. Nothing
-  //. ```
-  function lastIndexOf(x, xs) {
-    var idx = xs.lastIndexOf(x);
-    return idx >= 0 ? Just(idx) : Nothing;
-  }
-  S.lastIndexOf =
-  def('lastIndexOf', {}, [a, List(a), $Maybe($.Integer)], lastIndexOf);
-
   //. ### Array
+
+  //# size :: Foldable f => f a -> Integer
+  //.
+  //. Returns the number of elements of the given structure.
+  //.
+  //. ```javascript
+  //. > S.size([])
+  //. 0
+  //.
+  //. > S.size(['foo', 'bar', 'baz'])
+  //. 3
+  //.
+  //. > S.size(Nil)
+  //. 0
+  //.
+  //. > S.size(Cons('foo', Cons('bar', Cons('baz', Nil))))
+  //. 3
+  //.
+  //. > S.size(S.Nothing)
+  //. 0
+  //.
+  //. > S.size(S.Just('quux'))
+  //. 1
+  //. ```
+  S.size = def('size', {f: [Z.Foldable]}, [f(a), $.Integer], Z.size);
 
   //# append :: (Applicative f, Semigroup (f a)) => a -> f a -> f a
   //.
@@ -3401,20 +3313,20 @@
   //. > S.append(3, [1, 2])
   //. [1, 2, 3]
   //.
+  //. > S.append(3, Cons(1, Cons(2, Nil)))
+  //. Cons(1, Cons(2, Cons(3, Nil)))
+  //.
   //. > S.append([1], S.Nothing)
   //. Just([1])
   //.
   //. > S.append([3], S.Just([1, 2]))
   //. Just([1, 2, 3])
   //. ```
-  function append(x, xs) {
-    return Z.concat(xs, Z.of(xs.constructor, x));
-  }
   S.append =
   def('append',
       {f: [Z.Applicative, Z.Semigroup]},
       [a, f(a), f(a)],
-      append);
+      Z.append);
 
   //# prepend :: (Applicative f, Semigroup (f a)) => a -> f a -> f a
   //.
@@ -3426,20 +3338,20 @@
   //. > S.prepend(1, [2, 3])
   //. [1, 2, 3]
   //.
+  //. > S.prepend(1, Cons(2, Cons(3, Nil)))
+  //. Cons(1, Cons(2, Cons(3, Nil)))
+  //.
   //. > S.prepend([1], S.Nothing)
   //. Just([1])
   //.
   //. > S.prepend([1], S.Just([2, 3]))
   //. Just([1, 2, 3])
   //. ```
-  function prepend(x, xs) {
-    return Z.concat(Z.of(xs.constructor, x), xs);
-  }
   S.prepend =
   def('prepend',
       {f: [Z.Applicative, Z.Semigroup]},
       [a, f(a), f(a)],
-      prepend);
+      Z.prepend);
 
   //# joinWith :: String -> Array String -> String
   //.
@@ -3463,8 +3375,8 @@
 
   //# elem :: (Setoid a, Foldable f) => a -> f a -> Boolean
   //.
-  //. Takes a value and a structure and returns `true` if the value is an
-  //. element of the structure; `false` otherwise.
+  //. Takes a value and a structure and returns `true` [iff][] the value is an
+  //. element of the structure.
   //.
   //. See also [`find`](#find).
   //.
@@ -3490,11 +3402,8 @@
   //. > S.elem(0, S.Nothing)
   //. false
   //. ```
-  function elem(x, xs) {
-    return Z.reduce(function(b, y) { return b || Z.equals(x, y); }, false, xs);
-  }
   S.elem =
-  def('elem', {a: [Z.Setoid], f: [Z.Foldable]}, [a, f(a), $.Boolean], elem);
+  def('elem', {a: [Z.Setoid], f: [Z.Foldable]}, [a, f(a), $.Boolean], Z.elem);
 
   //# find :: Foldable f => (a -> Boolean) -> f a -> Maybe a
   //.
@@ -3518,9 +3427,10 @@
       xs
     );
   }
-  S.find = def('find', {f: [Z.Foldable]}, [Pred(a), f(a), $Maybe(a)], find);
+  S.find =
+  def('find', {f: [Z.Foldable]}, [$.Predicate(a), f(a), $Maybe(a)], find);
 
-  //# pluck :: (Accessible a, Functor f) => String -> f a -> f b
+  //# pluck :: Functor f => String -> f a -> f b
   //.
   //. Combines [`map`](#map) and [`prop`](#prop). `pluck(k, xs)` is equivalent
   //. to `map(prop(k), xs)`.
@@ -3534,16 +3444,13 @@
   //. ```
   function pluck(key, xs) {
     return Z.map(function(x) {
-      if (key in Object(x)) return x[key];
+      var obj = toObject(x);
+      if (key in obj) return obj[key];
       throw new TypeError('‘pluck’ expected object to have a property named ' +
                           '‘' + key + '’; ' + Z.toString(x) + ' does not');
     }, xs);
   }
-  S.pluck =
-  def('pluck',
-      {a: [Accessible], f: [Z.Functor]},
-      [$.String, f(a), f(b)],
-      pluck);
+  S.pluck = def('pluck', {f: [Z.Functor]}, [$.String, f(a), f(b)], pluck);
 
   //# unfoldr :: (b -> Maybe (Pair a b)) -> b -> Array a
   //.
@@ -3601,8 +3508,6 @@
   //. for functions that aren't reflexive, transitive, and symmetric
   //. (see [equivalence][] relation).
   //.
-  //. See also [`groupBy_`](#groupBy_).
-  //.
   //. Properties:
   //.
   //.   - `forall f :: a -> a -> Boolean, xs :: Array a.
@@ -3616,33 +3521,41 @@
   //. [[2], [-3, 3, 3, 3], [4, -4], [4]]
   //. ```
   function groupBy(f, xs) {
-    return groupBy_(uncurry2(f), xs);
-  }
-  S.groupBy =
-  def('groupBy',
-      {},
-      [Fn(a, Pred(a)), $.Array(a), $.Array($.Array(a))],
-      groupBy);
-
-  //# groupBy_ :: ((a, a) -> Boolean) -> Array a -> Array (Array a)
-  //.
-  //. Variant of [`groupBy`](#groupBy) which takes an uncurried function.
-  function groupBy_(f, xs) {
     if (xs.length === 0) return [];
     var x0 = xs[0];         // :: a
     var active = [x0];      // :: Array a
     var result = [active];  // :: Array (Array a)
     for (var idx = 1; idx < xs.length; idx += 1) {
       var x = xs[idx];
-      if (f(x0, x)) active.push(x); else result.push(active = [x0 = x]);
+      if (f(x0)(x)) active.push(x); else result.push(active = [x0 = x]);
     }
     return result;
   }
-  S.groupBy_ =
-  def('groupBy_',
+  S.groupBy =
+  def('groupBy',
       {},
-      [$.Function([a, a, $.Boolean]), $.Array(a), $.Array($.Array(a))],
-      groupBy_);
+      [Fn(a, $.Predicate(a)), $.Array(a), $.Array($.Array(a))],
+      groupBy);
+
+  //# reverse :: (Applicative f, Foldable f, Monoid (f a)) => f a -> f a
+  //.
+  //. Reverses the elements of the given structure.
+  //.
+  //. ```javascript
+  //. > S.reverse([1, 2, 3])
+  //. [3, 2, 1]
+  //.
+  //. > S.reverse(Cons(1, Cons(2, Cons(3, Nil))))
+  //. Cons(3, Cons(2, Cons(1, Nil)))
+  //.
+  //. > S.pipe([S.splitOn(''), S.reverse, S.joinWith('')], 'abc')
+  //. 'cba'
+  //. ```
+  S.reverse =
+  def('reverse',
+      {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+      [f(a), f(a)],
+      Z.reverse);
 
   //# sort :: (Ord a, Applicative m, Foldable m, Monoid (m a)) => m a -> m a
   //.
@@ -3662,14 +3575,11 @@
   //. > S.sort([S.Left(4), S.Right(3), S.Left(2), S.Right(1)])
   //. [Left(2), Left(4), Right(1), Right(3)]
   //. ```
-  function sort(m) {
-    return sortBy(I, m);
-  }
   S.sort =
   def('sort',
       {a: [Z.Ord], m: [Z.Applicative, Z.Foldable, Z.Monoid]},
       [m(a), m(a)],
-      sort);
+      Z.sort);
 
   //# sortBy :: (Ord b, Applicative m, Foldable m, Monoid (m a)) => (a -> b) -> m a -> m a
   //.
@@ -3706,35 +3616,15 @@
   //. . {rank: 7, suit: 'spades'},
   //. . {rank: 5, suit: 'spades'} ]
   //. ```
-  function sortBy(f, m) {
-    var rs = Z.reduce(function(xs, x) {
-      var fx = f(x);
-      var lower = 0;
-      var upper = xs.length;
-      while (lower < upper) {
-        var idx = Math.floor((lower + upper) / 2);
-        if (Z.lte(xs[idx].fx, fx)) lower = idx + 1; else upper = idx;
-      }
-      xs.splice(lower, 0, {x: x, fx: fx});
-      return xs;
-    }, [], m);
-
-    var M = m.constructor;
-    var result = Z.empty(M);
-    for (var idx = 0; idx < rs.length; idx += 1) {
-      result = Z.concat(result, Z.of(M, rs[idx].x));
-    }
-    return result;
-  }
   S.sortBy =
   def('sortBy',
       {b: [Z.Ord], m: [Z.Applicative, Z.Foldable, Z.Monoid]},
       [Fn(a, b), m(a), m(a)],
-      sortBy);
+      Z.sortBy);
 
   //. ### Object
 
-  //# prop :: Accessible a => String -> a -> b
+  //# prop :: String -> a -> b
   //.
   //. Takes a property name and an object with known properties and returns
   //. the value of the specified property. If for some reason the object
@@ -3748,14 +3638,15 @@
   //. > S.prop('a', {a: 1, b: 2})
   //. 1
   //. ```
-  function prop(key, obj) {
-    if (key in Object(obj)) return obj[key];
+  function prop(key, x) {
+    var obj = toObject(x);
+    if (key in obj) return obj[key];
     throw new TypeError('‘prop’ expected object to have a property named ‘' +
-                        key + '’; ' + Z.toString(obj) + ' does not');
+                        key + '’; ' + Z.toString(x) + ' does not');
   }
-  S.prop = def('prop', {a: [Accessible]}, [$.String, a, b], prop);
+  S.prop = def('prop', {}, [$.String, a, b], prop);
 
-  //# props :: Accessible a => Array String -> a -> b
+  //# props :: Array String -> a -> b
   //.
   //. Takes a property path (an array of property names) and an object with
   //. known structure and returns the value at the given path. If for some
@@ -3768,17 +3659,18 @@
   //. > S.props(['a', 'b', 'c'], {a: {b: {c: 1}}})
   //. 1
   //. ```
-  function props(path, obj) {
-    return path.reduce(function(memo, key) {
-      if (key in memo) return memo[key];
+  function props(path, x) {
+    return path.reduce(function(x, key) {
+      var obj = toObject(x);
+      if (key in obj) return obj[key];
       throw new TypeError('‘props’ expected object to have a property at ' +
                           Z.toString(path) + '; ' +
-                          Z.toString(obj) + ' does not');
-    }, Object(obj));
+                          Z.toString(x) + ' does not');
+    }, x);
   }
-  S.props = def('props', {a: [Accessible]}, [$.Array($.String), a, b], props);
+  S.props = def('props', {}, [$.Array($.String), a, b], props);
 
-  //# get :: Accessible a => (b -> Boolean) -> String -> a -> Maybe c
+  //# get :: (Any -> Boolean) -> String -> a -> Maybe b
   //.
   //. Takes a predicate, a property name, and an object and returns Just the
   //. value of the specified object property if it exists and the value
@@ -3795,15 +3687,24 @@
   //.
   //. > S.get(S.is(Number), 'x', {})
   //. Nothing
+  //.
+  //. > S.get($.test([], $.Array($.Number)), 'x', {x: [1, 2, 3]})
+  //. Just([1, 2, 3])
+  //.
+  //. > S.get($.test([], $.Array($.Number)), 'x', {x: [1, 2, 3, null]})
+  //. Nothing
   //. ```
-  function get(pred, key, obj) {
-    var x = null;
-    return key in obj && pred(x = obj[key]) ? Just(x) : Nothing;
+  function get(pred, key, x) {
+    var obj = toObject(x);
+    if (key in obj) {
+      var val = obj[key];
+      if (pred(val)) return Just(val);
+    }
+    return Nothing;
   }
-  S.get =
-  def('get', {a: [Accessible]}, [Pred(b), $.String, a, $Maybe(c)], get);
+  S.get = def('get', {}, [$.Predicate($.Any), $.String, a, $Maybe(b)], get);
 
-  //# gets :: Accessible a => (b -> Boolean) -> Array String -> a -> Maybe c
+  //# gets :: (Any -> Boolean) -> Array String -> a -> Maybe b
   //.
   //. Takes a predicate, a property path (an array of property names), and
   //. an object and returns Just the value at the given path if such a path
@@ -3821,18 +3722,85 @@
   //. > S.gets(S.is(Number), ['a', 'b', 'c'], {})
   //. Nothing
   //. ```
-  function gets(pred, keys, obj) {
-    return Z.filter(pred, Z.reduce(function(m, k) {
+  function gets(pred, keys, x) {
+    return Z.filter(pred, Z.reduce(function(m, key) {
       return Z.chain(function(x) {
-        return x != null && k in x ? Just(x[k]) : Nothing;
+        var obj = toObject(x);
+        return key in obj ? Just(obj[key]) : Nothing;
       }, m);
-    }, Just(obj), keys));
+    }, Just(x), keys));
   }
   S.gets =
-  def('gets',
-      {a: [Accessible]},
-      [Pred(b), $.Array($.String), a, $Maybe(c)],
-      gets);
+  def('gets', {}, [$.Predicate($.Any), $.Array($.String), a, $Maybe(b)], gets);
+
+  //. ### StrMap
+  //.
+  //. StrMap is an abbreviation of _string map_. A string map is an object,
+  //. such as `{foo: 1, bar: 2, baz: 3}`, whose values are all members of
+  //. the same type. Formally, a value is a member of type `StrMap a` if its
+  //. [type identifier][] is `'Object'` and the values of its enumerable own
+  //. properties are all members of type `a`.
+
+  //# singleton :: String -> a -> StrMap a
+  //.
+  //. Takes a string and a value of any type, and returns a string map with
+  //. a single entry (mapping the key to the value).
+  //.
+  //. ```javascript
+  //. > S.singleton('foo', 42)
+  //. {foo: 42}
+  //. ```
+  function singleton(key, val) {
+    var strMap = {};
+    strMap[key] = val;
+    return strMap;
+  }
+  S.singleton = def('singleton', {}, [$.String, a, $.StrMap(a)], singleton);
+
+  //# insert :: String -> a -> StrMap a -> StrMap a
+  //.
+  //. Takes a string, a value of any type, and a string map, and returns a
+  //. string map comprising all the entries of the given string map plus the
+  //. entry specified by the first two arguments (which takes precedence).
+  //.
+  //. Equivalent to Haskell's `insert` function. Similar to Clojure's `assoc`
+  //. function.
+  //.
+  //. ```javascript
+  //. > S.insert('c', 3, {a: 1, b: 2})
+  //. {a: 1, b: 2, c: 3}
+  //.
+  //. > S.insert('a', 4, {a: 1, b: 2})
+  //. {a: 4, b: 2}
+  //. ```
+  function insert(key, val, strMap) {
+    return Z.concat(strMap, singleton(key, val));
+  }
+  S.insert =
+  def('insert', {}, [$.String, a, $.StrMap(a), $.StrMap(a)], insert);
+
+  //# remove :: String -> StrMap a -> StrMap a
+  //.
+  //. Takes a string and a string map, and returns a string map comprising all
+  //. the entries of the given string map except the one whose key matches the
+  //. given string (if such a key exists).
+  //.
+  //. Equivalent to Haskell's `delete` function. Similar to Clojure's `dissoc`
+  //. function.
+  //.
+  //. ```javascript
+  //. > S.remove('c', {a: 1, b: 2, c: 3})
+  //. {a: 1, b: 2}
+  //.
+  //. > S.remove('c', {})
+  //. {}
+  //. ```
+  function remove(key, strMap) {
+    var result = Z.concat(strMap, {});
+    delete result[key];
+    return result;
+  }
+  S.remove = def('remove', {}, [$.String, $.StrMap(a), $.StrMap(a)], remove);
 
   //# keys :: StrMap a -> Array String
   //.
@@ -3870,6 +3838,31 @@
   }
   S.pairs =
   def('pairs', {}, [$.StrMap(a), $.Array($.Pair($.String, a))], pairs);
+
+  //# fromPairs :: Foldable f => f (Pair String a) -> StrMap a
+  //.
+  //. Returns a string map containing the key–value pairs specified by the
+  //. given [Foldable][]. If a key appears in multiple pairs, the rightmost
+  //. pair takes precedence.
+  //.
+  //. ```javascript
+  //. > S.fromPairs([['a', 1], ['b', 2], ['c', 3]])
+  //. {a: 1, b: 2, c: 3}
+  //.
+  //. > S.fromPairs([['x', 1], ['x', 2]])
+  //. {x: 2}
+  //. ```
+  function fromPairs(pairs) {
+    return Z.reduce(function(strMap, pair) {
+      strMap[pair[0]] = pair[1];
+      return strMap;
+    }, {}, pairs);
+  }
+  S.fromPairs =
+  def('fromPairs',
+      {f: [Z.Foldable]},
+      [f($.Pair($.String, a)), $.StrMap(a)],
+      fromPairs);
 
   //. ### Number
 
@@ -3998,20 +3991,77 @@
       [f($.FiniteNumber), $.FiniteNumber],
       product);
 
-  //# div :: FiniteNumber -> NonZeroFiniteNumber -> FiniteNumber
+  //# div :: NonZeroFiniteNumber -> (FiniteNumber -> FiniteNumber)
+  //.
+  //. Takes a non-zero finite number `n` and returns the _divide by `n`_
+  //. function.
+  //.
+  //. See also [`div_`](#div_).
+  //.
+  //. ```javascript
+  //. > S.map(S.div(2), [0, 1, 2, 3])
+  //. [0, 0.5, 1, 1.5]
+  //. ```
+  S.div =
+  def('div',
+      {},
+      [$.NonZeroFiniteNumber, Fn($.FiniteNumber, $.FiniteNumber)],
+      flip$(div_));
+
+  //# div_ :: FiniteNumber -> NonZeroFiniteNumber -> FiniteNumber
   //.
   //. Returns the result of dividing its first argument (a finite number) by
   //. its second argument (a non-zero finite number).
   //.
+  //. See also [`div`](#div).
+  //.
   //. ```javascript
-  //. > S.div(7, 2)
+  //. > S.div_(7, 2)
   //. 3.5
+  //.
+  //. > S.map(S.div_(24), [1, 2, 3, 4])
+  //. [24, 12, 8, 6]
   //. ```
-  function div(x, y) {
+  function div_(x, y) {
     return x / y;
   }
-  S.div =
-  def('div', {}, [$.FiniteNumber, $.NonZeroFiniteNumber, $.FiniteNumber], div);
+  S.div_ =
+  def('div_',
+      {},
+      [$.FiniteNumber, $.NonZeroFiniteNumber, $.FiniteNumber],
+      div_);
+
+  //# pow :: FiniteNumber -> (FiniteNumber -> FiniteNumber)
+  //.
+  //. Takes a finite number `n` and returns the _power of `n`_ function.
+  //.
+  //. See also [`pow_`](#pow_).
+  //.
+  //. ```javascript
+  //. > S.map(S.pow(2), [-3, -2, -1, 0, 1, 2, 3])
+  //. [9, 4, 1, 0, 1, 4, 9]
+  //.
+  //. > S.map(S.pow(0.5), [1, 4, 9, 16, 25])
+  //. [1, 2, 3, 4, 5]
+  //. ```
+  S.pow =
+  def('pow',
+      {},
+      [$.FiniteNumber, Fn($.FiniteNumber, $.FiniteNumber)],
+      flip$(Math.pow));
+
+  //# pow_ :: FiniteNumber -> FiniteNumber -> FiniteNumber
+  //.
+  //. Curried version of [`Math.pow`][].
+  //.
+  //. See also [`pow`](#pow).
+  //.
+  //. ```javascript
+  //. > S.map(S.pow_(10), [-3, -2, -1, 0, 1, 2, 3])
+  //. [0.001, 0.01, 0.1, 1, 10, 100, 1000]
+  //. ```
+  S.pow_ =
+  def('pow_', {}, [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber], Math.pow);
 
   //# mean :: Foldable f => f FiniteNumber -> Maybe FiniteNumber
   //.
@@ -4084,7 +4134,7 @@
 
   //. ### Parse
 
-  //# parseDate :: String -> Maybe Date
+  //# parseDate :: String -> Maybe ValidDate
   //.
   //. Takes a string and returns Just the date represented by the string
   //. if it does in fact represent a date; Nothing otherwise.
@@ -4100,7 +4150,8 @@
     var date = new Date(s);
     return isNaN(date.valueOf()) ? Nothing : Just(date);
   }
-  S.parseDate = def('parseDate', {}, [$.String, $Maybe($.Date)], parseDate);
+  S.parseDate =
+  def('parseDate', {}, [$.String, $Maybe($.ValidDate)], parseDate);
 
   //  requiredNonCapturingGroup :: Array String -> String
   function requiredNonCapturingGroup(xs) {
@@ -4154,7 +4205,14 @@
   S.parseFloat =
   def('parseFloat', {}, [$.String, $Maybe($.Number)], parseFloat_);
 
-  //# parseInt :: Integer -> String -> Maybe Integer
+  //  Radix :: Type
+  var Radix = $.NullaryType(
+    'sanctuary/Radix',
+    '',
+    function(x) { return $.Integer._test(x) && x >= 2 && x <= 36; }
+  );
+
+  //# parseInt :: Radix -> String -> Maybe Integer
   //.
   //. Takes a radix (an integer between 2 and 36 inclusive) and a string,
   //. and returns Just the number represented by the string if it does in
@@ -4176,10 +4234,6 @@
   //. Nothing
   //. ```
   function parseInt_(radix, s) {
-    if (radix < 2 || radix > 36) {
-      throw new RangeError('Radix not in [2 .. 36]');
-    }
-
     var charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.slice(0, radix);
     var pattern = new RegExp('^[' + charset + ']+$', 'i');
 
@@ -4191,29 +4245,32 @@
     return Nothing;
   }
   S.parseInt =
-  def('parseInt', {}, [$.Integer, $.String, $Maybe($.Integer)], parseInt_);
+  def('parseInt', {}, [Radix, $.String, $Maybe($.Integer)], parseInt_);
 
-  //# parseJson :: (a -> Boolean) -> String -> Maybe b
+  //# parseJson :: (Any -> Boolean) -> String -> Maybe a
   //.
   //. Takes a predicate and a string which may or may not be valid JSON, and
   //. returns Just the result of applying `JSON.parse` to the string *if* the
   //. result satisfies the predicate; Nothing otherwise.
   //.
   //. ```javascript
-  //. > S.parseJson(S.is(Array), '["foo","bar","baz"]')
-  //. Just(['foo', 'bar', 'baz'])
-  //.
-  //. > S.parseJson(S.is(Array), '[')
+  //. > S.parseJson($.test([], $.Array($.Integer)), '[')
   //. Nothing
   //.
-  //. > S.parseJson(S.is(Object), '["foo","bar","baz"]')
+  //. > S.parseJson($.test([], $.Array($.Integer)), '["1","2","3"]')
   //. Nothing
+  //.
+  //. > S.parseJson($.test([], $.Array($.Integer)), '[0,1.5,3,4.5]')
+  //. Nothing
+  //.
+  //. > S.parseJson($.test([], $.Array($.Integer)), '[1,2,3]')
+  //. Just([1, 2, 3])
   //. ```
   function parseJson(pred, s) {
     return Z.filter(pred, encase(JSON.parse, s));
   }
   S.parseJson =
-  def('parseJson', {}, [Pred(a), $.String, $Maybe(b)], parseJson);
+  def('parseJson', {}, [$.Predicate($.Any), $.String, $Maybe(a)], parseJson);
 
   //. ### RegExp
 
@@ -4269,8 +4326,8 @@
 
   //# test :: RegExp -> String -> Boolean
   //.
-  //. Takes a pattern and a string, and returns `true` if the pattern
-  //. matches the string; `false` otherwise.
+  //. Takes a pattern and a string, and returns `true` [iff][] the pattern
+  //. matches the string.
   //.
   //. ```javascript
   //. > S.test(/^a/, 'abacus')
@@ -4587,14 +4644,15 @@
 //. [Monad]:            v:fantasyland/fantasy-land#monad
 //. [Monoid]:           v:fantasyland/fantasy-land#monoid
 //. [Nullable]:         v:sanctuary-js/sanctuary-def#Nullable
+//. [Ord]:              v:fantasyland/fantasy-land#ord
 //. [PureScript]:       http://www.purescript.org/
 //. [Ramda]:            http://ramdajs.com/
 //. [RegexFlags]:       v:sanctuary-js/sanctuary-def#RegexFlags
 //. [Semigroup]:        v:fantasyland/fantasy-land#semigroup
 //. [Semigroupoid]:     v:fantasyland/fantasy-land#semigroupoid
-//. [Setoid]:           v:fantasyland/fantasy-land#setoid
 //. [Traversable]:      v:fantasyland/fantasy-land#traversable
 //. [UnaryType]:        v:sanctuary-js/sanctuary-def#UnaryType
+//. [`Math.pow`]:       https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/pow
 //. [`Z.alt`]:          v:sanctuary-js/sanctuary-type-classes#alt
 //. [`Z.ap`]:           v:sanctuary-js/sanctuary-type-classes#ap
 //. [`Z.apFirst`]:      v:sanctuary-js/sanctuary-type-classes#apFirst
@@ -4614,6 +4672,7 @@
 //. [`Z.gt`]:           v:sanctuary-js/sanctuary-type-classes#gt
 //. [`Z.gte`]:          v:sanctuary-js/sanctuary-type-classes#gte
 //. [`Z.id`]:           v:sanctuary-js/sanctuary-type-classes#id
+//. [`Z.invert`]:       v:sanctuary-js/sanctuary-type-classes#invert
 //. [`Z.join`]:         v:sanctuary-js/sanctuary-type-classes#join
 //. [`Z.lt`]:           v:sanctuary-js/sanctuary-type-classes#lt
 //. [`Z.lte`]:          v:sanctuary-js/sanctuary-type-classes#lte
@@ -4626,6 +4685,7 @@
 //. [`Z.zero`]:         v:sanctuary-js/sanctuary-type-classes#zero
 //. [`of`]:             v:fantasyland/fantasy-land#of-method
 //. [equivalence]:      https://en.wikipedia.org/wiki/Equivalence_relation
+//. [iff]:              https://en.wikipedia.org/wiki/If_and_only_if
 //. [parseInt]:         https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt
 //. [sanctuary-def]:    v:sanctuary-js/sanctuary-def
 //. [stable sort]:      https://en.wikipedia.org/wiki/Sorting_algorithm#Stability

@@ -4,7 +4,7 @@
 
   'use strict';
 
-  var S = window.S.create({checkTypes: false, env: window.S.env});
+  var S = window.S.create({checkTypes: false, env: window.env});
 
   //  replace :: RegExp -> String -> String -> Either String String
   var replace = S.curry3(function(pattern, replacement, s) {
