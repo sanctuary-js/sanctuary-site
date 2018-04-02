@@ -1,30 +1,31 @@
 #!/usr/bin/env node
 
 /* eslint-env node */
-/* eslint indent: ["off"], max-len: ["off"], prefer-template: ["off"] */
+/* eslint max-len: ["off"] */
 
 'use strict';
 
-const fs                = require('fs');
-const path              = require('path');
-const vm                = require('vm');
+const fs                = require ('fs');
+const path              = require ('path');
+const vm                = require ('vm');
 
-const envvar            = require('envvar');
-const marked            = require('marked');
-const R                 = require('ramda');
-const S_                = require('sanctuary');
-const pkg               = require('sanctuary/package.json');
-const $                 = require('sanctuary-def');
-const Z                 = require('sanctuary-type-classes');
+const marked            = require ('marked');
+const R                 = require ('ramda');
+const S_                = require ('sanctuary');
+const pkg               = require ('sanctuary/package.json');
+const $                 = require ('sanctuary-def');
+const Descending        = require ('sanctuary-descending');
+const show              = require ('sanctuary-show');
+const Z                 = require ('sanctuary-type-classes');
 
-const List              = require('../adt/List');
-const Sum               = require('../adt/Sum');
+const List              = require ('../adt/List');
+const Sum               = require ('../adt/Sum');
+const env               = require ('../env');
 
 
-const checkTypes        = envvar.boolean('SANCTUARY_CHECK_TYPES', true);
-const env               = Z.concat(S_.env, [List.Type($.Unknown), Sum.Type]);
-const S                 = S_.create({checkTypes, env});
-const def               = $.create({checkTypes, env});
+const checkTypes        = process.env.NODE_ENV !== 'production';
+const S                 = S_.create ({checkTypes, env});
+const def               = $.create ({checkTypes, env});
 
 const Either            = S.EitherType;
 const I                 = S.I;
@@ -34,15 +35,11 @@ const Maybe             = S.MaybeType;
 const Right             = S.Right;
 const allPass           = S.allPass;
 const ap                = S.ap;
-const apply             = R.apply;
 const at                = S.at;
 const chain             = S.chain;
 const compose           = S.compose;
-const compose_          = R.compose;
 const concat            = S.concat;
 const cond              = R.cond;
-const contains          = R.contains;
-const converge          = R.converge;
 const curry2            = S.curry2;
 const either            = S.either;
 const encaseEither      = S.encaseEither;
@@ -70,13 +67,11 @@ const reduce            = S.reduce;
 const regex             = S.regex;
 const replace           = R.replace;
 const sequence          = S.sequence;
-const slice_            = R.slice;
+const singleton         = S.singleton;
 const sort              = S.sort;
 const splitOn           = S.splitOn;
 const splitOnRegex      = S.splitOnRegex;
 const test              = S.test;
-const toString          = S.toString;
-const unapply           = R.unapply;
 const unlines           = S.unlines;
 const when              = S.when;
 
@@ -84,461 +79,464 @@ const reset             = '\u001B[0m';
 const red               = '\u001B[31m';
 const green             = '\u001B[32m';
 
-//    Fn :: (Type, Type) -> Type
-const Fn = (x, y) => $.Function([x, y]);
+//    Fn :: Type -> Type -> Type
+const Fn = x => y => $.Function ([x, y]);
 
 //    a :: Type
-const a = $.TypeVariable('a');
+const a = $.TypeVariable ('a');
 
 //    fromJust :: Maybe a -> a !
 const fromJust =
-def('fromJust',
-    {},
-    [Maybe(a), a],
-    maybe_(() => { throw new Error('fromJust applied to Nothing'); }, I));
+def ('fromJust')
+    ({})
+    ([Maybe (a), a])
+    (maybe_ (() => { throw new Error ('fromJust applied to Nothing'); }) (I));
 
 //    j :: Array String -> String
-const j = def('j', {}, [$.Array($.String), $.String], joinWith(''));
-
-//    replace_ :: RegExp -> (Array String -> String) -> String -> String
-const replace_ =
-def('replace_',
-    {},
-    [$.RegExp, Fn($.Array($.String), $.String), $.String, $.String],
-    (pattern, f, s) => s.replace(pattern,
-                                 unapply(compose_(f, slice_(1, -2)))));
+const j = def ('j') ({}) ([$.Array ($.String), $.String]) (joinWith (''));
 
 //    htmlEncode :: String -> String
 const htmlEncode =
-def('htmlEncode',
-    {},
-    [$.String, $.String],
-    pipe([replace(/&/g, '&amp;'),
-          replace(/</g, '&lt;'),
-          replace(/"/g, '&quot;')]));
+def ('htmlEncode')
+    ({})
+    ([$.String, $.String])
+    (pipe ([replace (/&/g) ('&amp;'),
+            replace (/</g) ('&lt;'),
+            replace (/"/g) ('&quot;')]));
 
 //    htmlDecode :: String -> String
 const htmlDecode =
-def('htmlDecode',
-    {},
-    [$.String, $.String],
-    pipe([replace(/&quot;/g, '"'),
-          replace(/&lt;/g,   '<'),
-          replace(/&amp;/g,  '&')]));
+def ('htmlDecode')
+    ({})
+    ([$.String, $.String])
+    (pipe ([replace (/&quot;/g) ('"'),
+            replace (/&lt;/g)   ('<'),
+            replace (/&amp;/g)  ('&')]));
 
 //    wrap :: String -> String -> String -> String
 const wrap =
-def('wrap',
-    {},
-    [$.String, $.String, $.String, $.String],
-    (before, after, middle) => `${before}${middle}${after}`);
+def ('wrap')
+    ({})
+    ([$.String, $.String, $.String, $.String])
+    (before => after => middle => `${before}${middle}${after}`);
 
 //    el :: String -> StrMap String -> String -> String
 const el =
-def('el',
-    {},
-    [$.String, $.StrMap($.String), $.String, $.String],
-    (tagName, attrs, innerHtml) => {
-      const attrsHtml = j(map(k => ` ${k}="${attrs[k]}"`, sort(keys(attrs))));
-      return `<${tagName}${attrsHtml}>${innerHtml}</${tagName}>`;
-    });
+def ('el')
+    ({})
+    ([$.String, $.StrMap ($.String), $.String, $.String])
+    (tagName => attrs =>
+       wrap (`<${tagName}` +
+             j (map (k => ` ${k}="${attrs[k]}"`) (sort (keys (attrs)))) +
+             '>')
+            (`</${tagName}>`));
 
 //    spanClass :: String -> String -> String
 const spanClass =
-def('spanClass',
-    {},
-    [$.String, $.String, $.String],
-    (className, innerHtml) => el('span', {class: className}, innerHtml));
+def ('spanClass')
+    ({})
+    ([$.String, $.String, $.String])
+    (compose (el ('span')) (singleton ('class')));
 
 //    Version :: Type
-const Version =
-$.NullaryType('sanctuary-site/Version',
-              '',
-              allPass([is(String), test(/^\d+[.]\d+[.]\d+$/)]));
+const Version = $.NullaryType
+  ('sanctuary-site/Version')
+  ('')
+  (allPass ([is ($.String), test (/^\d+[.]\d+[.]\d+$/)]));
 
 //    dependencyVersion :: String -> Maybe Version
 const dependencyVersion =
-def('dependencyVersion',
-    {},
-    [$.String, Maybe(Version)],
-    name => get($.test([], Version), name, pkg.dependencies));
+def ('dependencyVersion')
+    ({})
+    ([$.String, Maybe (Version)])
+    (name => get (is (Version)) (name) (pkg.dependencies));
 
 //    dependencyUrl :: String -> Maybe String
 const dependencyUrl =
-def('dependencyUrl',
-    {},
-    [$.String, Maybe($.String)],
-    name => map(concat(`https://github.com/sanctuary-js/${name}/tree/v`),
-                dependencyVersion(name)));
+def ('dependencyUrl')
+    ({})
+    ([$.String, Maybe ($.String)])
+    (name => map (concat (`https://github.com/sanctuary-js/${name}/tree/v`))
+                 (dependencyVersion (name)));
 
 //    externalLink :: String -> String -> String
 const externalLink =
-def('externalLink',
-    {},
-    [$.String, $.String, $.String],
-    (name, s) => el('a', {href: fromJust(dependencyUrl(name)) + '#' + s}, s));
+def ('externalLink')
+    ({})
+    ([$.String, $.String, $.String])
+    (name => s => el ('a')
+                     ({href: fromJust (dependencyUrl (name)) + '#' + s})
+                     (s));
 
 //    linkTokens :: String -> String
-const linkTokens = cond([
-  [test(/^[a-z]$/),      I],
-  [equals(''),           I],
-  [equals('=>'),         I],
-  [equals('~>'),         I],
-  [equals('-\u2060>'),   K('->')],
-  [equals('Either'),     el('a', {href: '#EitherType'})],
-  [equals('List'),       el('a', {href: '#list'})],
-  [equals('Maybe'),      el('a', {href: '#MaybeType'})],
-  [equals('TypeRep'),    el('a', {href: '#type-representatives'})],
-  [flip(has, $),         externalLink('sanctuary-def')],
-  [flip(has, Z),         externalLink('sanctuary-type-classes')],
-  [K(true),              I],
+const linkTokens = cond ([
+  [test (/^[a-z]$/),     I],
+  [equals (''),          I],
+  [equals ('=>'),        I],
+  [equals ('~>'),        I],
+  [equals ('-\u2060>'),  K ('->')],
+  [equals ('Either'),    el ('a') ({href: '#EitherType'})],
+  [equals ('Maybe'),     el ('a') ({href: '#MaybeType'})],
+  [equals ('Pair'),      el ('a') ({href: '#PairType'})],
+  [equals ('TypeRep'),   el ('a') ({href: 'https://github.com/fantasyland/fantasy-land#type-representatives'})],
+  [flip (has) ($),       externalLink ('sanctuary-def')],
+  [flip (has) (Z),       externalLink ('sanctuary-type-classes')],
+  [K (true),             I],
 ]);
 
 //    headingToMarkup :: String -> String -> String -> String
 const headingToMarkup =
-def('headingToMarkup',
-    {},
-    [$.String, $.String, $.String, $.String],
-    (id, href, html) => {
-      const [s, t] = reduce(
-        ([s, t, ctx]) => c =>
-          c === ' ' && ctx === '' ?
-            [s + el('a', {href}, t) + c, '', ctx] :
-          c === ':' && (ctx === '' || ctx.endsWith('{')) ?
-            [s + c, '', ctx + ';'] :
-          c === ':' && (ctx === ';' || ctx.endsWith('{;')) ?
-            [s + c, '', init(ctx) + ':'] :
-          c === '(' || c === '[' || c === '{' ?
-            [s + linkTokens(t) + c, '', ctx + c] :
-          c === ')' || c === ']' || c === '}' ?
-            [s + linkTokens(t) + c, '', init(ctx.replace(/:$/, ''))] :
-          c === ',' ?
-            [s + linkTokens(t) + c, '', ctx.replace(/:$/, '')] :
-          c === ' ' || c === '\u00A0' || c === '?' ?
-            [s + (ctx.endsWith('{') ? I : linkTokens)(t) + c, '', ctx] :
-          // else
-            [s, t + c, ctx],
-        ['', '', ''],
-        splitOn('', html)
-      );
-      return el('h4', {id}, el('code', {}, s + linkTokens(t)));
-    });
+def ('headingToMarkup')
+    ({})
+    ([$.String, $.String, $.String, $.String])
+    (id => href => text => {
+       const [s, t] = reduce
+         (([s, t, ctx]) => c =>
+            c === ' ' && ctx === '' ?
+              [s + el ('a') ({href}) (t) + c, '', ctx] :
+            c === ':' && (ctx === '' || ctx.endsWith ('{')) ?
+              [s + c, '', ctx + ';'] :
+            c === ':' && (ctx === ';' || ctx.endsWith ('{;')) ?
+              [s + c, '', init (ctx) + ':'] :
+            c === '(' || c === '[' || c === '{' ?
+              [s + linkTokens (t) + c, '', ctx + c] :
+            c === ')' || c === ']' || c === '}' ?
+              [s + linkTokens (t) + c, '', init (ctx.replace (/:$/, ''))] :
+            c === ',' ?
+              [s + linkTokens (t) + c, '', ctx.replace (/:$/, '')] :
+            c === ' ' || c === '\u00A0' || c === '?' ?
+              [s + (ctx.endsWith ('{') ? I : linkTokens) (t) + c, '', ctx] :
+            // else
+              [s, t + c, ctx])
+         (['', '', ''])
+         (splitOn ('') (htmlEncode (text)));
+
+       return el ('h4') ({id}) (el ('code') ({}) (s + linkTokens (t)));
+     });
 
 //    toInputMarkup :: String -> String
 const toInputMarkup =
-def('toInputMarkup',
-    {},
-    [$.String, $.String],
-    pipe([htmlEncode,
-          wrap('<input value="', '">'),
-          concat(htmlEncode('>\u00A0'))]));
+def ('toInputMarkup')
+    ({})
+    ([$.String, $.String])
+    (pipe ([htmlEncode,
+            wrap ('<input value="') ('">'),
+            concat (htmlEncode ('>\u00A0'))]));
 
 //    $context :: ContextifiedSandbox
 const $context = (() => {
   const {Nil, Cons} = List;
-  const S = S_.create({checkTypes: true, env});
-  return vm.createContext({$, Cons, List, Nil, R, S, Sum});
-})();
+  const S = Object.assign (S_.create ({checkTypes: true, env}),
+                           {env: S_.env});
+  return vm.createContext ({$, Cons, Descending, List, Nil, R, S, Sum});
+}) ();
 
 //    toOutputMarkup :: String -> String
 const toOutputMarkup =
-def('toOutputMarkup',
-    {},
-    [$.String, $.String],
-    pipe([encaseEither(prop('message'),
-                       code => vm.runInContext(code,
-                                               $context,
-                                               {displayErrors: false})),
-          either(pipe([concat('! '),
-                       htmlEncode,
-                       el('div', {class: 'output', 'data-error': 'true'})]),
-                 pipe([toString,
-                       htmlEncode,
-                       el('div', {class: 'output'})]))]));
+def ('toOutputMarkup')
+    ({})
+    ([$.String, $.String])
+    (pipe ([encaseEither (prop ('message'))
+                         (code => vm.runInContext (code,
+                                                   $context,
+                                                   {displayErrors: false})),
+            either (pipe ([concat ('! '),
+                           htmlEncode,
+                           el ('div') ({'class': 'output',
+                                        'data-error': 'true'})]))
+                   (pipe ([show,
+                           htmlEncode,
+                           el ('div') ({'class': 'output'})]))]));
 
 //    doctestsToMarkup :: String -> String
 const doctestsToMarkup =
-def('doctestsToMarkup',
-    {},
-    [$.String, $.String],
-    pipe([matchAll(/^> .*(?:\n[.] .*)*/gm),
-          map(prop('match')),
-          map(replace(/\[\n[.] */g, '[')),
-          map(replace(/,\n[.] \]/g, ']')),
-          map(replace(/^../gm, '')),
-          map(replace(/^ +/gm, ' ')),
-          map(replace(/\n/g, '')),
-          map(replace(/^global[.]/, 'const ')),
-          map(lift2(pair, toInputMarkup, toOutputMarkup)),
-          map(map(concat('    '))),
-          map(unlines),
-          map(wrap('  <form>\n', '  </form>\n')),
-          j,
-          wrap('<div class="examples">\n', '</div>\n')]));
+def ('doctestsToMarkup')
+    ({})
+    ([$.String, $.String])
+    (pipe ([matchAll (/^> .*(?:\n[.] .*)*/gm),
+            map (prop ('match')),
+            map (replace (/\[\n[.] */g) ('[')),
+            map (replace (/,\n[.] \]/g) (']')),
+            map (replace (/^../gm) ('')),
+            map (replace (/^ +/gm) (' ')),
+            map (replace (/\n/g) ('')),
+            map (replace (/^global[.]/) ('const ')),
+            map (lift2 (pair) (toInputMarkup) (toOutputMarkup)),
+            map (map (concat ('    '))),
+            map (unlines),
+            map (wrap ('  <form>\n') ('  </form>\n')),
+            j,
+            wrap ('<div class="examples">\n') ('</div>\n')]));
 
 //    syntax :: String -> RegExp -> (String -> String) -> String -> String
 const syntax =
-def('syntax',
-    {},
-    [$.String, $.RegExp, Fn($.String, $.String), $.String, $.String],
-    (className, pattern, f, s) =>
-      s.split(pattern).map((s, idx) =>
-        idx % 2 === 0 ? f(s) : spanClass(className, htmlEncode(s))
-      ).join(''));
+def ('syntax')
+    ({})
+    ([$.String, $.RegExp, Fn ($.String) ($.String), $.String, $.String])
+    (className => pattern => f => s =>
+       j (s.split (pattern)
+           .map ((s, idx) =>
+                   idx % 2 === 0 ? f (s)
+                                 : spanClass (className) (htmlEncode (s)))));
 
 //    highlightChunk :: String -> String
 const highlightChunk =
-def('highlightChunk',
-    {},
-    [$.String, $.String],
-    syntax('keyword',
-           /\b(const|else|function|if|instanceof|new|return|this)\b/,
-           syntax('boolean-literal',
-                  /\b(false|true)\b/,
-                  syntax('number-literal',
-                         /\b([0-9]+(?:[.][0-9]+)?)\b/,
-                         htmlEncode))));
+def ('highlightChunk')
+    ({})
+    ([$.String, $.String])
+    (syntax ('keyword')
+            (/\b(const|else|function|if|instanceof|new|return|this)\b/)
+            (syntax ('boolean-literal')
+                    (/\b(false|true)\b/)
+                    (syntax ('number-literal')
+                            (/\b([0-9]+(?:[.][0-9]+)?)\b/)
+                            (htmlEncode))));
 
 //    highlight :: String -> String
 const highlight =
-def('highlight',
-    {},
-    [$.String, $.String],
-    _input => {
-      const input = htmlDecode(_input);
-      let output = '';
-      let chunk = '';
-      const $ctx = [];
-      const pop = () => { chunk = ''; $ctx.pop(); };
-      for (let consumed, idx = 0; idx < input.length; idx += consumed.length) {
-        const c = input.charAt(idx);
-        const cc = input.slice(idx, idx + 2);
-        const ctx = $ctx[$ctx.length - 1];
-        if (ctx === '//') {
-          if (c === '\n') {
-            output += spanClass('comment', htmlEncode(chunk)) +
-                      (consumed = c);
-            pop();
-          } else {
-            chunk += consumed = c;
-          }
-        } else if (ctx === "'" || ctx === '"') {
-          if (c === ctx) {
-            output += spanClass('string-literal',
-                                htmlEncode(chunk + (consumed = c)));
-            pop();
-          } else if (c === '\\') {
-            chunk += consumed = cc;
-          } else {
-            chunk += consumed = c;
-          }
-        } else if (ctx === '`') {
-          if (c === ctx) {
-            output += spanClass('template-literal',
-                                htmlEncode(chunk + (consumed = c)));
-            pop();
-          } else if (cc === '${') {
-            output += spanClass('template-literal', htmlEncode(chunk)) +
-                      spanClass('punctuation', htmlEncode(consumed = cc));
-            chunk = '';
-            $ctx.push(cc);
-          } else if (c === '\\') {
-            chunk += consumed = cc;
-          } else {
-            chunk += consumed = c;
-          }
-        } else if (ctx === '${') {
-          if (c === '}') {
-            output += highlightChunk(chunk) +
-                      spanClass('punctuation', consumed = c);
-            pop();
-          } else {
-            chunk += consumed = c;
-          }
-        } else if (cc === '//') {
-          output += highlightChunk(chunk);
-          $ctx.push(chunk = consumed = cc);
-        } else if (c === "'" || c === '"' || c === '`') {
-          output += highlightChunk(chunk);
-          $ctx.push(chunk = consumed = c);
-        } else {
-          chunk += consumed = c;
-        }
-      }
-      return output + highlightChunk(chunk);
-    });
+def ('highlight')
+    ({})
+    ([$.String, $.String])
+    (_input => {
+       const input = htmlDecode (_input);
+       let output = '';
+       let chunk = '';
+       const $ctx = [];
+       const pop = () => { chunk = ''; $ctx.pop (); };
+       for (let consumed, idx = 0; idx < input.length; idx += consumed.length) {
+         const c = input.charAt (idx);
+         const cc = input.slice (idx, idx + 2);
+         const ctx = $ctx[$ctx.length - 1];
+         if (ctx === '//') {
+           if (c === '\n') {
+             output += spanClass ('comment') (htmlEncode (chunk)) +
+                       (consumed = c);
+             pop ();
+           } else {
+             chunk += consumed = c;
+           }
+         } else if (ctx === "'" || ctx === '"') {
+           if (c === ctx) {
+             output += spanClass ('string-literal')
+                                 (htmlEncode (chunk + (consumed = c)));
+             pop ();
+           } else if (c === '\\') {
+             chunk += consumed = cc;
+           } else {
+             chunk += consumed = c;
+           }
+         } else if (ctx === '`') {
+           if (c === ctx) {
+             output += spanClass ('template-literal')
+                                 (htmlEncode (chunk + (consumed = c)));
+             pop ();
+           } else if (cc === '${') {
+             output += spanClass ('template-literal') (htmlEncode (chunk)) +
+                       spanClass ('punctuation') (htmlEncode (consumed = cc));
+             chunk = '';
+             $ctx.push (cc);
+           } else if (c === '\\') {
+             chunk += consumed = cc;
+           } else {
+             chunk += consumed = c;
+           }
+         } else if (ctx === '${') {
+           if (c === '}') {
+             output += highlightChunk (chunk) +
+                       spanClass ('punctuation') (consumed = c);
+             pop ();
+           } else {
+             chunk += consumed = c;
+           }
+         } else if (cc === '//') {
+           output += highlightChunk (chunk);
+           $ctx.push (chunk = consumed = cc);
+         } else if (c === "'" || c === '"' || c === '`') {
+           output += highlightChunk (chunk);
+           $ctx.push (chunk = consumed = c);
+         } else {
+           chunk += consumed = c;
+         }
+       }
+       return output + highlightChunk (chunk);
+     });
 
 //    generate :: String -> String
 const generate =
-def('generate',
-    {},
-    [$.String, $.String],
-    pipe([replace_(regex('g', '<h4 name="(.*)"><code><a href="(.*)">(.*)</a></code></h4>'),
-                   apply(headingToMarkup)),
-          replace_(/^```javascript\n(> [\s\S]*?)^```\n/gm,
-                   apply(doctestsToMarkup)),
-          //  Replace NO-BREAK SPACE characters with SYMBOL FOR SPACE
-          //  characters to work around chjj/marked#363.
-          replace(/\u00A0/g, '\u2420'),
-          s => marked(s, {pedantic: true}),
-          replace(/\u2420/g, '\u00A0'),
-          replace(/&#39;/g, "'"),
-          replace(/&gt;/g, '>'),
-          replace(/\n\n(?=\n<[/]code><[/]pre>)/g, ''),
-          replace_(regex('g', '(<pre><code class="lang-javascript">)([^]*?)(?=</code></pre>)'),
-                   ([$1, $2]) => $1 + highlight($2)),
-          replace(/(?=<(h[2-6]) id="([^"]*)")/g,
-                  '<a class="pilcrow $1" href="#$2">\u00B6</a>\n')]));
+def ('generate')
+    ({})
+    ([$.String, $.String])
+    (pipe ([replace (regex ('gm') ('^#### <a name="(.*)" href="(.*)">`(.*)`</a>$'))
+                    (($0, $1, $2, $3) => headingToMarkup ($1) ($2) ($3)),
+            replace (regex ('gm') ('^```javascript\\n(> [^]*?)^```\\n'))
+                    (($0, $1) => doctestsToMarkup ($1)),
+            //  Replace NO-BREAK SPACE characters with SYMBOL FOR SPACE
+            //  characters to work around chjj/marked#363.
+            replace (/\u00A0/g) ('\u2420'),
+            s => marked (s, {pedantic: true}),
+            replace (/\u2420/g) ('\u00A0'),
+            replace (/&#39;/g) ("'"),
+            replace (/&gt;/g) ('>'),
+            replace (/\n\n(?=\n<[/]code><[/]pre>)/g) (''),
+            replace (regex ('g') ('(<pre><code class="lang-javascript">)([^]*?)(?=</code></pre>)'))
+                    (($0, $1, $2) => $1 + highlight ($2)),
+            replace (/(?=<(h[2-6]) id="([^"]*)")/g)
+                    ('<a class="pilcrow $1" href="#$2">\u00B6</a>\n')]));
 
 //    readFile :: String -> Either String String
 const readFile =
-def('readFile',
-    {},
-    [$.String, Either($.String, $.String)],
-    encaseEither(prop('message'), s => fs.readFileSync(s, 'utf8')));
+def ('readFile')
+    ({})
+    ([$.String, Either ($.String) ($.String)])
+    (encaseEither (prop ('message')) (s => fs.readFileSync (s, 'utf8')));
 
 //    writeFile :: String -> String -> Either String String
 const writeFile =
-def('writeFile',
-    {},
-    [$.String, $.String, Either($.String, $.String)],
-    converge(map,
-             [compose_(K, K),
-              encaseEither2(prop('message'), curry2(fs.writeFileSync))]));
+def ('writeFile')
+    ({})
+    ([$.String, $.String, Either ($.String) ($.String)])
+    (filename => s =>
+       map (S.K (filename))
+           (encaseEither2 (prop ('message'))
+                          (curry2 (fs.writeFileSync))
+                          (filename)
+                          (s)));
 
 //    version :: String -> Either String String
 const version =
-def('version',
-    {},
-    [$.String, Either($.String, $.String)],
-    pipe([s => path.join(s, 'package.json'),
-          readFile,
-          chain(encaseEither(prop('message'), JSON.parse)),
-          map(get(is(String), 'version')),
-          chain(maybeToEither('Invalid "version"'))]));
+def ('version')
+    ({})
+    ([$.String, Either ($.String) ($.String)])
+    (pipe ([s => path.join (s, 'package.json'),
+            readFile,
+            chain (encaseEither (prop ('message')) (JSON.parse)),
+            map (get (is ($.String)) ('version')),
+            chain (maybeToEither ('Invalid "version"'))]));
 
 //    description :: String -> Either String String
 const description =
-def('description',
-    {},
-    [$.String, Either($.String, $.String)],
-    pipe([s => path.join(s, 'package.json'),
-          readFile,
-          chain(encaseEither(prop('message'), JSON.parse)),
-          map(get(is(String), 'description')),
-          chain(maybeToEither('Invalid "description"'))]));
+def ('description')
+    ({})
+    ([$.String, Either ($.String) ($.String)])
+    (pipe ([s => path.join (s, 'package.json'),
+            readFile,
+            chain (encaseEither (prop ('message')) (JSON.parse)),
+            map (get (is ($.String)) ('description')),
+            chain (maybeToEither ('Invalid "description"'))]));
 
 //    customize :: String -> Either String (String -> Either String String)
 const customize =
-def('customize',
-    {},
-    [$.String, Either($.String, Fn($.String, Either($.String, $.String)))],
-    pipe([readFile,
-          map(splitOnRegex(/\n={79}\n\n/g)),
-          chain(ifElse(compose(equals(2), prop('length')),
-                       Right,
-                       K(Left('Expected exactly one separator')))),
-          map(apply((existing, replacement) =>
-                      ifElse(contains(existing),
-                             compose(Right, replace(existing, replacement)),
-                             K(Left('Substring not found:\n\n' +
-                                    existing)))))]));
+def ('customize')
+    ({})
+    ([$.String,
+      Either ($.String) (Fn ($.String) (Either ($.String) ($.String)))])
+    (pipe ([readFile,
+            map (splitOnRegex (/\n={79}\n\n/g)),
+            chain (ifElse (compose (equals (2)) (prop ('length')))
+                          (Right)
+                          (K (Left ('Expected exactly one separator')))),
+            map (([existing, replacement]) =>
+                   ifElse (s => s.includes (existing))
+                          (compose (Right) (replace (existing) (replacement)))
+                          (K (Left ('Substring not found:\n\n' + existing))))]));
 
 //    readme :: String -> Either String String
 const readme =
-def('readme',
-    {},
-    [$.String, Either($.String, $.String)],
-    pipe([s => path.join(s, 'README.md'),
-          readFile,
-          ap(customize('custom/preamble.md')),
-          join,
-          ap(customize('custom/type-error.md')),
-          join,
-          ap(customize('custom/type-checking-sanctuary.md')),
-          join,
-          ap(customize('custom/type-checking-ramda.md')),
-          join,
-          map(generate),
-          map(concat('\n')),
-          map(replace(/\n$/, ''))]));
+def ('readme')
+    ({})
+    ([$.String, Either ($.String) ($.String)])
+    (pipe ([s => path.join (s, 'README.md'),
+            readFile,
+            ap (customize ('custom/preamble.md')),
+            join,
+            ap (customize ('custom/type-error.md')),
+            join,
+            ap (customize ('custom/type-checking-sanctuary.md')),
+            join,
+            ap (customize ('custom/type-checking-ramda.md')),
+            join,
+            ap (customize ('custom/split-on-regex.md')),
+            join,
+            map (generate),
+            map (concat ('\n')),
+            map (replace (/\n$/) (''))]));
 
 //    Heading :: Type
-const Heading = $.RecordType({
+const Heading = $.RecordType ({
   level: $.PositiveInteger,
   id: $.String,
   html: $.String,
-  subheads: $.Array($.NullaryType('Heading', '', x => $.test([], Heading, x))),
+  subheads: $.Array ($.NullaryType ('Heading')
+                                   ('')
+                                   (x => $.test ([]) (Heading) (x))),
 });
 
 //    tocListItem :: Heading -> String
 const tocListItem =
-def('tocListItem',
-    {},
-    [Heading, $.String],
-    function recur({level, id, html, subheads}) {
-      const indent = ' '.repeat(level * (level - 1) + 4);
-      const a = el('a',
-                   {href: '#' + id},
-                   html.replace(/<a [^>]*>([^<]*)<[/]a>/g,
-                                ($0, $1, idx) =>
-                                  when(K(idx === '<code>'.length),
-                                       wrap('<b>', '</b>'),
-                                       $1)));
-      return wrap(`${indent}<li>\n`,
-                  `${indent}</li>\n`,
-                  subheads.length === 0 ?
-                    wrap(`${indent}  `, '\n', a) :
-                  level < 3 ?
-                    wrap(`${indent}  ${a}\n` +
-                         `${indent}  <ul>\n`,
-                         `${indent}  </ul>\n`,
-                         j(map(recur, subheads))) :
-                  // else
-                    wrap(`${indent}  <details>\n` +
-                         `${indent}    <summary>${a}</summary>\n` +
-                         `${indent}    <ul>\n`,
-                         `${indent}    </ul>\n` +
-                         `${indent}  </details>\n`,
-                         j(map(recur, subheads))));
-    });
+def ('tocListItem')
+    ({})
+    ([Heading, $.String])
+    (function recur({level, id, html, subheads}) {
+       const indent = ' '.repeat (level * (level - 1) + 4);
+       const a = el ('a')
+                    ({href: '#' + id})
+                    (html.replace (/<a [^>]*>([^<]*)<[/]a>/g,
+                                   ($0, $1, idx) =>
+                                     when (K (idx === '<code>'.length))
+                                          (wrap ('<b>') ('</b>'))
+                                          ($1)));
+       return wrap (`${indent}<li>\n`)
+                   (`${indent}</li>\n`)
+                   (subheads.length === 0 ?
+                      wrap (`${indent}  `) ('\n') (a) :
+                    level < 3 ?
+                      wrap (`${indent}  ${a}\n` +
+                            `${indent}  <ul>\n`)
+                           (`${indent}  </ul>\n`)
+                           (j (map (recur) (subheads))) :
+                    // else
+                      wrap (`${indent}  <details>\n` +
+                            `${indent}    <summary>${a}</summary>\n` +
+                            `${indent}    <ul>\n`)
+                           (`${indent}    </ul>\n` +
+                            `${indent}  </details>\n`)
+                           (j (map (recur) (subheads))));
+     });
 
 //    toc :: String -> String
 const toc =
-def('toc',
-    {},
-    [$.String, $.String],
-    pipe([matchAll(/<(h[1-6]) id="([^"]*)">(.*)<[/]\1>/g),
-          map(prop('groups')),
-          map(map(fromJust)),
-          reduce(heading => ([tagName, id, html]) => {
-                   const level = id === 'create' || id === 'env' ?
-                                   3 :
-                                   Number(replace('h', '', tagName));
-                   for (let subheads = heading.subheads;
-                        true;
-                        subheads = subheads[subheads.length - 1].subheads) {
-                     if (subheads.length === 0 ||
-                         subheads[0].level === level) {
-                       subheads.push({level, id, html, subheads: []});
-                       return heading;
-                     }
-                   }
-                 },
-                 {level: 1, id: '', html: '', subheads: []}),
-          prop('subheads'),
-          map(tocListItem),
-          j,
-          wrap('    <ul id="toc">\n',
-               '    </ul>'),
-          concat('\n')]));
+def ('toc')
+    ({})
+    ([$.String, $.String])
+    (pipe ([matchAll (/<(h[1-6]) id="([^"]*)">(.*)<[/]\1>/g),
+            map (prop ('groups')),
+            map (map (fromJust)),
+            reduce (heading => ([tagName, id, html]) => {
+                      const level = Number (replace ('h', '', tagName));
+                      for (let subheads = heading.subheads;
+                           true;
+                           subheads = subheads[subheads.length - 1].subheads) {
+                        if (subheads.length === 0 ||
+                            subheads[0].level === level) {
+                          subheads.push ({level, id, html, subheads: []});
+                          return heading;
+                        }
+                      }
+                    })
+                   ({level: 1, id: '', html: '', subheads: []}),
+            prop ('subheads'),
+            map (tocListItem),
+            j,
+            wrap ('    <ul id="toc">\n')
+                 ('    </ul>'),
+            concat ('\n')]));
 
 //    toDocument :: String -> String -> String -> String
 const toDocument =
-def('toDocument',
-    {},
-    [$.String, $.String, $.String, $.String],
-    (version, tagline, content) => `<!doctype html>
+def ('toDocument')
+    ({})
+    ([$.String, $.String, $.String, $.String])
+    (version => tagline => content => `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -568,23 +566,33 @@ def('toDocument',
   <div id="css-main">
     <h1 id="sanctuary">Sanctuary <small>v${version}</small></h1>
     <p id="tagline">${tagline}</p>
-${toc(content)}
+${toc (content)}
 ${content}
   </div>
   <script src="vendor/ramda.js"></script>
+  <script src="vendor/sanctuary-show.js"></script>
   <script src="vendor/sanctuary-type-identifiers.js"></script>
   <script src="vendor/sanctuary-type-classes.js"></script>
+  <script src="vendor/sanctuary-descending.js"></script>
+  <script src="vendor/sanctuary-either.js"></script>
+  <script src="vendor/sanctuary-identity.js"></script>
+  <script src="vendor/sanctuary-maybe.js"></script>
+  <script src="vendor/sanctuary-pair.js"></script>
   <script src="vendor/sanctuary-def.js"></script>
   <script src="adt/List.js"></script>
   <script src="adt/Sum.js"></script>
   <script src="vendor/sanctuary.js"></script>
+  <script src="env.js"></script>
   <script>
+    window.type = window.sanctuaryTypeIdentifiers;
     window.Z = window.sanctuaryTypeClasses;
     window.$ = window.sanctuaryDef;
+    window.Descending = window.sanctuaryDescending;
+    window.Identity = window.sanctuaryIdentity;
     window.Nil = window.List.Nil;
     window.Cons = window.List.Cons;
-    window.env = window.sanctuary.env.concat([List.Type($.Unknown), Sum.Type]);
     window.S = window.sanctuary.create({checkTypes: true, env: env});
+    window.S.env = window.sanctuary.env;
     window.def = $.create({checkTypes: true, env: env});
   </script>
   <script src="behaviour.js"></script>
@@ -594,22 +602,23 @@ ${content}
 
 //    failure :: String -> Undefined
 const failure = s => {
-  process.stderr.write(`${red}${s}${reset}\n`);
-  process.exit(1);
+  process.stderr.write (`${red}${s}${reset}\n`);
+  process.exit (1);
 };
 
 //    success :: String -> Undefined
 const success = s => {
-  process.stdout.write(`${green}Successfully created ${s}${reset}\n`);
-  process.exit(0);
+  process.stdout.write (`${green}Successfully created ${s}${reset}\n`);
+  process.exit (0);
 };
 
-pipe([at(2),
-      maybeToEither('Missing command-line argument'),
-      map(of(Array)),
-      map(ap([version, description, readme])),
-      chain(sequence(S.Either)),
-      map(apply(toDocument)),
-      chain(writeFile('index.html')),
-      either(failure, success)],
-     process.argv);
+pipe ([at (2),
+       maybeToEither ('Missing command-line argument'),
+       map (of (Array)),
+       map (ap ([version, description, readme])),
+       chain (sequence (S.Either)),
+       map (([version, tagline, content]) =>
+              toDocument (version) (tagline) (content)),
+       chain (writeFile ('index.html')),
+       either (failure) (success)])
+     (process.argv);

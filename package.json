@@ -3,16 +3,21 @@
   "private": true,
   "dependencies": {
     "ramda": "0.25.0",
-    "sanctuary": "0.14.1",
-    "sanctuary-def": "0.14.0",
+    "sanctuary": "0.15.0",
+    "sanctuary-def": "0.18.1",
+    "sanctuary-descending": "1.0.0",
+    "sanctuary-either": "1.0.0",
+    "sanctuary-identity": "1.0.0",
     "sanctuary-logo": "1.1.0",
-    "sanctuary-type-classes": "7.1.1",
+    "sanctuary-maybe": "1.0.0",
+    "sanctuary-pair": "1.0.0",
+    "sanctuary-show": "1.0.0",
+    "sanctuary-type-classes": "9.0.0",
     "sanctuary-type-identifiers": "2.0.1"
   },
   "devDependencies": {
-    "envvar": "1.1.x",
     "eslint": "4.9.x",
     "marked": "0.3.9",
-    "sanctuary-style": "1.0.x"
+    "sanctuary-style": "2.0.x"
   }
 }
