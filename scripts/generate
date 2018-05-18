@@ -124,6 +124,17 @@ def('htmlEncode',
           replace(/>/g, '&gt;'),
           replace(/"/g, '&quot;')]));
 
+//    htmlDecode :: String -> String
+const htmlDecode =
+def('htmlDecode',
+    {},
+    [$.String, $.String],
+    pipe([replace(/&#39;/g,  "'"),
+          replace(/&quot;/g, '"'),
+          replace(/&gt;/g,   '>'),
+          replace(/&lt;/g,   '<'),
+          replace(/&amp;/g,  '&')]));
+
 //    wrap :: String -> String -> String -> String
 const wrap =
 def('wrap',
@@ -140,6 +151,13 @@ def('el',
       const attrsHtml = j(map(k => ` ${k}="${attrs[k]}"`, sort(keys(attrs))));
       return `<${tagName}${attrsHtml}>${innerHtml}</${tagName}>`;
     });
+
+//    spanClass :: String -> String -> String
+const spanClass =
+def('spanClass',
+    {},
+    [$.String, $.String, $.String],
+    (className, innerHtml) => el('span', {class: className}, innerHtml));
 
 //    Version :: Type
 const Version =
@@ -267,6 +285,98 @@ def('doctestsToMarkup',
           j,
           wrap('<div class="examples">\n', '</div>\n')]));
 
+//    syntax :: String -> RegExp -> (String -> String) -> String -> String
+const syntax =
+def('syntax',
+    {},
+    [$.String, $.RegExp, Fn($.String, $.String), $.String, $.String],
+    (className, pattern, f, s) =>
+      s.split(pattern).map((s, idx) =>
+        idx % 2 === 0 ? f(s) : spanClass(className, htmlEncode(s))
+      ).join(''));
+
+//    highlightChunk :: String -> String
+const highlightChunk =
+def('highlightChunk',
+    {},
+    [$.String, $.String],
+    syntax('keyword',
+           /\b(const|else|function|if|instanceof|new|return|this)\b/,
+           syntax('boolean-literal',
+                  /\b(false|true)\b/,
+                  syntax('number-literal',
+                         /\b([0-9]+(?:[.][0-9]+)?)\b/,
+                         htmlEncode))));
+
+//    highlight :: String -> String
+const highlight =
+def('highlight',
+    {},
+    [$.String, $.String],
+    _input => {
+      const input = htmlDecode(_input);
+      let output = '';
+      let chunk = '';
+      const $ctx = [];
+      const pop = () => { chunk = ''; $ctx.pop(); };
+      for (let consumed, idx = 0; idx < input.length; idx += consumed.length) {
+        const c = input.charAt(idx);
+        const cc = input.slice(idx, idx + 2);
+        const ctx = $ctx[$ctx.length - 1];
+        if (ctx === '//') {
+          if (c === '\n') {
+            output += spanClass('comment', htmlEncode(chunk)) +
+                      (consumed = c);
+            pop();
+          } else {
+            chunk += consumed = c;
+          }
+        } else if (ctx === "'" || ctx === '"') {
+          if (c === ctx) {
+            output += spanClass('string-literal',
+                                htmlEncode(chunk + (consumed = c)));
+            pop();
+          } else if (c === '\\') {
+            chunk += consumed = cc;
+          } else {
+            chunk += consumed = c;
+          }
+        } else if (ctx === '`') {
+          if (c === ctx) {
+            output += spanClass('template-literal',
+                                htmlEncode(chunk + (consumed = c)));
+            pop();
+          } else if (cc === '${') {
+            output += spanClass('template-literal', htmlEncode(chunk)) +
+                      spanClass('punctuation', htmlEncode(consumed = cc));
+            chunk = '';
+            $ctx.push(cc);
+          } else if (c === '\\') {
+            chunk += consumed = cc;
+          } else {
+            chunk += consumed = c;
+          }
+        } else if (ctx === '${') {
+          if (c === '}') {
+            output += highlightChunk(chunk) +
+                      spanClass('punctuation', consumed = c);
+            pop();
+          } else {
+            chunk += consumed = c;
+          }
+        } else if (cc === '//') {
+          output += highlightChunk(chunk);
+          $ctx.push(chunk = consumed = cc);
+        } else if (c === "'" || c === '"' || c === '`') {
+          output += highlightChunk(chunk);
+          $ctx.push(chunk = consumed = c);
+        } else {
+          chunk += consumed = c;
+        }
+      }
+      return output + highlightChunk(chunk);
+    });
+
 //    generate :: String -> String
 const generate =
 def('generate',
@@ -282,6 +392,8 @@ def('generate',
           s => marked(s, {pedantic: true}),
           replace(/\u2420/g, '\u00A0'),
           replace(/\n\n(?=\n<[/]code><[/]pre>)/g, ''),
+          replace_(regex('g', '(<pre><code class="lang-javascript">)([^]*?)(?=</code></pre>)'),
+                   ([$1, $2]) => $1 + highlight($2)),
           replace(/(?=<(h[2-6]) id="([^"]*)")/g,
                   '<a class="pilcrow $1" href="#$2">\u00B6</a>\n')]));
 
