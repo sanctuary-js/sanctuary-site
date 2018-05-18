@@ -177,6 +177,31 @@ pre code {
   color: #c36;
 }
 
+code.lang-javascript {
+  color: #333;
+}
+
+code.lang-javascript .boolean-literal {
+  color: #963;
+}
+
+code.lang-javascript .comment {
+  color: #999;
+}
+
+code.lang-javascript .keyword {
+  color: #c36;
+}
+
+code.lang-javascript .number-literal {
+  color: #069;
+}
+
+code.lang-javascript .string-literal,
+code.lang-javascript .template-literal {
+  color: #080;
+}
+
 h1,
 h2, .h2,
 h3, .h3,

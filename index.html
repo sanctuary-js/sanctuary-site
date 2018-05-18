@@ -901,10 +901,10 @@ disable type checking in certain contexts to avoid paying this cost.
 does not perform type checking.</p>
 <p>In Node, one could use an environment variable to determine whether to
 perform type checking:</p>
-<pre><code class="lang-javascript">const {create, env} = require(&#39;sanctuary&#39;);
+<pre><code class="lang-javascript"><span class="keyword">const</span> {create, env} = require(<span class="string-literal">'sanctuary'</span>);
 
-const checkTypes = process.env.NODE_ENV !== &#39;production&#39;;
-const S = create({checkTypes, env});
+<span class="keyword">const</span> checkTypes = process.env.NODE_ENV !== <span class="string-literal">'production'</span>;
+<span class="keyword">const</span> S = create({checkTypes, env});
 </code></pre>
 <a class="pilcrow h2" href="#api">¶</a>
 <h2 id="api">API</h2>
@@ -921,37 +921,37 @@ is enabled, a badly typed application will produce an exception with a
 descriptive error message.</p>
 <p>The following snippet demonstrates defining a custom type and using
 <code>create</code> to produce a Sanctuary module which is aware of that type:</p>
-<pre><code class="lang-javascript">const {create, env} = require(&#39;sanctuary&#39;);
-const $ = require(&#39;sanctuary-def&#39;);
-const type = require(&#39;sanctuary-type-identifiers&#39;);
+<pre><code class="lang-javascript"><span class="keyword">const</span> {create, env} = require(<span class="string-literal">'sanctuary'</span>);
+<span class="keyword">const</span> $ = require(<span class="string-literal">'sanctuary-def'</span>);
+<span class="keyword">const</span> type = require(<span class="string-literal">'sanctuary-type-identifiers'</span>);
 
-//    Identity :: a -&gt; Identity a
-const Identity = function Identity(x) {
-  if (!(this instanceof Identity)) return new Identity(x);
-  this.value = x;
+<span class="comment">//    Identity :: a -&gt; Identity a</span>
+<span class="keyword">const</span> Identity = <span class="keyword">function</span> Identity(x) {
+  <span class="keyword">if</span> (!(<span class="keyword">this</span> <span class="keyword">instanceof</span> Identity)) <span class="keyword">return</span> <span class="keyword">new</span> Identity(x);
+  <span class="keyword">this</span>.value = x;
 };
 
-Identity[&#39;@@type&#39;] = &#39;my-package/Identity@1&#39;;
+Identity[<span class="string-literal">'@@type'</span>] = <span class="string-literal">'my-package/Identity@1'</span>;
 
-Identity.prototype[&#39;fantasy-land/map&#39;] = function(f) {
-  return Identity(f(this.value));
+Identity.prototype[<span class="string-literal">'fantasy-land/map'</span>] = <span class="keyword">function</span>(f) {
+  <span class="keyword">return</span> Identity(f(<span class="keyword">this</span>.value));
 };
 
-//    IdentityType :: Type -&gt; Type
-const IdentityType = $.UnaryType(
-  Identity[&#39;@@type&#39;],
-  &#39;http://example.com/my-package#Identity&#39;,
-  x =&gt; type(x) === Identity[&#39;@@type&#39;],
+<span class="comment">//    IdentityType :: Type -&gt; Type</span>
+<span class="keyword">const</span> IdentityType = $.UnaryType(
+  Identity[<span class="string-literal">'@@type'</span>],
+  <span class="string-literal">'http://example.com/my-package#Identity'</span>,
+  x =&gt; type(x) === Identity[<span class="string-literal">'@@type'</span>],
   identity =&gt; [identity.value]
 );
 
-const S = create({
-  checkTypes: process.env.NODE_ENV !== &#39;production&#39;,
+<span class="keyword">const</span> S = create({
+  checkTypes: process.env.NODE_ENV !== <span class="string-literal">'production'</span>,
   env: env.concat([IdentityType($.Unknown)]),
 });
 
-S.map(S.sub(1), Identity(43));
-// =&gt; Identity(42)
+S.map(S.sub(<span class="number-literal">1</span>), Identity(<span class="number-literal">43</span>));
+<span class="comment">// =&gt; Identity(42)</span>
 </code></pre>
 <p>See also <a href="#env"><code>env</code></a>.</p>
 <a class="pilcrow h4" href="#env">¶</a>
