@@ -108,6 +108,22 @@ a code {
   content: "\2013";
 }
 
+#toc details summary {
+  outline: none;
+}
+
+#toc details summary:focus {
+  margin-right: 0.001px;  /* XXX: Trigger redraw in WebKit */
+}
+
+#toc details summary::-webkit-details-marker {
+  color: #999;
+}
+
+#toc details summary:focus::-webkit-details-marker {
+  color: #080;
+}
+
 #toc code b {
   font-weight: 500;
 }

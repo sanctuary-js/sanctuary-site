@@ -54,702 +54,740 @@
             <a href="#env"><code><b>env</b> :: Array Type</code></a>
           </li>
           <li>
-            <a href="#placeholder">Placeholder</a>
-            <ul>
-              <li>
-                <a href="#__"><code><b>__</b> :: Placeholder</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#placeholder">Placeholder</a></summary>
+              <ul>
+                <li>
+                  <a href="#__"><code><b>__</b> :: Placeholder</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#classify">Classify</a>
-            <ul>
-              <li>
-                <a href="#type"><code><b>type</b> :: Any -> { namespace :: Maybe String, name :: String, version :: NonNegativeInteger }</code></a>
-              </li>
-              <li>
-                <a href="#is"><code><b>is</b> :: TypeRep a -> Any -> Boolean</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#classify">Classify</a></summary>
+              <ul>
+                <li>
+                  <a href="#type"><code><b>type</b> :: Any -> { namespace :: Maybe String, name :: String, version :: NonNegativeInteger }</code></a>
+                </li>
+                <li>
+                  <a href="#is"><code><b>is</b> :: TypeRep a -> Any -> Boolean</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#showable">Showable</a>
-            <ul>
-              <li>
-                <a href="#toString"><code><b>toString</b> :: Any -> String</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#showable">Showable</a></summary>
+              <ul>
+                <li>
+                  <a href="#toString"><code><b>toString</b> :: Any -> String</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#fantasy-land">Fantasy Land</a>
-            <ul>
-              <li>
-                <a href="#equals"><code><b>equals</b> :: Setoid a => a -> a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#lt"><code><b>lt</b> :: Ord a => a -> (a -> Boolean)</code></a>
-              </li>
-              <li>
-                <a href="#lt_"><code><b>lt_</b> :: Ord a => a -> a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#lte"><code><b>lte</b> :: Ord a => a -> (a -> Boolean)</code></a>
-              </li>
-              <li>
-                <a href="#lte_"><code><b>lte_</b> :: Ord a => a -> a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#gt"><code><b>gt</b> :: Ord a => a -> (a -> Boolean)</code></a>
-              </li>
-              <li>
-                <a href="#gt_"><code><b>gt_</b> :: Ord a => a -> a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#gte"><code><b>gte</b> :: Ord a => a -> (a -> Boolean)</code></a>
-              </li>
-              <li>
-                <a href="#gte_"><code><b>gte_</b> :: Ord a => a -> a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#min"><code><b>min</b> :: Ord a => a -> a -> a</code></a>
-              </li>
-              <li>
-                <a href="#max"><code><b>max</b> :: Ord a => a -> a -> a</code></a>
-              </li>
-              <li>
-                <a href="#id"><code><b>id</b> :: Category c => TypeRep c -> c</code></a>
-              </li>
-              <li>
-                <a href="#concat"><code><b>concat</b> :: Semigroup a => a -> a -> a</code></a>
-              </li>
-              <li>
-                <a href="#empty"><code><b>empty</b> :: Monoid a => TypeRep a -> a</code></a>
-              </li>
-              <li>
-                <a href="#invert"><code><b>invert</b> :: Group g => g -> g</code></a>
-              </li>
-              <li>
-                <a href="#map"><code><b>map</b> :: Functor f => (a -> b) -> f a -> f b</code></a>
-              </li>
-              <li>
-                <a href="#bimap"><code><b>bimap</b> :: Bifunctor f => (a -> b) -> (c -> d) -> f a c -> f b d</code></a>
-              </li>
-              <li>
-                <a href="#promap"><code><b>promap</b> :: Profunctor p => (a -> b) -> (c -> d) -> p b c -> p a d</code></a>
-              </li>
-              <li>
-                <a href="#alt"><code><b>alt</b> :: Alt f => f a -> f a -> f a</code></a>
-              </li>
-              <li>
-                <a href="#zero"><code><b>zero</b> :: Plus f => TypeRep f -> f a</code></a>
-              </li>
-              <li>
-                <a href="#reduce"><code><b>reduce</b> :: Foldable f => (b -> a -> b) -> b -> f a -> b</code></a>
-              </li>
-              <li>
-                <a href="#traverse"><code><b>traverse</b> :: (Applicative f, Traversable t) => TypeRep f -> (a -> f b) -> t a -> f (t b)</code></a>
-              </li>
-              <li>
-                <a href="#sequence"><code><b>sequence</b> :: (Applicative f, Traversable t) => TypeRep f -> t (f a) -> f (t a)</code></a>
-              </li>
-              <li>
-                <a href="#ap"><code><b>ap</b> :: Apply f => f (a -> b) -> f a -> f b</code></a>
-              </li>
-              <li>
-                <a href="#lift2"><code><b>lift2</b> :: Apply f => (a -> b -> c) -> f a -> f b -> f c</code></a>
-              </li>
-              <li>
-                <a href="#lift3"><code><b>lift3</b> :: Apply f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d</code></a>
-              </li>
-              <li>
-                <a href="#apFirst"><code><b>apFirst</b> :: Apply f => f a -> f b -> f a</code></a>
-              </li>
-              <li>
-                <a href="#apSecond"><code><b>apSecond</b> :: Apply f => f a -> f b -> f b</code></a>
-              </li>
-              <li>
-                <a href="#of"><code><b>of</b> :: Applicative f => TypeRep f -> a -> f a</code></a>
-              </li>
-              <li>
-                <a href="#chain"><code><b>chain</b> :: Chain m => (a -> m b) -> m a -> m b</code></a>
-              </li>
-              <li>
-                <a href="#join"><code><b>join</b> :: Chain m => m (m a) -> m a</code></a>
-              </li>
-              <li>
-                <a href="#chainRec"><code><b>chainRec</b> :: ChainRec m => TypeRep m -> (a -> m (Either a b)) -> a -> m b</code></a>
-              </li>
-              <li>
-                <a href="#extend"><code><b>extend</b> :: Extend w => (w a -> b) -> w a -> w b</code></a>
-              </li>
-              <li>
-                <a href="#extract"><code><b>extract</b> :: Comonad w => w a -> a</code></a>
-              </li>
-              <li>
-                <a href="#contramap"><code><b>contramap</b> :: Contravariant f => (b -> a) -> f a -> f b</code></a>
-              </li>
-              <li>
-                <a href="#filter"><code><b>filter</b> :: (Applicative f, Foldable f, Monoid (f a)) => (a -> Boolean) -> f a -> f a</code></a>
-              </li>
-              <li>
-                <a href="#filterM"><code><b>filterM</b> :: (Alternative m, Monad m) => (a -> Boolean) -> m a -> m a</code></a>
-              </li>
-              <li>
-                <a href="#takeWhile"><code><b>takeWhile</b> :: (Foldable f, Alternative f) => (a -> Boolean) -> f a -> f a</code></a>
-              </li>
-              <li>
-                <a href="#dropWhile"><code><b>dropWhile</b> :: (Foldable f, Alternative f) => (a -> Boolean) -> f a -> f a</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#fantasy-land">Fantasy Land</a></summary>
+              <ul>
+                <li>
+                  <a href="#equals"><code><b>equals</b> :: Setoid a => a -> a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#lt"><code><b>lt</b> :: Ord a => a -> (a -> Boolean)</code></a>
+                </li>
+                <li>
+                  <a href="#lt_"><code><b>lt_</b> :: Ord a => a -> a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#lte"><code><b>lte</b> :: Ord a => a -> (a -> Boolean)</code></a>
+                </li>
+                <li>
+                  <a href="#lte_"><code><b>lte_</b> :: Ord a => a -> a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#gt"><code><b>gt</b> :: Ord a => a -> (a -> Boolean)</code></a>
+                </li>
+                <li>
+                  <a href="#gt_"><code><b>gt_</b> :: Ord a => a -> a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#gte"><code><b>gte</b> :: Ord a => a -> (a -> Boolean)</code></a>
+                </li>
+                <li>
+                  <a href="#gte_"><code><b>gte_</b> :: Ord a => a -> a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#min"><code><b>min</b> :: Ord a => a -> a -> a</code></a>
+                </li>
+                <li>
+                  <a href="#max"><code><b>max</b> :: Ord a => a -> a -> a</code></a>
+                </li>
+                <li>
+                  <a href="#id"><code><b>id</b> :: Category c => TypeRep c -> c</code></a>
+                </li>
+                <li>
+                  <a href="#concat"><code><b>concat</b> :: Semigroup a => a -> a -> a</code></a>
+                </li>
+                <li>
+                  <a href="#empty"><code><b>empty</b> :: Monoid a => TypeRep a -> a</code></a>
+                </li>
+                <li>
+                  <a href="#invert"><code><b>invert</b> :: Group g => g -> g</code></a>
+                </li>
+                <li>
+                  <a href="#map"><code><b>map</b> :: Functor f => (a -> b) -> f a -> f b</code></a>
+                </li>
+                <li>
+                  <a href="#bimap"><code><b>bimap</b> :: Bifunctor f => (a -> b) -> (c -> d) -> f a c -> f b d</code></a>
+                </li>
+                <li>
+                  <a href="#promap"><code><b>promap</b> :: Profunctor p => (a -> b) -> (c -> d) -> p b c -> p a d</code></a>
+                </li>
+                <li>
+                  <a href="#alt"><code><b>alt</b> :: Alt f => f a -> f a -> f a</code></a>
+                </li>
+                <li>
+                  <a href="#zero"><code><b>zero</b> :: Plus f => TypeRep f -> f a</code></a>
+                </li>
+                <li>
+                  <a href="#reduce"><code><b>reduce</b> :: Foldable f => (b -> a -> b) -> b -> f a -> b</code></a>
+                </li>
+                <li>
+                  <a href="#traverse"><code><b>traverse</b> :: (Applicative f, Traversable t) => TypeRep f -> (a -> f b) -> t a -> f (t b)</code></a>
+                </li>
+                <li>
+                  <a href="#sequence"><code><b>sequence</b> :: (Applicative f, Traversable t) => TypeRep f -> t (f a) -> f (t a)</code></a>
+                </li>
+                <li>
+                  <a href="#ap"><code><b>ap</b> :: Apply f => f (a -> b) -> f a -> f b</code></a>
+                </li>
+                <li>
+                  <a href="#lift2"><code><b>lift2</b> :: Apply f => (a -> b -> c) -> f a -> f b -> f c</code></a>
+                </li>
+                <li>
+                  <a href="#lift3"><code><b>lift3</b> :: Apply f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d</code></a>
+                </li>
+                <li>
+                  <a href="#apFirst"><code><b>apFirst</b> :: Apply f => f a -> f b -> f a</code></a>
+                </li>
+                <li>
+                  <a href="#apSecond"><code><b>apSecond</b> :: Apply f => f a -> f b -> f b</code></a>
+                </li>
+                <li>
+                  <a href="#of"><code><b>of</b> :: Applicative f => TypeRep f -> a -> f a</code></a>
+                </li>
+                <li>
+                  <a href="#chain"><code><b>chain</b> :: Chain m => (a -> m b) -> m a -> m b</code></a>
+                </li>
+                <li>
+                  <a href="#join"><code><b>join</b> :: Chain m => m (m a) -> m a</code></a>
+                </li>
+                <li>
+                  <a href="#chainRec"><code><b>chainRec</b> :: ChainRec m => TypeRep m -> (a -> m (Either a b)) -> a -> m b</code></a>
+                </li>
+                <li>
+                  <a href="#extend"><code><b>extend</b> :: Extend w => (w a -> b) -> w a -> w b</code></a>
+                </li>
+                <li>
+                  <a href="#extract"><code><b>extract</b> :: Comonad w => w a -> a</code></a>
+                </li>
+                <li>
+                  <a href="#contramap"><code><b>contramap</b> :: Contravariant f => (b -> a) -> f a -> f b</code></a>
+                </li>
+                <li>
+                  <a href="#filter"><code><b>filter</b> :: (Applicative f, Foldable f, Monoid (f a)) => (a -> Boolean) -> f a -> f a</code></a>
+                </li>
+                <li>
+                  <a href="#filterM"><code><b>filterM</b> :: (Alternative m, Monad m) => (a -> Boolean) -> m a -> m a</code></a>
+                </li>
+                <li>
+                  <a href="#takeWhile"><code><b>takeWhile</b> :: (Foldable f, Alternative f) => (a -> Boolean) -> f a -> f a</code></a>
+                </li>
+                <li>
+                  <a href="#dropWhile"><code><b>dropWhile</b> :: (Foldable f, Alternative f) => (a -> Boolean) -> f a -> f a</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#combinator">Combinator</a>
-            <ul>
-              <li>
-                <a href="#I"><code><b>I</b> :: a -> a</code></a>
-              </li>
-              <li>
-                <a href="#K"><code><b>K</b> :: a -> b -> a</code></a>
-              </li>
-              <li>
-                <a href="#A"><code><b>A</b> :: (a -> b) -> a -> b</code></a>
-              </li>
-              <li>
-                <a href="#T"><code><b>T</b> :: a -> (a -> b) -> b</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#combinator">Combinator</a></summary>
+              <ul>
+                <li>
+                  <a href="#I"><code><b>I</b> :: a -> a</code></a>
+                </li>
+                <li>
+                  <a href="#K"><code><b>K</b> :: a -> b -> a</code></a>
+                </li>
+                <li>
+                  <a href="#A"><code><b>A</b> :: (a -> b) -> a -> b</code></a>
+                </li>
+                <li>
+                  <a href="#T"><code><b>T</b> :: a -> (a -> b) -> b</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#function">Function</a>
-            <ul>
-              <li>
-                <a href="#curry2"><code><b>curry2</b> :: ((a, b) -> c) -> a -> b -> c</code></a>
-              </li>
-              <li>
-                <a href="#curry3"><code><b>curry3</b> :: ((a, b, c) -> d) -> a -> b -> c -> d</code></a>
-              </li>
-              <li>
-                <a href="#curry4"><code><b>curry4</b> :: ((a, b, c, d) -> e) -> a -> b -> c -> d -> e</code></a>
-              </li>
-              <li>
-                <a href="#curry5"><code><b>curry5</b> :: ((a, b, c, d, e) -> f) -> a -> b -> c -> d -> e -> f</code></a>
-              </li>
-              <li>
-                <a href="#flip"><code><b>flip</b> :: (a -> b -> c) -> b -> a -> c</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#function">Function</a></summary>
+              <ul>
+                <li>
+                  <a href="#curry2"><code><b>curry2</b> :: ((a, b) -> c) -> a -> b -> c</code></a>
+                </li>
+                <li>
+                  <a href="#curry3"><code><b>curry3</b> :: ((a, b, c) -> d) -> a -> b -> c -> d</code></a>
+                </li>
+                <li>
+                  <a href="#curry4"><code><b>curry4</b> :: ((a, b, c, d) -> e) -> a -> b -> c -> d -> e</code></a>
+                </li>
+                <li>
+                  <a href="#curry5"><code><b>curry5</b> :: ((a, b, c, d, e) -> f) -> a -> b -> c -> d -> e -> f</code></a>
+                </li>
+                <li>
+                  <a href="#flip"><code><b>flip</b> :: (a -> b -> c) -> b -> a -> c</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#composition">Composition</a>
-            <ul>
-              <li>
-                <a href="#compose"><code><b>compose</b> :: Semigroupoid s => s b c -> s a b -> s a c</code></a>
-              </li>
-              <li>
-                <a href="#pipe"><code><b>pipe</b> :: [(a -> b), (b -> c), ..., (m -> n)] -> a -> n</code></a>
-              </li>
-              <li>
-                <a href="#on"><code><b>on</b> :: (b -> b -> c) -> (a -> b) -> a -> a -> c</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#composition">Composition</a></summary>
+              <ul>
+                <li>
+                  <a href="#compose"><code><b>compose</b> :: Semigroupoid s => s b c -> s a b -> s a c</code></a>
+                </li>
+                <li>
+                  <a href="#pipe"><code><b>pipe</b> :: [(a -> b), (b -> c), ..., (m -> n)] -> a -> n</code></a>
+                </li>
+                <li>
+                  <a href="#on"><code><b>on</b> :: (b -> b -> c) -> (a -> b) -> a -> a -> c</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#maybe-type">Maybe type</a>
-            <ul>
-              <li>
-                <a href="#MaybeType"><code><b>MaybeType</b> :: Type -> Type</code></a>
-              </li>
-              <li>
-                <a href="#Maybe"><code><b>Maybe</b> :: TypeRep Maybe</code></a>
-              </li>
-              <li>
-                <a href="#Nothing"><code><b>Nothing</b> :: Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#Just"><code><b>Just</b> :: a -> Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.@@type"><code><b>Maybe.@@type</b> :: String</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.fantasy-land/empty"><code><b>Maybe.fantasy-land/empty</b> :: () -> Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.fantasy-land/of"><code><b>Maybe.fantasy-land/of</b> :: a -> Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.fantasy-land/zero"><code><b>Maybe.fantasy-land/zero</b> :: () -> Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.isNothing"><code><b>Maybe#isNothing</b> :: Maybe a ~> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.isJust"><code><b>Maybe#isJust</b> :: Maybe a ~> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.toString"><code><b>Maybe#toString</b> :: Maybe a ~> () -> String</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.inspect"><code><b>Maybe#inspect</b> :: Maybe a ~> () -> String</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.fantasy-land/equals"><code><b>Maybe#fantasy-land/equals</b> :: Setoid a => Maybe a ~> Maybe a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.fantasy-land/lte"><code><b>Maybe#fantasy-land/lte</b> :: Ord a => Maybe a ~> Maybe a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.fantasy-land/concat"><code><b>Maybe#fantasy-land/concat</b> :: Semigroup a => Maybe a ~> Maybe a -> Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.fantasy-land/map"><code><b>Maybe#fantasy-land/map</b> :: Maybe a ~> (a -> b) -> Maybe b</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.fantasy-land/ap"><code><b>Maybe#fantasy-land/ap</b> :: Maybe a ~> Maybe (a -> b) -> Maybe b</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.fantasy-land/chain"><code><b>Maybe#fantasy-land/chain</b> :: Maybe a ~> (a -> Maybe b) -> Maybe b</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.fantasy-land/alt"><code><b>Maybe#fantasy-land/alt</b> :: Maybe a ~> Maybe a -> Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.fantasy-land/reduce"><code><b>Maybe#fantasy-land/reduce</b> :: Maybe a ~> ((b, a) -> b, b) -> b</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.fantasy-land/traverse"><code><b>Maybe#fantasy-land/traverse</b> :: Applicative f => Maybe a ~> (TypeRep f, a -> f b) -> f (Maybe b)</code></a>
-              </li>
-              <li>
-                <a href="#Maybe.prototype.fantasy-land/extend"><code><b>Maybe#fantasy-land/extend</b> :: Maybe a ~> (Maybe a -> b) -> Maybe b</code></a>
-              </li>
-              <li>
-                <a href="#isNothing"><code><b>isNothing</b> :: Maybe a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#isJust"><code><b>isJust</b> :: Maybe a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#fromMaybe"><code><b>fromMaybe</b> :: a -> Maybe a -> a</code></a>
-              </li>
-              <li>
-                <a href="#fromMaybe_"><code><b>fromMaybe_</b> :: (() -> a) -> Maybe a -> a</code></a>
-              </li>
-              <li>
-                <a href="#maybeToNullable"><code><b>maybeToNullable</b> :: Maybe a -> Nullable a</code></a>
-              </li>
-              <li>
-                <a href="#toMaybe"><code><b>toMaybe</b> :: a? -> Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#maybe"><code><b>maybe</b> :: b -> (a -> b) -> Maybe a -> b</code></a>
-              </li>
-              <li>
-                <a href="#maybe_"><code><b>maybe_</b> :: (() -> b) -> (a -> b) -> Maybe a -> b</code></a>
-              </li>
-              <li>
-                <a href="#justs"><code><b>justs</b> :: Array (Maybe a) -> Array a</code></a>
-              </li>
-              <li>
-                <a href="#mapMaybe"><code><b>mapMaybe</b> :: (a -> Maybe b) -> Array a -> Array b</code></a>
-              </li>
-              <li>
-                <a href="#encase"><code><b>encase</b> :: (a -> b) -> a -> Maybe b</code></a>
-              </li>
-              <li>
-                <a href="#encase2"><code><b>encase2</b> :: (a -> b -> c) -> a -> b -> Maybe c</code></a>
-              </li>
-              <li>
-                <a href="#encase3"><code><b>encase3</b> :: (a -> b -> c -> d) -> a -> b -> c -> Maybe d</code></a>
-              </li>
-              <li>
-                <a href="#maybeToEither"><code><b>maybeToEither</b> :: a -> Maybe b -> Either a b</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#maybe-type">Maybe type</a></summary>
+              <ul>
+                <li>
+                  <a href="#MaybeType"><code><b>MaybeType</b> :: Type -> Type</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe"><code><b>Maybe</b> :: TypeRep Maybe</code></a>
+                </li>
+                <li>
+                  <a href="#Nothing"><code><b>Nothing</b> :: Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#Just"><code><b>Just</b> :: a -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.@@type"><code><b>Maybe.@@type</b> :: String</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.fantasy-land/empty"><code><b>Maybe.fantasy-land/empty</b> :: () -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.fantasy-land/of"><code><b>Maybe.fantasy-land/of</b> :: a -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.fantasy-land/zero"><code><b>Maybe.fantasy-land/zero</b> :: () -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.isNothing"><code><b>Maybe#isNothing</b> :: Maybe a ~> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.isJust"><code><b>Maybe#isJust</b> :: Maybe a ~> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.toString"><code><b>Maybe#toString</b> :: Maybe a ~> () -> String</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.inspect"><code><b>Maybe#inspect</b> :: Maybe a ~> () -> String</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.fantasy-land/equals"><code><b>Maybe#fantasy-land/equals</b> :: Setoid a => Maybe a ~> Maybe a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.fantasy-land/lte"><code><b>Maybe#fantasy-land/lte</b> :: Ord a => Maybe a ~> Maybe a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.fantasy-land/concat"><code><b>Maybe#fantasy-land/concat</b> :: Semigroup a => Maybe a ~> Maybe a -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.fantasy-land/map"><code><b>Maybe#fantasy-land/map</b> :: Maybe a ~> (a -> b) -> Maybe b</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.fantasy-land/ap"><code><b>Maybe#fantasy-land/ap</b> :: Maybe a ~> Maybe (a -> b) -> Maybe b</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.fantasy-land/chain"><code><b>Maybe#fantasy-land/chain</b> :: Maybe a ~> (a -> Maybe b) -> Maybe b</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.fantasy-land/alt"><code><b>Maybe#fantasy-land/alt</b> :: Maybe a ~> Maybe a -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.fantasy-land/reduce"><code><b>Maybe#fantasy-land/reduce</b> :: Maybe a ~> ((b, a) -> b, b) -> b</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.fantasy-land/traverse"><code><b>Maybe#fantasy-land/traverse</b> :: Applicative f => Maybe a ~> (TypeRep f, a -> f b) -> f (Maybe b)</code></a>
+                </li>
+                <li>
+                  <a href="#Maybe.prototype.fantasy-land/extend"><code><b>Maybe#fantasy-land/extend</b> :: Maybe a ~> (Maybe a -> b) -> Maybe b</code></a>
+                </li>
+                <li>
+                  <a href="#isNothing"><code><b>isNothing</b> :: Maybe a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#isJust"><code><b>isJust</b> :: Maybe a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#fromMaybe"><code><b>fromMaybe</b> :: a -> Maybe a -> a</code></a>
+                </li>
+                <li>
+                  <a href="#fromMaybe_"><code><b>fromMaybe_</b> :: (() -> a) -> Maybe a -> a</code></a>
+                </li>
+                <li>
+                  <a href="#maybeToNullable"><code><b>maybeToNullable</b> :: Maybe a -> Nullable a</code></a>
+                </li>
+                <li>
+                  <a href="#toMaybe"><code><b>toMaybe</b> :: a? -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#maybe"><code><b>maybe</b> :: b -> (a -> b) -> Maybe a -> b</code></a>
+                </li>
+                <li>
+                  <a href="#maybe_"><code><b>maybe_</b> :: (() -> b) -> (a -> b) -> Maybe a -> b</code></a>
+                </li>
+                <li>
+                  <a href="#justs"><code><b>justs</b> :: Array (Maybe a) -> Array a</code></a>
+                </li>
+                <li>
+                  <a href="#mapMaybe"><code><b>mapMaybe</b> :: (a -> Maybe b) -> Array a -> Array b</code></a>
+                </li>
+                <li>
+                  <a href="#encase"><code><b>encase</b> :: (a -> b) -> a -> Maybe b</code></a>
+                </li>
+                <li>
+                  <a href="#encase2"><code><b>encase2</b> :: (a -> b -> c) -> a -> b -> Maybe c</code></a>
+                </li>
+                <li>
+                  <a href="#encase3"><code><b>encase3</b> :: (a -> b -> c -> d) -> a -> b -> c -> Maybe d</code></a>
+                </li>
+                <li>
+                  <a href="#maybeToEither"><code><b>maybeToEither</b> :: a -> Maybe b -> Either a b</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#either-type">Either type</a>
-            <ul>
-              <li>
-                <a href="#EitherType"><code><b>EitherType</b> :: Type -> Type -> Type</code></a>
-              </li>
-              <li>
-                <a href="#Either"><code><b>Either</b> :: TypeRep Either</code></a>
-              </li>
-              <li>
-                <a href="#Left"><code><b>Left</b> :: a -> Either a b</code></a>
-              </li>
-              <li>
-                <a href="#Right"><code><b>Right</b> :: b -> Either a b</code></a>
-              </li>
-              <li>
-                <a href="#Either.@@type"><code><b>Either.@@type</b> :: String</code></a>
-              </li>
-              <li>
-                <a href="#Either.fantasy-land/of"><code><b>Either.fantasy-land/of</b> :: b -> Either a b</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.isLeft"><code><b>Either#isLeft</b> :: Either a b ~> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.isRight"><code><b>Either#isRight</b> :: Either a b ~> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.toString"><code><b>Either#toString</b> :: Either a b ~> () -> String</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.inspect"><code><b>Either#inspect</b> :: Either a b ~> () -> String</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.fantasy-land/equals"><code><b>Either#fantasy-land/equals</b> :: (Setoid a, Setoid b) => Either a b ~> Either a b -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.fantasy-land/lte"><code><b>Either#fantasy-land/lte</b> :: (Ord a, Ord b) => Either a b ~> Either a b -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.fantasy-land/concat"><code><b>Either#fantasy-land/concat</b> :: (Semigroup a, Semigroup b) => Either a b ~> Either a b -> Either a b</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.fantasy-land/map"><code><b>Either#fantasy-land/map</b> :: Either a b ~> (b -> c) -> Either a c</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.fantasy-land/bimap"><code><b>Either#fantasy-land/bimap</b> :: Either a b ~> (a -> c, b -> d) -> Either c d</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.fantasy-land/ap"><code><b>Either#fantasy-land/ap</b> :: Either a b ~> Either a (b -> c) -> Either a c</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.fantasy-land/chain"><code><b>Either#fantasy-land/chain</b> :: Either a b ~> (b -> Either a c) -> Either a c</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.fantasy-land/alt"><code><b>Either#fantasy-land/alt</b> :: Either a b ~> Either a b -> Either a b</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.fantasy-land/reduce"><code><b>Either#fantasy-land/reduce</b> :: Either a b ~> ((c, b) -> c, c) -> c</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.fantasy-land/traverse"><code><b>Either#fantasy-land/traverse</b> :: Applicative f => Either a b ~> (TypeRep f, b -> f c) -> f (Either a c)</code></a>
-              </li>
-              <li>
-                <a href="#Either.prototype.fantasy-land/extend"><code><b>Either#fantasy-land/extend</b> :: Either a b ~> (Either a b -> c) -> Either a c</code></a>
-              </li>
-              <li>
-                <a href="#isLeft"><code><b>isLeft</b> :: Either a b -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#isRight"><code><b>isRight</b> :: Either a b -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#fromEither"><code><b>fromEither</b> :: b -> Either a b -> b</code></a>
-              </li>
-              <li>
-                <a href="#toEither"><code><b>toEither</b> :: a -> b? -> Either a b</code></a>
-              </li>
-              <li>
-                <a href="#either"><code><b>either</b> :: (a -> c) -> (b -> c) -> Either a b -> c</code></a>
-              </li>
-              <li>
-                <a href="#lefts"><code><b>lefts</b> :: Array (Either a b) -> Array a</code></a>
-              </li>
-              <li>
-                <a href="#rights"><code><b>rights</b> :: Array (Either a b) -> Array b</code></a>
-              </li>
-              <li>
-                <a href="#tagBy"><code><b>tagBy</b> :: (a -> Boolean) -> a -> Either a a</code></a>
-              </li>
-              <li>
-                <a href="#encaseEither"><code><b>encaseEither</b> :: (Error -> l) -> (a -> r) -> a -> Either l r</code></a>
-              </li>
-              <li>
-                <a href="#encaseEither2"><code><b>encaseEither2</b> :: (Error -> l) -> (a -> b -> r) -> a -> b -> Either l r</code></a>
-              </li>
-              <li>
-                <a href="#encaseEither3"><code><b>encaseEither3</b> :: (Error -> l) -> (a -> b -> c -> r) -> a -> b -> c -> Either l r</code></a>
-              </li>
-              <li>
-                <a href="#eitherToMaybe"><code><b>eitherToMaybe</b> :: Either a b -> Maybe b</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#either-type">Either type</a></summary>
+              <ul>
+                <li>
+                  <a href="#EitherType"><code><b>EitherType</b> :: Type -> Type -> Type</code></a>
+                </li>
+                <li>
+                  <a href="#Either"><code><b>Either</b> :: TypeRep Either</code></a>
+                </li>
+                <li>
+                  <a href="#Left"><code><b>Left</b> :: a -> Either a b</code></a>
+                </li>
+                <li>
+                  <a href="#Right"><code><b>Right</b> :: b -> Either a b</code></a>
+                </li>
+                <li>
+                  <a href="#Either.@@type"><code><b>Either.@@type</b> :: String</code></a>
+                </li>
+                <li>
+                  <a href="#Either.fantasy-land/of"><code><b>Either.fantasy-land/of</b> :: b -> Either a b</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.isLeft"><code><b>Either#isLeft</b> :: Either a b ~> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.isRight"><code><b>Either#isRight</b> :: Either a b ~> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.toString"><code><b>Either#toString</b> :: Either a b ~> () -> String</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.inspect"><code><b>Either#inspect</b> :: Either a b ~> () -> String</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.fantasy-land/equals"><code><b>Either#fantasy-land/equals</b> :: (Setoid a, Setoid b) => Either a b ~> Either a b -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.fantasy-land/lte"><code><b>Either#fantasy-land/lte</b> :: (Ord a, Ord b) => Either a b ~> Either a b -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.fantasy-land/concat"><code><b>Either#fantasy-land/concat</b> :: (Semigroup a, Semigroup b) => Either a b ~> Either a b -> Either a b</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.fantasy-land/map"><code><b>Either#fantasy-land/map</b> :: Either a b ~> (b -> c) -> Either a c</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.fantasy-land/bimap"><code><b>Either#fantasy-land/bimap</b> :: Either a b ~> (a -> c, b -> d) -> Either c d</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.fantasy-land/ap"><code><b>Either#fantasy-land/ap</b> :: Either a b ~> Either a (b -> c) -> Either a c</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.fantasy-land/chain"><code><b>Either#fantasy-land/chain</b> :: Either a b ~> (b -> Either a c) -> Either a c</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.fantasy-land/alt"><code><b>Either#fantasy-land/alt</b> :: Either a b ~> Either a b -> Either a b</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.fantasy-land/reduce"><code><b>Either#fantasy-land/reduce</b> :: Either a b ~> ((c, b) -> c, c) -> c</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.fantasy-land/traverse"><code><b>Either#fantasy-land/traverse</b> :: Applicative f => Either a b ~> (TypeRep f, b -> f c) -> f (Either a c)</code></a>
+                </li>
+                <li>
+                  <a href="#Either.prototype.fantasy-land/extend"><code><b>Either#fantasy-land/extend</b> :: Either a b ~> (Either a b -> c) -> Either a c</code></a>
+                </li>
+                <li>
+                  <a href="#isLeft"><code><b>isLeft</b> :: Either a b -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#isRight"><code><b>isRight</b> :: Either a b -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#fromEither"><code><b>fromEither</b> :: b -> Either a b -> b</code></a>
+                </li>
+                <li>
+                  <a href="#toEither"><code><b>toEither</b> :: a -> b? -> Either a b</code></a>
+                </li>
+                <li>
+                  <a href="#either"><code><b>either</b> :: (a -> c) -> (b -> c) -> Either a b -> c</code></a>
+                </li>
+                <li>
+                  <a href="#lefts"><code><b>lefts</b> :: Array (Either a b) -> Array a</code></a>
+                </li>
+                <li>
+                  <a href="#rights"><code><b>rights</b> :: Array (Either a b) -> Array b</code></a>
+                </li>
+                <li>
+                  <a href="#tagBy"><code><b>tagBy</b> :: (a -> Boolean) -> a -> Either a a</code></a>
+                </li>
+                <li>
+                  <a href="#encaseEither"><code><b>encaseEither</b> :: (Error -> l) -> (a -> r) -> a -> Either l r</code></a>
+                </li>
+                <li>
+                  <a href="#encaseEither2"><code><b>encaseEither2</b> :: (Error -> l) -> (a -> b -> r) -> a -> b -> Either l r</code></a>
+                </li>
+                <li>
+                  <a href="#encaseEither3"><code><b>encaseEither3</b> :: (Error -> l) -> (a -> b -> c -> r) -> a -> b -> c -> Either l r</code></a>
+                </li>
+                <li>
+                  <a href="#eitherToMaybe"><code><b>eitherToMaybe</b> :: Either a b -> Maybe b</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#logic">Logic</a>
-            <ul>
-              <li>
-                <a href="#and"><code><b>and</b> :: Boolean -> Boolean -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#or"><code><b>or</b> :: Boolean -> Boolean -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#not"><code><b>not</b> :: Boolean -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#complement"><code><b>complement</b> :: (a -> Boolean) -> a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#ifElse"><code><b>ifElse</b> :: (a -> Boolean) -> (a -> b) -> (a -> b) -> a -> b</code></a>
-              </li>
-              <li>
-                <a href="#when"><code><b>when</b> :: (a -> Boolean) -> (a -> a) -> a -> a</code></a>
-              </li>
-              <li>
-                <a href="#unless"><code><b>unless</b> :: (a -> Boolean) -> (a -> a) -> a -> a</code></a>
-              </li>
-              <li>
-                <a href="#allPass"><code><b>allPass</b> :: Foldable f => f (a -> Boolean) -> a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#anyPass"><code><b>anyPass</b> :: Foldable f => f (a -> Boolean) -> a -> Boolean</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#logic">Logic</a></summary>
+              <ul>
+                <li>
+                  <a href="#and"><code><b>and</b> :: Boolean -> Boolean -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#or"><code><b>or</b> :: Boolean -> Boolean -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#not"><code><b>not</b> :: Boolean -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#complement"><code><b>complement</b> :: (a -> Boolean) -> a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#ifElse"><code><b>ifElse</b> :: (a -> Boolean) -> (a -> b) -> (a -> b) -> a -> b</code></a>
+                </li>
+                <li>
+                  <a href="#when"><code><b>when</b> :: (a -> Boolean) -> (a -> a) -> a -> a</code></a>
+                </li>
+                <li>
+                  <a href="#unless"><code><b>unless</b> :: (a -> Boolean) -> (a -> a) -> a -> a</code></a>
+                </li>
+                <li>
+                  <a href="#allPass"><code><b>allPass</b> :: Foldable f => f (a -> Boolean) -> a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#anyPass"><code><b>anyPass</b> :: Foldable f => f (a -> Boolean) -> a -> Boolean</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#list">List</a>
-            <ul>
-              <li>
-                <a href="#slice"><code><b>slice</b> :: Integer -> Integer -> List a -> Maybe (List a)</code></a>
-              </li>
-              <li>
-                <a href="#at"><code><b>at</b> :: Integer -> List a -> Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#head"><code><b>head</b> :: List a -> Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#last"><code><b>last</b> :: List a -> Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#tail"><code><b>tail</b> :: List a -> Maybe (List a)</code></a>
-              </li>
-              <li>
-                <a href="#init"><code><b>init</b> :: List a -> Maybe (List a)</code></a>
-              </li>
-              <li>
-                <a href="#take"><code><b>take</b> :: Integer -> List a -> Maybe (List a)</code></a>
-              </li>
-              <li>
-                <a href="#takeLast"><code><b>takeLast</b> :: Integer -> List a -> Maybe (List a)</code></a>
-              </li>
-              <li>
-                <a href="#drop"><code><b>drop</b> :: Integer -> List a -> Maybe (List a)</code></a>
-              </li>
-              <li>
-                <a href="#dropLast"><code><b>dropLast</b> :: Integer -> List a -> Maybe (List a)</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#list">List</a></summary>
+              <ul>
+                <li>
+                  <a href="#slice"><code><b>slice</b> :: Integer -> Integer -> List a -> Maybe (List a)</code></a>
+                </li>
+                <li>
+                  <a href="#at"><code><b>at</b> :: Integer -> List a -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#head"><code><b>head</b> :: List a -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#last"><code><b>last</b> :: List a -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#tail"><code><b>tail</b> :: List a -> Maybe (List a)</code></a>
+                </li>
+                <li>
+                  <a href="#init"><code><b>init</b> :: List a -> Maybe (List a)</code></a>
+                </li>
+                <li>
+                  <a href="#take"><code><b>take</b> :: Integer -> List a -> Maybe (List a)</code></a>
+                </li>
+                <li>
+                  <a href="#takeLast"><code><b>takeLast</b> :: Integer -> List a -> Maybe (List a)</code></a>
+                </li>
+                <li>
+                  <a href="#drop"><code><b>drop</b> :: Integer -> List a -> Maybe (List a)</code></a>
+                </li>
+                <li>
+                  <a href="#dropLast"><code><b>dropLast</b> :: Integer -> List a -> Maybe (List a)</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#array">Array</a>
-            <ul>
-              <li>
-                <a href="#size"><code><b>size</b> :: Foldable f => f a -> Integer</code></a>
-              </li>
-              <li>
-                <a href="#append"><code><b>append</b> :: (Applicative f, Semigroup (f a)) => a -> f a -> f a</code></a>
-              </li>
-              <li>
-                <a href="#prepend"><code><b>prepend</b> :: (Applicative f, Semigroup (f a)) => a -> f a -> f a</code></a>
-              </li>
-              <li>
-                <a href="#joinWith"><code><b>joinWith</b> :: String -> Array String -> String</code></a>
-              </li>
-              <li>
-                <a href="#elem"><code><b>elem</b> :: (Setoid a, Foldable f) => a -> f a -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#find"><code><b>find</b> :: Foldable f => (a -> Boolean) -> f a -> Maybe a</code></a>
-              </li>
-              <li>
-                <a href="#pluck"><code><b>pluck</b> :: Functor f => String -> f a -> f b</code></a>
-              </li>
-              <li>
-                <a href="#unfoldr"><code><b>unfoldr</b> :: (b -> Maybe (Pair a b)) -> b -> Array a</code></a>
-              </li>
-              <li>
-                <a href="#range"><code><b>range</b> :: Integer -> Integer -> Array Integer</code></a>
-              </li>
-              <li>
-                <a href="#groupBy"><code><b>groupBy</b> :: (a -> a -> Boolean) -> Array a -> Array (Array a)</code></a>
-              </li>
-              <li>
-                <a href="#reverse"><code><b>reverse</b> :: (Applicative f, Foldable f, Monoid (f a)) => f a -> f a</code></a>
-              </li>
-              <li>
-                <a href="#sort"><code><b>sort</b> :: (Ord a, Applicative m, Foldable m, Monoid (m a)) => m a -> m a</code></a>
-              </li>
-              <li>
-                <a href="#sortBy"><code><b>sortBy</b> :: (Ord b, Applicative m, Foldable m, Monoid (m a)) => (a -> b) -> m a -> m a</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#array">Array</a></summary>
+              <ul>
+                <li>
+                  <a href="#size"><code><b>size</b> :: Foldable f => f a -> Integer</code></a>
+                </li>
+                <li>
+                  <a href="#append"><code><b>append</b> :: (Applicative f, Semigroup (f a)) => a -> f a -> f a</code></a>
+                </li>
+                <li>
+                  <a href="#prepend"><code><b>prepend</b> :: (Applicative f, Semigroup (f a)) => a -> f a -> f a</code></a>
+                </li>
+                <li>
+                  <a href="#joinWith"><code><b>joinWith</b> :: String -> Array String -> String</code></a>
+                </li>
+                <li>
+                  <a href="#elem"><code><b>elem</b> :: (Setoid a, Foldable f) => a -> f a -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#find"><code><b>find</b> :: Foldable f => (a -> Boolean) -> f a -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#pluck"><code><b>pluck</b> :: Functor f => String -> f a -> f b</code></a>
+                </li>
+                <li>
+                  <a href="#unfoldr"><code><b>unfoldr</b> :: (b -> Maybe (Pair a b)) -> b -> Array a</code></a>
+                </li>
+                <li>
+                  <a href="#range"><code><b>range</b> :: Integer -> Integer -> Array Integer</code></a>
+                </li>
+                <li>
+                  <a href="#groupBy"><code><b>groupBy</b> :: (a -> a -> Boolean) -> Array a -> Array (Array a)</code></a>
+                </li>
+                <li>
+                  <a href="#reverse"><code><b>reverse</b> :: (Applicative f, Foldable f, Monoid (f a)) => f a -> f a</code></a>
+                </li>
+                <li>
+                  <a href="#sort"><code><b>sort</b> :: (Ord a, Applicative m, Foldable m, Monoid (m a)) => m a -> m a</code></a>
+                </li>
+                <li>
+                  <a href="#sortBy"><code><b>sortBy</b> :: (Ord b, Applicative m, Foldable m, Monoid (m a)) => (a -> b) -> m a -> m a</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#object">Object</a>
-            <ul>
-              <li>
-                <a href="#prop"><code><b>prop</b> :: String -> a -> b</code></a>
-              </li>
-              <li>
-                <a href="#props"><code><b>props</b> :: Array String -> a -> b</code></a>
-              </li>
-              <li>
-                <a href="#get"><code><b>get</b> :: (Any -> Boolean) -> String -> a -> Maybe b</code></a>
-              </li>
-              <li>
-                <a href="#gets"><code><b>gets</b> :: (Any -> Boolean) -> Array String -> a -> Maybe b</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#object">Object</a></summary>
+              <ul>
+                <li>
+                  <a href="#prop"><code><b>prop</b> :: String -> a -> b</code></a>
+                </li>
+                <li>
+                  <a href="#props"><code><b>props</b> :: Array String -> a -> b</code></a>
+                </li>
+                <li>
+                  <a href="#get"><code><b>get</b> :: (Any -> Boolean) -> String -> a -> Maybe b</code></a>
+                </li>
+                <li>
+                  <a href="#gets"><code><b>gets</b> :: (Any -> Boolean) -> Array String -> a -> Maybe b</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#strmap">StrMap</a>
-            <ul>
-              <li>
-                <a href="#singleton"><code><b>singleton</b> :: String -> a -> StrMap a</code></a>
-              </li>
-              <li>
-                <a href="#insert"><code><b>insert</b> :: String -> a -> StrMap a -> StrMap a</code></a>
-              </li>
-              <li>
-                <a href="#remove"><code><b>remove</b> :: String -> StrMap a -> StrMap a</code></a>
-              </li>
-              <li>
-                <a href="#keys"><code><b>keys</b> :: StrMap a -> Array String</code></a>
-              </li>
-              <li>
-                <a href="#values"><code><b>values</b> :: StrMap a -> Array a</code></a>
-              </li>
-              <li>
-                <a href="#pairs"><code><b>pairs</b> :: StrMap a -> Array (Pair String a)</code></a>
-              </li>
-              <li>
-                <a href="#fromPairs"><code><b>fromPairs</b> :: Foldable f => f (Pair String a) -> StrMap a</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#strmap">StrMap</a></summary>
+              <ul>
+                <li>
+                  <a href="#singleton"><code><b>singleton</b> :: String -> a -> StrMap a</code></a>
+                </li>
+                <li>
+                  <a href="#insert"><code><b>insert</b> :: String -> a -> StrMap a -> StrMap a</code></a>
+                </li>
+                <li>
+                  <a href="#remove"><code><b>remove</b> :: String -> StrMap a -> StrMap a</code></a>
+                </li>
+                <li>
+                  <a href="#keys"><code><b>keys</b> :: StrMap a -> Array String</code></a>
+                </li>
+                <li>
+                  <a href="#values"><code><b>values</b> :: StrMap a -> Array a</code></a>
+                </li>
+                <li>
+                  <a href="#pairs"><code><b>pairs</b> :: StrMap a -> Array (Pair String a)</code></a>
+                </li>
+                <li>
+                  <a href="#fromPairs"><code><b>fromPairs</b> :: Foldable f => f (Pair String a) -> StrMap a</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#number">Number</a>
-            <ul>
-              <li>
-                <a href="#negate"><code><b>negate</b> :: ValidNumber -> ValidNumber</code></a>
-              </li>
-              <li>
-                <a href="#add"><code><b>add</b> :: FiniteNumber -> FiniteNumber -> FiniteNumber</code></a>
-              </li>
-              <li>
-                <a href="#sum"><code><b>sum</b> :: Foldable f => f FiniteNumber -> FiniteNumber</code></a>
-              </li>
-              <li>
-                <a href="#sub"><code><b>sub</b> :: FiniteNumber -> (FiniteNumber -> FiniteNumber)</code></a>
-              </li>
-              <li>
-                <a href="#sub_"><code><b>sub_</b> :: FiniteNumber -> FiniteNumber -> FiniteNumber</code></a>
-              </li>
-              <li>
-                <a href="#mult"><code><b>mult</b> :: FiniteNumber -> FiniteNumber -> FiniteNumber</code></a>
-              </li>
-              <li>
-                <a href="#product"><code><b>product</b> :: Foldable f => f FiniteNumber -> FiniteNumber</code></a>
-              </li>
-              <li>
-                <a href="#div"><code><b>div</b> :: NonZeroFiniteNumber -> (FiniteNumber -> FiniteNumber)</code></a>
-              </li>
-              <li>
-                <a href="#div_"><code><b>div_</b> :: FiniteNumber -> NonZeroFiniteNumber -> FiniteNumber</code></a>
-              </li>
-              <li>
-                <a href="#pow"><code><b>pow</b> :: FiniteNumber -> (FiniteNumber -> FiniteNumber)</code></a>
-              </li>
-              <li>
-                <a href="#pow_"><code><b>pow_</b> :: FiniteNumber -> FiniteNumber -> FiniteNumber</code></a>
-              </li>
-              <li>
-                <a href="#mean"><code><b>mean</b> :: Foldable f => f FiniteNumber -> Maybe FiniteNumber</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#number">Number</a></summary>
+              <ul>
+                <li>
+                  <a href="#negate"><code><b>negate</b> :: ValidNumber -> ValidNumber</code></a>
+                </li>
+                <li>
+                  <a href="#add"><code><b>add</b> :: FiniteNumber -> FiniteNumber -> FiniteNumber</code></a>
+                </li>
+                <li>
+                  <a href="#sum"><code><b>sum</b> :: Foldable f => f FiniteNumber -> FiniteNumber</code></a>
+                </li>
+                <li>
+                  <a href="#sub"><code><b>sub</b> :: FiniteNumber -> (FiniteNumber -> FiniteNumber)</code></a>
+                </li>
+                <li>
+                  <a href="#sub_"><code><b>sub_</b> :: FiniteNumber -> FiniteNumber -> FiniteNumber</code></a>
+                </li>
+                <li>
+                  <a href="#mult"><code><b>mult</b> :: FiniteNumber -> FiniteNumber -> FiniteNumber</code></a>
+                </li>
+                <li>
+                  <a href="#product"><code><b>product</b> :: Foldable f => f FiniteNumber -> FiniteNumber</code></a>
+                </li>
+                <li>
+                  <a href="#div"><code><b>div</b> :: NonZeroFiniteNumber -> (FiniteNumber -> FiniteNumber)</code></a>
+                </li>
+                <li>
+                  <a href="#div_"><code><b>div_</b> :: FiniteNumber -> NonZeroFiniteNumber -> FiniteNumber</code></a>
+                </li>
+                <li>
+                  <a href="#pow"><code><b>pow</b> :: FiniteNumber -> (FiniteNumber -> FiniteNumber)</code></a>
+                </li>
+                <li>
+                  <a href="#pow_"><code><b>pow_</b> :: FiniteNumber -> FiniteNumber -> FiniteNumber</code></a>
+                </li>
+                <li>
+                  <a href="#mean"><code><b>mean</b> :: Foldable f => f FiniteNumber -> Maybe FiniteNumber</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#integer">Integer</a>
-            <ul>
-              <li>
-                <a href="#even"><code><b>even</b> :: Integer -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#odd"><code><b>odd</b> :: Integer -> Boolean</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#integer">Integer</a></summary>
+              <ul>
+                <li>
+                  <a href="#even"><code><b>even</b> :: Integer -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#odd"><code><b>odd</b> :: Integer -> Boolean</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#parse">Parse</a>
-            <ul>
-              <li>
-                <a href="#parseDate"><code><b>parseDate</b> :: String -> Maybe ValidDate</code></a>
-              </li>
-              <li>
-                <a href="#parseFloat"><code><b>parseFloat</b> :: String -> Maybe Number</code></a>
-              </li>
-              <li>
-                <a href="#parseInt"><code><b>parseInt</b> :: Radix -> String -> Maybe Integer</code></a>
-              </li>
-              <li>
-                <a href="#parseJson"><code><b>parseJson</b> :: (Any -> Boolean) -> String -> Maybe a</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#parse">Parse</a></summary>
+              <ul>
+                <li>
+                  <a href="#parseDate"><code><b>parseDate</b> :: String -> Maybe ValidDate</code></a>
+                </li>
+                <li>
+                  <a href="#parseFloat"><code><b>parseFloat</b> :: String -> Maybe Number</code></a>
+                </li>
+                <li>
+                  <a href="#parseInt"><code><b>parseInt</b> :: Radix -> String -> Maybe Integer</code></a>
+                </li>
+                <li>
+                  <a href="#parseJson"><code><b>parseJson</b> :: (Any -> Boolean) -> String -> Maybe a</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#regexp">RegExp</a>
-            <ul>
-              <li>
-                <a href="#regex"><code><b>regex</b> :: RegexFlags -> String -> RegExp</code></a>
-              </li>
-              <li>
-                <a href="#regexEscape"><code><b>regexEscape</b> :: String -> String</code></a>
-              </li>
-              <li>
-                <a href="#test"><code><b>test</b> :: RegExp -> String -> Boolean</code></a>
-              </li>
-              <li>
-                <a href="#match"><code><b>match</b> :: NonGlobalRegExp -> String -> Maybe { match :: String, groups :: Array (Maybe String) }</code></a>
-              </li>
-              <li>
-                <a href="#matchAll"><code><b>matchAll</b> :: GlobalRegExp -> String -> Array { match :: String, groups :: Array (Maybe String) }</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#regexp">RegExp</a></summary>
+              <ul>
+                <li>
+                  <a href="#regex"><code><b>regex</b> :: RegexFlags -> String -> RegExp</code></a>
+                </li>
+                <li>
+                  <a href="#regexEscape"><code><b>regexEscape</b> :: String -> String</code></a>
+                </li>
+                <li>
+                  <a href="#test"><code><b>test</b> :: RegExp -> String -> Boolean</code></a>
+                </li>
+                <li>
+                  <a href="#match"><code><b>match</b> :: NonGlobalRegExp -> String -> Maybe { match :: String, groups :: Array (Maybe String) }</code></a>
+                </li>
+                <li>
+                  <a href="#matchAll"><code><b>matchAll</b> :: GlobalRegExp -> String -> Array { match :: String, groups :: Array (Maybe String) }</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
           <li>
-            <a href="#string">String</a>
-            <ul>
-              <li>
-                <a href="#toUpper"><code><b>toUpper</b> :: String -> String</code></a>
-              </li>
-              <li>
-                <a href="#toLower"><code><b>toLower</b> :: String -> String</code></a>
-              </li>
-              <li>
-                <a href="#trim"><code><b>trim</b> :: String -> String</code></a>
-              </li>
-              <li>
-                <a href="#stripPrefix"><code><b>stripPrefix</b> :: String -> String -> Maybe String</code></a>
-              </li>
-              <li>
-                <a href="#stripSuffix"><code><b>stripSuffix</b> :: String -> String -> Maybe String</code></a>
-              </li>
-              <li>
-                <a href="#words"><code><b>words</b> :: String -> Array String</code></a>
-              </li>
-              <li>
-                <a href="#unwords"><code><b>unwords</b> :: Array String -> String</code></a>
-              </li>
-              <li>
-                <a href="#lines"><code><b>lines</b> :: String -> Array String</code></a>
-              </li>
-              <li>
-                <a href="#unlines"><code><b>unlines</b> :: Array String -> String</code></a>
-              </li>
-              <li>
-                <a href="#splitOn"><code><b>splitOn</b> :: String -> String -> Array String</code></a>
-              </li>
-              <li>
-                <a href="#splitOnRegex"><code><b>splitOnRegex</b> :: GlobalRegExp -> String -> Array String</code></a>
-              </li>
-            </ul>
+            <details>
+              <summary><a href="#string">String</a></summary>
+              <ul>
+                <li>
+                  <a href="#toUpper"><code><b>toUpper</b> :: String -> String</code></a>
+                </li>
+                <li>
+                  <a href="#toLower"><code><b>toLower</b> :: String -> String</code></a>
+                </li>
+                <li>
+                  <a href="#trim"><code><b>trim</b> :: String -> String</code></a>
+                </li>
+                <li>
+                  <a href="#stripPrefix"><code><b>stripPrefix</b> :: String -> String -> Maybe String</code></a>
+                </li>
+                <li>
+                  <a href="#stripSuffix"><code><b>stripSuffix</b> :: String -> String -> Maybe String</code></a>
+                </li>
+                <li>
+                  <a href="#words"><code><b>words</b> :: String -> Array String</code></a>
+                </li>
+                <li>
+                  <a href="#unwords"><code><b>unwords</b> :: Array String -> String</code></a>
+                </li>
+                <li>
+                  <a href="#lines"><code><b>lines</b> :: String -> Array String</code></a>
+                </li>
+                <li>
+                  <a href="#unlines"><code><b>unlines</b> :: Array String -> String</code></a>
+                </li>
+                <li>
+                  <a href="#splitOn"><code><b>splitOn</b> :: String -> String -> Array String</code></a>
+                </li>
+                <li>
+                  <a href="#splitOnRegex"><code><b>splitOnRegex</b> :: GlobalRegExp -> String -> Array String</code></a>
+                </li>
+              </ul>
+            </details>
           </li>
         </ul>
       </li>
