@@ -28,11 +28,9 @@ const def               = $.create({checkTypes, env});
 
 const Either            = S.EitherType;
 const I                 = S.I;
-const Just              = S.Just;
 const K                 = S.K;
 const Left              = S.Left;
 const Maybe             = S.MaybeType;
-const Nothing           = S.Nothing;
 const Right             = S.Right;
 const allPass           = S.allPass;
 const ap                = S.ap;
@@ -58,22 +56,18 @@ const init              = R.init;
 const is                = S.is;
 const join              = S.join;
 const joinWith          = S.joinWith;
-const justs             = S.justs;
 const keys              = S.keys;
-const lensProp          = R.lensProp;
 const lift2             = S.lift2;
 const map               = S.map;
 const matchAll          = S.matchAll;
 const maybe_            = S.maybe_;
 const maybeToEither     = S.maybeToEither;
 const of                = S.of;
-const over              = R.over;
 const pair              = R.pair;
 const pipe              = S.pipe;
 const prop              = S.prop;
 const reduce            = S.reduce;
 const regex             = S.regex;
-const repeat            = R.repeat;
 const replace           = R.replace;
 const sequence          = S.sequence;
 const slice_            = R.slice;
@@ -83,8 +77,8 @@ const splitOnRegex      = S.splitOnRegex;
 const test              = S.test;
 const toString          = S.toString;
 const unapply           = R.unapply;
-const unfoldr           = S.unfoldr;
 const unlines           = S.unlines;
+const when              = S.when;
 
 const reset             = '\u001B[0m';
 const red               = '\u001B[31m';
@@ -470,8 +464,37 @@ def('readme',
           map(concat('\n')),
           map(replace(/\n$/, ''))]));
 
-//    pad :: Integer -> String
-const pad = def('pad', {}, [$.Integer, $.String], compose(j, repeat('  ')));
+//    Heading :: Type
+const Heading = $.RecordType({
+  level: $.PositiveInteger,
+  id: $.String,
+  html: $.String,
+  subheads: $.Array($.NullaryType('Heading', '', x => $.test([], Heading, x))),
+});
+
+//    tocListItem :: Heading -> String
+const tocListItem =
+def('tocListItem',
+    {},
+    [Heading, $.String],
+    function recur({level, id, html, subheads}) {
+      const indent = ' '.repeat(4 * level - 2);
+      const a = el('a',
+                   {href: '#' + id},
+                   html.replace(/<a [^>]*>([^<]*)<[/]a>/g,
+                                ($0, $1, idx) =>
+                                  when(K(idx === '<code>'.length),
+                                       wrap('<b>', '</b>'),
+                                       $1)));
+      return wrap(`${indent}<li>\n`,
+                  `${indent}</li>\n`,
+                  subheads.length === 0 ?
+                    wrap(`${indent}  `, '\n', a) :
+                    wrap(`${indent}  ${a}\n` +
+                         `${indent}  <ul>\n`,
+                         `${indent}  </ul>\n`,
+                         j(map(recur, subheads))));
+    });
 
 //    toc :: String -> String
 const toc =
@@ -480,45 +503,28 @@ def('toc',
     [$.String, $.String],
     pipe([matchAll(/<(h[1-6]) id="([^"]*)">(.*)<[/]\1>/g),
           map(prop('groups')),
-          map(justs),
-          reduce(({level, tagName, html}) => ([hN, id, _innerHtml]) => {
-            const level$ = Number(hN[1]);
-            const level$$ = level$ > level ? hN === tagName ? level : level + 1 : level$;
-
-            const pattern = '<a [^>]*>([^<]*)</a>';
-            const innerHtml =
-            pipe([replace(regex('', pattern), '<b>$1</b>'),
-                  replace(regex('g', pattern), '$1')],
-                 _innerHtml);
-
-            const html$ =
-            html + '\n' +
-            (level$$ > level ?
-               pad(2 * level$$ - 2) + '<ul' + (level === 1 ? ' id="toc"' : '') + '>\n' +
-               pad(2 * level$$ - 1) + '<li>\n' +
-               pad(2 * level$$ - 0) :
-             level$$ < level ?
-               pad(2 * level$$ + 1) + '</li>\n' +
-               pad(2 * level$$ - 0) + '</ul>\n' +
-               pad(2 * level$$ - 1) + '</li>\n' +
-               pad(2 * level$$ - 1) + '<li>\n' +
-               pad(2 * level$$ - 0) :
-             // else
-               pad(2 * level$$ - 1) + '</li>\n' +
-               pad(2 * level$$ - 1) + '<li>\n' +
-               pad(2 * level$$ - 0)) +
-            el('a', {href: '#' + id}, innerHtml);
-
-            return {level: level$$, tagName: hN, html: html$};
-          }, {level: 1, tagName: 'h1', html: ''}),
-          over(lensProp('level'),
-               compose(j,
-                       unfoldr(level => level > 1 ?
-                                 Just(['\n' + pad(2 * level - 1) + '</li>' +
-                                       '\n' + pad(2 * level - 2) + '</ul>',
-                                      level - 1]) :
-                                 Nothing))),
-          lift2(concat, prop('html'), prop('level'))]));
+          map(map(fromJust)),
+          reduce(heading => ([tagName, id, html]) => {
+                   const level = id === 'create' || id === 'env' ?
+                                   3 :
+                                   Number(replace('h', '', tagName));
+                   for (let subheads = heading.subheads;
+                        true;
+                        subheads = subheads[subheads.length - 1].subheads) {
+                     if (subheads.length === 0 ||
+                         subheads[0].level === level) {
+                       subheads.push({level, id, html, subheads: []});
+                       return heading;
+                     }
+                   }
+                 },
+                 {level: 1, id: '', html: '', subheads: []}),
+          prop('subheads'),
+          map(tocListItem),
+          j,
+          wrap('    <ul id="toc">\n',
+               '    </ul>'),
+          concat('\n')]));
 
 //    toDocument :: String -> String -> String -> String
 const toDocument =
