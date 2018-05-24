@@ -478,7 +478,7 @@ def('tocListItem',
     {},
     [Heading, $.String],
     function recur({level, id, html, subheads}) {
-      const indent = ' '.repeat(4 * level - 2);
+      const indent = ' '.repeat(level * (level - 1) + 4);
       const a = el('a',
                    {href: '#' + id},
                    html.replace(/<a [^>]*>([^<]*)<[/]a>/g,
@@ -490,9 +490,17 @@ def('tocListItem',
                   `${indent}</li>\n`,
                   subheads.length === 0 ?
                     wrap(`${indent}  `, '\n', a) :
+                  level < 3 ?
                     wrap(`${indent}  ${a}\n` +
                          `${indent}  <ul>\n`,
                          `${indent}  </ul>\n`,
+                         j(map(recur, subheads))) :
+                  // else
+                    wrap(`${indent}  <details>\n` +
+                         `${indent}    <summary>${a}</summary>\n` +
+                         `${indent}    <ul>\n`,
+                         `${indent}    </ul>\n` +
+                         `${indent}  </details>\n`,
                          j(map(recur, subheads))));
     });
 
