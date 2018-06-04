@@ -124,10 +124,6 @@ a code {
   color: #080;
 }
 
-#toc code b {
-  font-weight: 500;
-}
-
 pre {
   margin: 1.334em 0;
   padding: 0;
@@ -201,7 +197,8 @@ code.lang-javascript .boolean-literal {
   color: #963;
 }
 
-code.lang-javascript .comment {
+code.lang-javascript .comment,
+code.lang-javascript .punctuation {
   color: #999;
 }
 
@@ -263,6 +260,11 @@ h4 code a:first-child {
 
 p {
   margin: 1em 0;
+}
+
+b,
+strong {
+  font-weight: 500;
 }
 
 .pilcrow {

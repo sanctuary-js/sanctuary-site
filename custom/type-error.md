@@ -10,7 +10,7 @@ If `words` is `[]` we'll get a familiar error at run-time:
 Sanctuary gives us a fighting chance of avoiding such errors. We might
 write:
 
-    S.map(S.toUpper, S.head(words))
+    S.map (S.toUpper) (S.head (words))
 
 ===============================================================================
 
@@ -26,6 +26,6 @@ undefined
 > words[0].toUpperCase()
 "FOO"
 
-> S.map(S.toUpper, S.head(words))
-Nothing("FOO")
+> S.map (S.toUpper) (S.head (words))
+Nothing ("FOO")
 ```
