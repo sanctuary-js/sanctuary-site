@@ -586,6 +586,7 @@ ${content}
     window.Cons = window.List.Cons;
     window.env = window.sanctuary.env.concat([List.Type($.Unknown), Sum.Type]);
     window.S = window.sanctuary.create({checkTypes: true, env: env});
+    window.def = $.create({checkTypes: true, env: env});
   </script>
   <script src="behaviour.js"></script>
 </body>
