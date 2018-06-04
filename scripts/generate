@@ -115,7 +115,6 @@ def('htmlEncode',
     [$.String, $.String],
     pipe([replace(/&/g, '&amp;'),
           replace(/</g, '&lt;'),
-          replace(/>/g, '&gt;'),
           replace(/"/g, '&quot;')]));
 
 //    htmlDecode :: String -> String
@@ -123,9 +122,7 @@ const htmlDecode =
 def('htmlDecode',
     {},
     [$.String, $.String],
-    pipe([replace(/&#39;/g,  "'"),
-          replace(/&quot;/g, '"'),
-          replace(/&gt;/g,   '>'),
+    pipe([replace(/&quot;/g, '"'),
           replace(/&lt;/g,   '<'),
           replace(/&amp;/g,  '&')]));
 
@@ -385,6 +382,8 @@ def('generate',
           replace(/\u00A0/g, '\u2420'),
           s => marked(s, {pedantic: true}),
           replace(/\u2420/g, '\u00A0'),
+          replace(/&#39;/g, "'"),
+          replace(/&gt;/g, '>'),
           replace(/\n\n(?=\n<[/]code><[/]pre>)/g, ''),
           replace_(regex('g', '(<pre><code class="lang-javascript">)([^]*?)(?=</code></pre>)'),
                    ([$1, $2]) => $1 + highlight($2)),
