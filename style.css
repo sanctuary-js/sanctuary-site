@@ -93,17 +93,49 @@ a code {
   color: #666;
 }
 
-#toc {
+#css-search {
+  margin: 0 -9999px 0 -40px;
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: #ada;
+  background: #efe;
+  padding: 0 40px;
+}
+
+#search-input {
+  display: block;
+  margin: 1.105em 0;
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 90.476%;
+  line-height: 1.685;
+  font-family: "Fira Code", "Courier", monospace;
+  outline: none;
+}
+
+#search-input::-moz-selection {
+  background: #080;
+  color: #fff;
+}
+
+#search-input::selection {
+  background: #080;
+  color: #fff;
+}
+
+.list {
   list-style: none;
   padding-left: 0;
 }
 
-#toc ul {
+.list ul {
   list-style: none;
   padding-left: 1em;
 }
 
-#toc li:before {
+.list li:before {
   position: absolute;
   display: block;
   margin-left: -1em;

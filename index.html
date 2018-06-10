@@ -28,8 +28,11 @@
   <div id="css-main">
     <h1 id="sanctuary">Sanctuary <small>v2.0.0</small></h1>
     <p id="tagline">Refuge from unsafe JavaScript</p>
+    <div id="css-search">
+      <input id="search-input" placeholder="Find function by name or type signature..." autofocus>
+    </div>
 
-    <ul id="toc">
+    <ul id="toc" class="list">
       <li>
         <a href="#overview">Overview</a>
       </li>
@@ -4121,6 +4124,7 @@ string at every non-overlapping occurrence of the pattern.</p>
   <script src="adt/List.js"></script>
   <script src="adt/Sum.js"></script>
   <script src="vendor/sanctuary.js"></script>
+  <script src="vendor/sanctuary-search.js"></script>
   <script src="env.js"></script>
   <script>
     window.type = window.sanctuaryTypeIdentifiers;

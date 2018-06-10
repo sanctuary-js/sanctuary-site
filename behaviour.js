@@ -2,7 +2,18 @@
 
   'use strict';
 
+  var Html = window.Html;
   var S = window.S.create ({checkTypes: false, env: window.env});
+  var search = window.sanctuarySearch;
+
+  //  debounce :: (Number, x -> Undefined) -> x -> Undefined
+  function debounce(ms, f) {
+    var id = null;
+    return function(x) {
+      if (id != null) clearTimeout (id);
+      id = setTimeout (f, ms, x);
+    };
+  }
 
   //  replace :: RegExp -> String -> String -> Either String String
   function replace(pattern) {
@@ -23,6 +34,16 @@
     S.encase (function(body) { return new Function (body) (); }),
     S.mapLeft (S.prop ('message'))
   ]);
+
+  //  createElement :: (String, Object, Array Element) -> Element
+  function createElement(tagName, attrs, childNodes) {
+    var el = document.createElement (tagName);
+    for (var attr in attrs) el[attr] = attrs[attr];
+    for (var idx = 0; idx < childNodes.length; idx += 1) {
+      el.appendChild (childNodes[idx]);
+    }
+    return el;
+  }
 
   //  firstInput :: Element -> Element
   function firstInput(el) {
@@ -91,33 +112,30 @@
   }
 
   var examples = document.body.getElementsByClassName ('examples');
-  var locateVisibleExampleTimeoutId = setTimeout (function() {});
-  window.addEventListener ('scroll', function locateVisibleExample(event) {
-    clearTimeout (locateVisibleExampleTimeoutId);
-    locateVisibleExampleTimeoutId = setTimeout (function() {
-      var min = 0;
-      var max = examples.length - 1;
-      while (min <= max) {
-        var idx = Math.floor ((min + max) / 2);
-        var input = firstInput (examples[idx]);
-        var rect = input.getBoundingClientRect ();
-        if (rect.top < 0) {
-          min = idx + 1;
-        } else if (rect.bottom > window.innerHeight) {
-          max = idx - 1;
-        } else {
-          while ((idx -= 1) >= min) {
-            var prev = firstInput (examples[idx]);
-            if ((prev.getBoundingClientRect ()).top < 0) break;
-            input = prev;
-          }
-          window.removeEventListener ('scroll', locateVisibleExample, false);
-          demonstrateEditing (input);
-          break;
+  var locateVisibleExample = debounce (100, function(event) {
+    var min = 0;
+    var max = examples.length - 1;
+    while (min <= max) {
+      var idx = Math.floor ((min + max) / 2);
+      var input = firstInput (examples[idx]);
+      var rect = input.getBoundingClientRect ();
+      if (rect.top < 0) {
+        min = idx + 1;
+      } else if (rect.bottom > window.innerHeight) {
+        max = idx - 1;
+      } else {
+        while ((idx -= 1) >= min) {
+          var prev = firstInput (examples[idx]);
+          if ((prev.getBoundingClientRect ()).top < 0) break;
+          input = prev;
         }
+        window.removeEventListener ('scroll', locateVisibleExample, false);
+        demonstrateEditing (input);
+        break;
       }
-    }, 100);
+    }
   });
+  window.addEventListener ('scroll', locateVisibleExample);
 
   document.body.addEventListener ('click', function(event) {
     //  Dragging a selection triggers a "click" event. Selecting the
@@ -146,5 +164,47 @@
       );
     }
   }, false);
+
+  //  signatures :: Array (Pair String String)
+  var signatures = S.map (function(name) {
+    return S.Pair (name)
+                  (document.getElementById (name)
+                   .textContent
+                   .replace (/\s/g, ' '));
+  }) (Object.keys (S));
+
+  var searchInput = document.getElementById ('search-input');
+  var searchResults = createElement ('ul',
+                                     {id: 'search-results', className: 'list'},
+                                     []);
+  searchInput.parentNode.appendChild (searchResults);
+
+  searchInput.addEventListener ('input', debounce (100, function(event) {
+    searchResults.innerHTML = '';
+
+    //  matches :: Array (Pair String String)
+    var matches =
+    S.rights (S.map (S.pair (S.compose (S.map) (S.Pair)))
+                    (S.map (S.map (search (function(s) {
+                                             return '≤' + s + '≥';
+                                           })
+                                          (event.target.value)))
+                           (signatures)));
+
+    var fragment = document.createDocumentFragment ();
+    for (var idx = 0; idx < matches.length; idx += 1) {
+      var html = Html.unwrap (Html.encode (matches[idx].snd))
+                 .replace (/≤/g, '<b>')
+                 .replace (/≥/g, '</b>');
+      fragment.appendChild (
+        createElement ('li', {}, [
+          createElement ('a', {href: '#' + matches[idx].fst}, [
+            createElement ('code', {innerHTML: html}, [])
+          ])
+        ])
+      );
+    }
+    searchResults.appendChild (fragment);
+  }), false);
 
 } ());
