@@ -58,14 +58,6 @@
              (evaluate (input.value));
   }
 
-  //  evaluateForms :: Element -> Undefined
-  function evaluateForms(el) {
-    var forms = el.getElementsByTagName ('form');
-    Array.prototype.forEach.call (forms, evaluateForm);
-  }
-
-  evaluateForms (document.body);
-
   //  typeText :: (Element, String, () -> Undefined) -> Undefined
   function typeText(input, text, callback) {
     var shifted = '!"#$%&()*+:<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_{|}~';
@@ -149,7 +141,10 @@
   document.body.addEventListener ('submit', function(event) {
     if (event.target.tagName === 'FORM') {
       event.preventDefault ();
-      evaluateForms (event.target.parentNode);
+      Array.prototype.forEach.call (
+        event.target.parentNode.getElementsByTagName ('form'),
+        evaluateForm
+      );
     }
   }, false);
 
