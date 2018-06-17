@@ -30,9 +30,11 @@ const def               = $.create ({checkTypes, env});
 
 const Either            = S.EitherType;
 const I                 = S.I;
+const Just              = S.Just;
 const K                 = S.K;
 const Left              = S.Left;
 const Maybe             = S.MaybeType;
+const Nothing           = S.Nothing;
 const Right             = S.Right;
 const allPass           = S.allPass;
 const ap                = S.ap;
@@ -57,6 +59,7 @@ const join              = S.join;
 const lift2             = S.lift2;
 const map               = S.map;
 const matchAll          = S.matchAll;
+const maybe             = S.maybe;
 const maybe_            = S.maybe_;
 const maybeToEither     = S.maybeToEither;
 const of                = S.of;
@@ -99,11 +102,11 @@ def ('wrap')
     ([a, a, a, a])
     (before => after => middle => concat (concat (before) (middle)) (after));
 
-//    el :: String -> StrMap String -> Html -> Html
+//    el :: String -> StrMap String -> Maybe Html -> Html
 const el =
 def ('el')
     ({})
-    ([$.String, $.StrMap ($.String), Html.Type, Html.Type])
+    ([$.String, $.StrMap ($.String), S.MaybeType (Html.Type), Html.Type])
     (tagName => attrs => html =>
        reduce (concat)
               (empty (Html))
@@ -116,15 +119,15 @@ def ('el')
                                       Html ('"')])
                             (sort (pairs (attrs))),
                       [Html ('>')],
-                      [html],
-                      [Html (`</${tagName}>`)]])));
+                      maybe ([]) (of (Array)) (html),
+                      maybe ([]) (K ([Html (`</${tagName}>`)])) (html)])));
 
 //    anchor :: String -> String -> Html
 const anchor =
 def ('anchor')
     ({})
     ([$.String, $.String, Html.Type])
-    (href => text => el ('a') ({href}) (Html.encode (text)));
+    (href => text => el ('a') ({href}) (Just (Html.encode (text))));
 
 //    spanClass :: String -> String -> Html
 const spanClass =
@@ -133,7 +136,7 @@ def ('spanClass')
     ([$.String, $.String, Html.Type])
     (className => text => el ('span')
                              ({class: className})
-                             (Html.encode (text)));
+                             (Just (Html.encode (text))));
 
 //    Version :: Type
 const Version = $.NullaryType
@@ -210,9 +213,9 @@ def ('headingToMarkup')
 
        return el ('h4')
                  ({id})
-                 (el ('code')
-                     ({})
-                     (concat (html) (linkTokens (t))));
+                 (Just (el ('code')
+                           ({})
+                           (Just (concat (html) (linkTokens (t))))));
      });
 
 //    toInputMarkup :: String -> Html
@@ -220,8 +223,7 @@ const toInputMarkup =
 def ('toInputMarkup')
     ({})
     ([$.String, Html.Type])
-    (pipe ([Html.encode,
-            wrap (Html ('<input value="')) (Html ('">')),
+    (pipe ([value => el ('input') ({value}) (Nothing),
             concat (Html.encode ('>\u00A0'))]));
 
 //    $context :: ContextifiedSandbox
@@ -243,10 +245,12 @@ def ('toOutputMarkup')
                                                    {displayErrors: false})),
             either (pipe ([concat ('! '),
                            Html.encode,
+                           Just,
                            el ('div') ({'class': 'output',
                                         'data-error': 'true'})]))
                    (pipe ([show,
                            Html.encode,
+                           Just,
                            el ('div') ({'class': 'output'})]))]));
 
 //    doctestsToMarkup :: String -> Html
@@ -491,12 +495,12 @@ def ('tocListItem')
     (function recur({level, id, html, subheads}) {
        const a = el ('a')
                     ({href: '#' + id})
-                    (Html (Html.unwrap (html)
-                           .replace (/<a [^>]*>([^<]*)<[/]a>/g,
-                                     ($0, $1, idx) =>
-                                       when (K (idx === '<code>'.length))
-                                            (wrap ('<b>') ('</b>'))
-                                            ($1))));
+                    (Just (Html (Html.unwrap (html)
+                                 .replace (/<a [^>]*>([^<]*)<[/]a>/g,
+                                           ($0, $1, idx) =>
+                                             when (K (idx === '<code>'.length))
+                                                  (wrap ('<b>') ('</b>'))
+                                                  ($1)))));
        return Html.indent (4) (reduce (concat) (empty (Html)) (join (join ([
          [[Html ('<li>\n')]],
          subheads.length === 0 ?
