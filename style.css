@@ -2,6 +2,9 @@ body {
   margin: 0;
   padding: 0 40px;
   font: 21px/1.524 "Avenir Next", "Avenir", sans-serif;
+  -ms-text-size-adjust: 150%;
+  -webkit-text-size-adjust: 150%;
+  text-size-adjust: 150%;
   overflow-x: hidden;
 }
 
