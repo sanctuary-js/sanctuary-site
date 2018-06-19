@@ -11,6 +11,7 @@
                         require ('sanctuary-identity'),
                         require ('sanctuary-type-classes'),
                         require ('sanctuary-type-identifiers'),
+                        require ('./adt/Html.js'),
                         require ('./adt/List.js'),
                         require ('./adt/Sum.js'));
   } else {
@@ -20,11 +21,12 @@
                   self.sanctuaryIdentity,
                   self.sanctuaryTypeClasses,
                   self.sanctuaryTypeIdentifiers,
+                  self.Html,
                   self.List,
                   self.Sum);
   }
 
-} (function(S, $, Descending, Identity, Z, type, List, Sum) {
+} (function(S, $, Descending, Identity, Z, type, Html, List, Sum) {
 
   'use strict';
 
@@ -71,6 +73,7 @@
 
   return S.env.concat ([
     DescendingType ($.Unknown),
+    Html.Type,
     IdentityType ($.Unknown),
     ListType ($.Unknown),
     SumType
