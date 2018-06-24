@@ -223,8 +223,7 @@ const toInputMarkup =
 def ('toInputMarkup')
     ({})
     ([$.String, Html.Type])
-    (pipe ([value => el ('input') ({value}) (Nothing),
-            concat (Html.encode ('>\u00A0'))]));
+    (value => el ('input') ({value}) (Nothing));
 
 //    $context :: ContextifiedSandbox
 const $context = (() => {

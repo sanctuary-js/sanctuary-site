@@ -167,6 +167,10 @@ pre code {
   margin: 1.5em 0;
 }
 
+.examples form:before {
+  content: "> ";
+}
+
 .examples input {
   display: inline;
   margin: 0;

@@ -738,15 +738,15 @@ In JavaScript it's trivial to introduce a possible run-time type error.</p>
 <p>Try changing <code>words</code> to <code>[]</code> in the REPL below. Hit <em>return</em> to re-evaluate.</p>
 <div class="examples">
   <form>
-    > <input value="words = ['foo', 'bar', 'baz']">
+    <input value="words = ['foo', 'bar', 'baz']">
     <div class="output">[&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]</div>
   </form>
   <form>
-    > <input value="words[0].toUpperCase()">
+    <input value="words[0].toUpperCase()">
     <div class="output">&quot;FOO&quot;</div>
   </form>
   <form>
-    > <input value="S.map (S.toUpper) (S.head (words))">
+    <input value="S.map (S.toUpper) (S.head (words))">
     <div class="output">Just (&quot;FOO&quot;)</div>
   </form>
 </div>
@@ -945,7 +945,7 @@ are reported immediately, avoiding circuitous stack traces (at best) and
 silent failures due to type coercion (at worst). For example:</p>
 <div class="examples">
   <form>
-    > <input value="S.add (2) (true)">
+    <input value="S.add (2) (true)">
     <div class="output" data-error="true">! Invalid value
 
 add :: FiniteNumber -> FiniteNumber -> FiniteNumber
@@ -964,7 +964,7 @@ See https://github.com/sanctuary-js/sanctuary-def/tree/v0.18.1#FiniteNumber for 
 <p>Compare this to the behaviour of Ramda's unchecked equivalent:</p>
 <div class="examples">
   <form>
-    > <input value="R.add (2) (true)">
+    <input value="R.add (2) (true)">
     <div class="output">3</div>
   </form>
 </div>
@@ -1061,7 +1061,7 @@ S.map (S.sub (<span class="number-literal">1</span>)) (Identity (<span class="nu
 is a reference to <code>env</code>). Useful in conjunction with <a href="#create"><code>create</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.env">
+    <input value="S.env">
     <div class="output">[Function, Arguments, (Array Unknown), Boolean, Date, Error, HtmlElement, Null, Number, Object, RegExp, (StrMap Unknown), String, Symbol, Undefined, FiniteNumber, NonZeroFiniteNumber, (Either Unknown Unknown), (Unknown -> Unknown), GlobalRegExp, NonGlobalRegExp, Integer, NonNegativeInteger, (Maybe Unknown), (Array2 Unknown Unknown), (Pair Unknown Unknown), RegexFlags, Type, TypeClass, ValidDate, ValidNumber]</div>
   </form>
 </div>
@@ -1075,7 +1075,7 @@ disallow, such as mapping over an object with heterogeneous values.</p>
 <p>See also <a href="#create"><code>create</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.unchecked.map (S.show) ({x: 'foo', y: true, z: 42})">
+    <input value="S.unchecked.map (S.show) ({x: 'foo', y: true, z: 42})">
     <div class="output">{&quot;x&quot;: &quot;\&quot;foo\&quot;&quot;, &quot;y&quot;: &quot;true&quot;, &quot;z&quot;: &quot;42&quot;}</div>
   </form>
 </div>
@@ -1083,7 +1083,7 @@ disallow, such as mapping over an object with heterogeneous values.</p>
 <p>Opting out of type checking may cause type errors to go unnoticed.</p>
 <div class="examples">
   <form>
-    > <input value="S.unchecked.add (2) ('2')">
+    <input value="S.unchecked.add (2) ('2')">
     <div class="output">&quot;22&quot;</div>
   </form>
 </div>
@@ -1096,11 +1096,11 @@ disallow, such as mapping over an object with heterogeneous values.</p>
 <p>Returns the result of parsing the <a href="https://github.com/sanctuary-js/sanctuary-type-identifiers/tree/v2.0.1">type identifier</a> of the given value.</p>
 <div class="examples">
   <form>
-    > <input value="S.type (S.Just (42))">
+    <input value="S.type (S.Just (42))">
     <div class="output">{&quot;name&quot;: &quot;Maybe&quot;, &quot;namespace&quot;: Just (&quot;sanctuary-maybe&quot;), &quot;version&quot;: 1}</div>
   </form>
   <form>
-    > <input value="S.type ([1, 2, 3])">
+    <input value="S.type ([1, 2, 3])">
     <div class="output">{&quot;name&quot;: &quot;Array&quot;, &quot;namespace&quot;: Nothing, &quot;version&quot;: 0}</div>
   </form>
 </div>
@@ -1112,11 +1112,11 @@ disallow, such as mapping over an object with heterogeneous values.</p>
 See <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.18.1#test"><code>$.test</code></a> for details.</p>
 <div class="examples">
   <form>
-    > <input value="S.is ($.Array ($.Integer)) ([1, 2, 3])">
+    <input value="S.is ($.Array ($.Integer)) ([1, 2, 3])">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.is ($.Array ($.Integer)) ([1, 2, 3.14])">
+    <input value="S.is ($.Array ($.Integer)) ([1, 2, 3.14])">
     <div class="output">false</div>
   </form>
 </div>
@@ -1129,19 +1129,19 @@ See <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.18.1#test"><c
 <p>Alias of <a href="https://github.com/sanctuary-js/sanctuary-show/tree/v1.0.0#show"><code>show</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.show (-0)">
+    <input value="S.show (-0)">
     <div class="output">&quot;-0&quot;</div>
   </form>
   <form>
-    > <input value="S.show (['foo', 'bar', 'baz'])">
+    <input value="S.show (['foo', 'bar', 'baz'])">
     <div class="output">&quot;[\&quot;foo\&quot;, \&quot;bar\&quot;, \&quot;baz\&quot;]&quot;</div>
   </form>
   <form>
-    > <input value="S.show ({x: 1, y: 2, z: 3})">
+    <input value="S.show ({x: 1, y: 2, z: 3})">
     <div class="output">&quot;{\&quot;x\&quot;: 1, \&quot;y\&quot;: 2, \&quot;z\&quot;: 3}&quot;</div>
   </form>
   <form>
-    > <input value="S.show (S.Left (S.Right (S.Just (S.Nothing))))">
+    <input value="S.show (S.Left (S.Right (S.Just (S.Nothing))))">
     <div class="output">&quot;Left (Right (Just (Nothing)))&quot;</div>
   </form>
 </div>
@@ -1159,19 +1159,19 @@ create a Sanctuary module with type checking disabled, then use that
 module's <code>equals</code> function.</p>
 <div class="examples">
   <form>
-    > <input value="S.equals (0) (-0)">
+    <input value="S.equals (0) (-0)">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.equals (NaN) (NaN)">
+    <input value="S.equals (NaN) (NaN)">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.equals (S.Just ([1, 2, 3])) (S.Just ([1, 2, 3]))">
+    <input value="S.equals (S.Just ([1, 2, 3])) (S.Just ([1, 2, 3]))">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.equals (S.Just ([1, 2, 3])) (S.Just ([1, 2, 4]))">
+    <input value="S.equals (S.Just ([1, 2, 3])) (S.Just ([1, 2, 4]))">
     <div class="output">false</div>
   </form>
 </div>
@@ -1183,7 +1183,7 @@ module's <code>equals</code> function.</p>
 according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#lt"><code>Z.lt</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.filter (S.lt (3)) ([1, 2, 3, 4, 5])">
+    <input value="S.filter (S.lt (3)) ([1, 2, 3, 4, 5])">
     <div class="output">[1, 2]</div>
   </form>
 </div>
@@ -1195,7 +1195,7 @@ according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tre
 the first according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#lte"><code>Z.lte</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.filter (S.lte (3)) ([1, 2, 3, 4, 5])">
+    <input value="S.filter (S.lte (3)) ([1, 2, 3, 4, 5])">
     <div class="output">[1, 2, 3]</div>
   </form>
 </div>
@@ -1207,7 +1207,7 @@ the first according to <a href="https://github.com/sanctuary-js/sanctuary-type-c
 according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#gt"><code>Z.gt</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.filter (S.gt (3)) ([1, 2, 3, 4, 5])">
+    <input value="S.filter (S.gt (3)) ([1, 2, 3, 4, 5])">
     <div class="output">[4, 5]</div>
   </form>
 </div>
@@ -1219,7 +1219,7 @@ according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tre
 to the first according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#gte"><code>Z.gte</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.filter (S.gte (3)) ([1, 2, 3, 4, 5])">
+    <input value="S.filter (S.gte (3)) ([1, 2, 3, 4, 5])">
     <div class="output">[3, 4, 5]</div>
   </form>
 </div>
@@ -1231,15 +1231,15 @@ to the first according to <a href="https://github.com/sanctuary-js/sanctuary-typ
 <p>See also <a href="#max"><code>max</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.min (10) (2)">
+    <input value="S.min (10) (2)">
     <div class="output">2</div>
   </form>
   <form>
-    > <input value="S.min (new Date ('1999-12-31')) (new Date ('2000-01-01'))">
+    <input value="S.min (new Date ('1999-12-31')) (new Date ('2000-01-01'))">
     <div class="output">new Date (&quot;1999-12-31T00:00:00.000Z&quot;)</div>
   </form>
   <form>
-    > <input value="S.min ('10') ('2')">
+    <input value="S.min ('10') ('2')">
     <div class="output">&quot;10&quot;</div>
   </form>
 </div>
@@ -1251,15 +1251,15 @@ to the first according to <a href="https://github.com/sanctuary-js/sanctuary-typ
 <p>See also <a href="#min"><code>min</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.max (10) (2)">
+    <input value="S.max (10) (2)">
     <div class="output">10</div>
   </form>
   <form>
-    > <input value="S.max (new Date ('1999-12-31')) (new Date ('2000-01-01'))">
+    <input value="S.max (new Date ('1999-12-31')) (new Date ('2000-01-01'))">
     <div class="output">new Date (&quot;2000-01-01T00:00:00.000Z&quot;)</div>
   </form>
   <form>
-    > <input value="S.max ('10') ('2')">
+    <input value="S.max ('10') ('2')">
     <div class="output">&quot;2&quot;</div>
   </form>
 </div>
@@ -1270,7 +1270,7 @@ to the first according to <a href="https://github.com/sanctuary-js/sanctuary-typ
 <p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.18.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#id"><code>Z.id</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.id (Function) (42)">
+    <input value="S.id (Function) (42)">
     <div class="output">42</div>
   </form>
 </div>
@@ -1281,23 +1281,23 @@ to the first according to <a href="https://github.com/sanctuary-js/sanctuary-typ
 <p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#concat"><code>Z.concat</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.concat ('abc') ('def')">
+    <input value="S.concat ('abc') ('def')">
     <div class="output">&quot;abcdef&quot;</div>
   </form>
   <form>
-    > <input value="S.concat ([1, 2, 3]) ([4, 5, 6])">
+    <input value="S.concat ([1, 2, 3]) ([4, 5, 6])">
     <div class="output">[1, 2, 3, 4, 5, 6]</div>
   </form>
   <form>
-    > <input value="S.concat ({x: 1, y: 2}) ({y: 3, z: 4})">
+    <input value="S.concat ({x: 1, y: 2}) ({y: 3, z: 4})">
     <div class="output">{&quot;x&quot;: 1, &quot;y&quot;: 3, &quot;z&quot;: 4}</div>
   </form>
   <form>
-    > <input value="S.concat (S.Just ([1, 2, 3])) (S.Just ([4, 5, 6]))">
+    <input value="S.concat (S.Just ([1, 2, 3])) (S.Just ([4, 5, 6]))">
     <div class="output">Just ([1, 2, 3, 4, 5, 6])</div>
   </form>
   <form>
-    > <input value="S.concat (Sum (18)) (Sum (24))">
+    <input value="S.concat (Sum (18)) (Sum (24))">
     <div class="output">Sum (42)</div>
   </form>
 </div>
@@ -1308,19 +1308,19 @@ to the first according to <a href="https://github.com/sanctuary-js/sanctuary-typ
 <p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.18.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#empty"><code>Z.empty</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.empty (String)">
+    <input value="S.empty (String)">
     <div class="output">&quot;&quot;</div>
   </form>
   <form>
-    > <input value="S.empty (Array)">
+    <input value="S.empty (Array)">
     <div class="output">[]</div>
   </form>
   <form>
-    > <input value="S.empty (Object)">
+    <input value="S.empty (Object)">
     <div class="output">{}</div>
   </form>
   <form>
-    > <input value="S.empty (Sum)">
+    <input value="S.empty (Sum)">
     <div class="output">Sum (0)</div>
   </form>
 </div>
@@ -1331,7 +1331,7 @@ to the first according to <a href="https://github.com/sanctuary-js/sanctuary-typ
 <p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.18.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#invert"><code>Z.invert</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.invert (Sum (5))">
+    <input value="S.invert (Sum (5))">
     <div class="output">Sum (-5)</div>
   </form>
 </div>
@@ -1344,23 +1344,23 @@ satisfy the predicate.</p>
 <p>See also <a href="#reject"><code>reject</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.filter (S.odd) ([1, 2, 3])">
+    <input value="S.filter (S.odd) ([1, 2, 3])">
     <div class="output">[1, 3]</div>
   </form>
   <form>
-    > <input value="S.filter (S.odd) ({x: 1, y: 2, z: 3})">
+    <input value="S.filter (S.odd) ({x: 1, y: 2, z: 3})">
     <div class="output">{&quot;x&quot;: 1, &quot;z&quot;: 3}</div>
   </form>
   <form>
-    > <input value="S.filter (S.odd) (S.Nothing)">
+    <input value="S.filter (S.odd) (S.Nothing)">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.filter (S.odd) (S.Just (0))">
+    <input value="S.filter (S.odd) (S.Just (0))">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.filter (S.odd) (S.Just (1))">
+    <input value="S.filter (S.odd) (S.Just (1))">
     <div class="output">Just (1)</div>
   </form>
 </div>
@@ -1373,23 +1373,23 @@ the predicate.</p>
 <p>See also <a href="#filter"><code>filter</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.reject (S.odd) ([1, 2, 3])">
+    <input value="S.reject (S.odd) ([1, 2, 3])">
     <div class="output">[2]</div>
   </form>
   <form>
-    > <input value="S.reject (S.odd) ({x: 1, y: 2, z: 3})">
+    <input value="S.reject (S.odd) ({x: 1, y: 2, z: 3})">
     <div class="output">{&quot;y&quot;: 2}</div>
   </form>
   <form>
-    > <input value="S.reject (S.odd) (S.Nothing)">
+    <input value="S.reject (S.odd) (S.Nothing)">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.reject (S.odd) (S.Just (0))">
+    <input value="S.reject (S.odd) (S.Just (0))">
     <div class="output">Just (0)</div>
   </form>
   <form>
-    > <input value="S.reject (S.odd) (S.Just (1))">
+    <input value="S.reject (S.odd) (S.Just (1))">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -1402,11 +1402,11 @@ does not satisfy the predicate, and all subsequent elements.</p>
 <p>See also <a href="#dropWhile"><code>dropWhile</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.takeWhile (S.odd) ([3, 3, 3, 7, 6, 3, 5, 4])">
+    <input value="S.takeWhile (S.odd) ([3, 3, 3, 7, 6, 3, 5, 4])">
     <div class="output">[3, 3, 3, 7]</div>
   </form>
   <form>
-    > <input value="S.takeWhile (S.even) ([3, 3, 3, 7, 6, 3, 5, 4])">
+    <input value="S.takeWhile (S.even) ([3, 3, 3, 7, 6, 3, 5, 4])">
     <div class="output">[]</div>
   </form>
 </div>
@@ -1419,11 +1419,11 @@ does not satisfy the predicate, and all subsequent elements.</p>
 <p>See also <a href="#takeWhile"><code>takeWhile</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.dropWhile (S.odd) ([3, 3, 3, 7, 6, 3, 5, 4])">
+    <input value="S.dropWhile (S.odd) ([3, 3, 3, 7, 6, 3, 5, 4])">
     <div class="output">[6, 3, 5, 4]</div>
   </form>
   <form>
-    > <input value="S.dropWhile (S.even) ([3, 3, 3, 7, 6, 3, 5, 4])">
+    <input value="S.dropWhile (S.even) ([3, 3, 3, 7, 6, 3, 5, 4])">
     <div class="output">[3, 3, 3, 7, 6, 3, 5, 4]</div>
   </form>
 </div>
@@ -1434,23 +1434,23 @@ does not satisfy the predicate, and all subsequent elements.</p>
 <p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#map"><code>Z.map</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.map (Math.sqrt) ([1, 4, 9])">
+    <input value="S.map (Math.sqrt) ([1, 4, 9])">
     <div class="output">[1, 2, 3]</div>
   </form>
   <form>
-    > <input value="S.map (Math.sqrt) ({x: 1, y: 4, z: 9})">
+    <input value="S.map (Math.sqrt) ({x: 1, y: 4, z: 9})">
     <div class="output">{&quot;x&quot;: 1, &quot;y&quot;: 2, &quot;z&quot;: 3}</div>
   </form>
   <form>
-    > <input value="S.map (Math.sqrt) (S.Just (9))">
+    <input value="S.map (Math.sqrt) (S.Just (9))">
     <div class="output">Just (3)</div>
   </form>
   <form>
-    > <input value="S.map (Math.sqrt) (S.Right (9))">
+    <input value="S.map (Math.sqrt) (S.Right (9))">
     <div class="output">Right (3)</div>
   </form>
   <form>
-    > <input value="S.map (Math.sqrt) (S.Pair (99980001) (99980001))">
+    <input value="S.map (Math.sqrt) (S.Pair (99980001) (99980001))">
     <div class="output">Pair (99980001) (9999)</div>
   </form>
 </div>
@@ -1465,7 +1465,7 @@ from combinatory logic (i.e. <a href="#compose"><code>compose</code></a>):</p>
 (b -> c) -> (a -> b) -> (a -> c)
 </code></pre><div class="examples">
   <form>
-    > <input value="S.map (Math.sqrt) (S.add (1)) (99)">
+    <input value="S.map (Math.sqrt) (S.add (1)) (99)">
     <div class="output">10</div>
   </form>
 </div>
@@ -1485,19 +1485,19 @@ Function a (b -> c) -> b -> Function a c
 (a -> b -> c) -> b -> a -> c
 </code></pre><div class="examples">
   <form>
-    > <input value="S.flip (S.concat) ('!') ('foo')">
+    <input value="S.flip (S.concat) ('!') ('foo')">
     <div class="output">&quot;foo!&quot;</div>
   </form>
   <form>
-    > <input value="S.flip ([Math.floor, Math.ceil]) (1.5)">
+    <input value="S.flip ([Math.floor, Math.ceil]) (1.5)">
     <div class="output">[1, 2]</div>
   </form>
   <form>
-    > <input value="S.flip ({floor: Math.floor, ceil: Math.ceil}) (1.5)">
+    <input value="S.flip ({floor: Math.floor, ceil: Math.ceil}) (1.5)">
     <div class="output">{&quot;ceil&quot;: 2, &quot;floor&quot;: 1}</div>
   </form>
   <form>
-    > <input value="S.flip (Cons (Math.floor) (Cons (Math.ceil) (Nil))) (1.5)">
+    <input value="S.flip (Cons (Math.floor) (Cons (Math.ceil) (Nil))) (1.5)">
     <div class="output">Cons (1) (Cons (2) (Nil))</div>
   </form>
 </div>
@@ -1508,15 +1508,15 @@ Function a (b -> c) -> b -> Function a c
 <p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#bimap"><code>Z.bimap</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.bimap (S.toUpper) (Math.sqrt) (S.Pair ('foo') (64))">
+    <input value="S.bimap (S.toUpper) (Math.sqrt) (S.Pair ('foo') (64))">
     <div class="output">Pair (&quot;FOO&quot;) (8)</div>
   </form>
   <form>
-    > <input value="S.bimap (S.toUpper) (Math.sqrt) (S.Left ('foo'))">
+    <input value="S.bimap (S.toUpper) (Math.sqrt) (S.Left ('foo'))">
     <div class="output">Left (&quot;FOO&quot;)</div>
   </form>
   <form>
-    > <input value="S.bimap (S.toUpper) (Math.sqrt) (S.Right (64))">
+    <input value="S.bimap (S.toUpper) (Math.sqrt) (S.Right (64))">
     <div class="output">Right (8)</div>
   </form>
 </div>
@@ -1528,15 +1528,15 @@ Function a (b -> c) -> b -> Function a c
 side of a Bifunctor.</p>
 <div class="examples">
   <form>
-    > <input value="S.mapLeft (S.toUpper) (S.Pair ('foo') (64))">
+    <input value="S.mapLeft (S.toUpper) (S.Pair ('foo') (64))">
     <div class="output">Pair (&quot;FOO&quot;) (64)</div>
   </form>
   <form>
-    > <input value="S.mapLeft (S.toUpper) (S.Left ('foo'))">
+    <input value="S.mapLeft (S.toUpper) (S.Left ('foo'))">
     <div class="output">Left (&quot;FOO&quot;)</div>
   </form>
   <form>
-    > <input value="S.mapLeft (S.toUpper) (S.Right (64))">
+    <input value="S.mapLeft (S.toUpper) (S.Right (64))">
     <div class="output">Right (64)</div>
   </form>
 </div>
@@ -1547,7 +1547,7 @@ side of a Bifunctor.</p>
 <p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#promap"><code>Z.promap</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.promap (Math.abs) (S.add (1)) (Math.sqrt) (-100)">
+    <input value="S.promap (Math.abs) (S.add (1)) (Math.sqrt) (-100)">
     <div class="output">11</div>
   </form>
 </div>
@@ -1558,19 +1558,19 @@ side of a Bifunctor.</p>
 <p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#alt"><code>Z.alt</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.alt (S.Nothing) (S.Just (1))">
+    <input value="S.alt (S.Nothing) (S.Just (1))">
     <div class="output">Just (1)</div>
   </form>
   <form>
-    > <input value="S.alt (S.Just (2)) (S.Just (3))">
+    <input value="S.alt (S.Just (2)) (S.Just (3))">
     <div class="output">Just (2)</div>
   </form>
   <form>
-    > <input value="S.alt (S.Left ('X')) (S.Right (1))">
+    <input value="S.alt (S.Left ('X')) (S.Right (1))">
     <div class="output">Right (1)</div>
   </form>
   <form>
-    > <input value="S.alt (S.Right (2)) (S.Right (3))">
+    <input value="S.alt (S.Right (2)) (S.Right (3))">
     <div class="output">Right (2)</div>
   </form>
 </div>
@@ -1581,15 +1581,15 @@ side of a Bifunctor.</p>
 <p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.18.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#zero"><code>Z.zero</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.zero (Array)">
+    <input value="S.zero (Array)">
     <div class="output">[]</div>
   </form>
   <form>
-    > <input value="S.zero (Object)">
+    <input value="S.zero (Object)">
     <div class="output">{}</div>
   </form>
   <form>
-    > <input value="S.zero (S.Maybe)">
+    <input value="S.zero (S.Maybe)">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -1606,11 +1606,11 @@ value if the Foldable is empty; the result of the final application
 otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.reduce (S.add) (0) ([1, 2, 3, 4, 5])">
+    <input value="S.reduce (S.add) (0) ([1, 2, 3, 4, 5])">
     <div class="output">15</div>
   </form>
   <form>
-    > <input value="S.reduce (xs => x => S.prepend (x) (xs)) ([]) ([1, 2, 3, 4, 5])">
+    <input value="S.reduce (xs => x => S.prepend (x) (xs)) ([]) ([1, 2, 3, 4, 5])">
     <div class="output">[5, 4, 3, 2, 1]</div>
   </form>
 </div>
@@ -1621,27 +1621,27 @@ otherwise.</p>
 <p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#traverse"><code>Z.traverse</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.traverse (Array) (S.words) (S.Just ('foo bar baz'))">
+    <input value="S.traverse (Array) (S.words) (S.Just ('foo bar baz'))">
     <div class="output">[Just (&quot;foo&quot;), Just (&quot;bar&quot;), Just (&quot;baz&quot;)]</div>
   </form>
   <form>
-    > <input value="S.traverse (Array) (S.words) (S.Nothing)">
+    <input value="S.traverse (Array) (S.words) (S.Nothing)">
     <div class="output">[Nothing]</div>
   </form>
   <form>
-    > <input value="S.traverse (S.Maybe) (S.parseInt (16)) (['A', 'B', 'C'])">
+    <input value="S.traverse (S.Maybe) (S.parseInt (16)) (['A', 'B', 'C'])">
     <div class="output">Just ([10, 11, 12])</div>
   </form>
   <form>
-    > <input value="S.traverse (S.Maybe) (S.parseInt (16)) (['A', 'B', 'C', 'X'])">
+    <input value="S.traverse (S.Maybe) (S.parseInt (16)) (['A', 'B', 'C', 'X'])">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.traverse (S.Maybe) (S.parseInt (16)) ({a: 'A', b: 'B', c: 'C'})">
+    <input value="S.traverse (S.Maybe) (S.parseInt (16)) ({a: 'A', b: 'B', c: 'C'})">
     <div class="output">Just ({&quot;a&quot;: 10, &quot;b&quot;: 11, &quot;c&quot;: 12})</div>
   </form>
   <form>
-    > <input value="S.traverse (S.Maybe) (S.parseInt (16)) ({a: 'A', b: 'B', c: 'C', x: 'X'})">
+    <input value="S.traverse (S.Maybe) (S.parseInt (16)) ({a: 'A', b: 'B', c: 'C', x: 'X'})">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -1653,23 +1653,23 @@ otherwise.</p>
 to produce an <code>f (t a)</code>.</p>
 <div class="examples">
   <form>
-    > <input value="S.sequence (Array) (S.Just ([1, 2, 3]))">
+    <input value="S.sequence (Array) (S.Just ([1, 2, 3]))">
     <div class="output">[Just (1), Just (2), Just (3)]</div>
   </form>
   <form>
-    > <input value="S.sequence (S.Maybe) ([S.Just (1), S.Just (2), S.Just (3)])">
+    <input value="S.sequence (S.Maybe) ([S.Just (1), S.Just (2), S.Just (3)])">
     <div class="output">Just ([1, 2, 3])</div>
   </form>
   <form>
-    > <input value="S.sequence (S.Maybe) ([S.Just (1), S.Just (2), S.Nothing])">
+    <input value="S.sequence (S.Maybe) ([S.Just (1), S.Just (2), S.Nothing])">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.sequence (S.Maybe) ({a: S.Just (1), b: S.Just (2), c: S.Just (3)})">
+    <input value="S.sequence (S.Maybe) ({a: S.Just (1), b: S.Just (2), c: S.Just (3)})">
     <div class="output">Just ({&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: 3})</div>
   </form>
   <form>
-    > <input value="S.sequence (S.Maybe) ({a: S.Just (1), b: S.Just (2), c: S.Nothing})">
+    <input value="S.sequence (S.Maybe) ({a: S.Just (1), b: S.Just (2), c: S.Nothing})">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -1680,15 +1680,15 @@ to produce an <code>f (t a)</code>.</p>
 <p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#ap"><code>Z.ap</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.ap ([Math.sqrt, x => x * x]) ([1, 4, 9, 16, 25])">
+    <input value="S.ap ([Math.sqrt, x => x * x]) ([1, 4, 9, 16, 25])">
     <div class="output">[1, 2, 3, 4, 5, 1, 16, 81, 256, 625]</div>
   </form>
   <form>
-    > <input value="S.ap ({x: Math.sqrt, y: S.add (1), z: S.sub (1)}) ({w: 4, x: 4, y: 4})">
+    <input value="S.ap ({x: Math.sqrt, y: S.add (1), z: S.sub (1)}) ({w: 4, x: 4, y: 4})">
     <div class="output">{&quot;x&quot;: 2, &quot;y&quot;: 5}</div>
   </form>
   <form>
-    > <input value="S.ap (S.Just (Math.sqrt)) (S.Just (64))">
+    <input value="S.ap (S.Just (Math.sqrt)) (S.Just (64))">
     <div class="output">Just (8)</div>
   </form>
 </div>
@@ -1703,7 +1703,7 @@ Function a (b -> c) -> Function a b -> Function a c
 (a -> b -> c) -> (a -> b) -> (a -> c)
 </code></pre><div class="examples">
   <form>
-    > <input value="S.ap (s => n => s.slice (0, n)) (s => Math.ceil (s.length / 2)) ('Haskell')">
+    <input value="S.ap (s => n => s.slice (0, n)) (s => Math.ceil (s.length / 2)) ('Haskell')">
     <div class="output">&quot;Hask&quot;</div>
   </form>
 </div>
@@ -1715,19 +1715,19 @@ Function a (b -> c) -> Function a b -> Function a c
 <a href="https://github.com/fantasyland/fantasy-land/tree/v3.5.0#apply">Apply</a>s.</p>
 <div class="examples">
   <form>
-    > <input value="S.lift2 (S.add) (S.Just (2)) (S.Just (3))">
+    <input value="S.lift2 (S.add) (S.Just (2)) (S.Just (3))">
     <div class="output">Just (5)</div>
   </form>
   <form>
-    > <input value="S.lift2 (S.add) (S.Just (2)) (S.Nothing)">
+    <input value="S.lift2 (S.add) (S.Just (2)) (S.Nothing)">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.lift2 (S.and) (S.Just (true)) (S.Just (true))">
+    <input value="S.lift2 (S.and) (S.Just (true)) (S.Just (true))">
     <div class="output">Just (true)</div>
   </form>
   <form>
-    > <input value="S.lift2 (S.and) (S.Just (true)) (S.Just (false))">
+    <input value="S.lift2 (S.and) (S.Just (true)) (S.Just (false))">
     <div class="output">Just (false)</div>
   </form>
 </div>
@@ -1739,11 +1739,11 @@ Function a (b -> c) -> Function a b -> Function a c
 <a href="https://github.com/fantasyland/fantasy-land/tree/v3.5.0#apply">Apply</a>s.</p>
 <div class="examples">
   <form>
-    > <input value="S.lift3 (S.reduce) (S.Just (S.add)) (S.Just (0)) (S.Just ([1, 2, 3]))">
+    <input value="S.lift3 (S.reduce) (S.Just (S.add)) (S.Just (0)) (S.Just ([1, 2, 3]))">
     <div class="output">Just (6)</div>
   </form>
   <form>
-    > <input value="S.lift3 (S.reduce) (S.Just (S.add)) (S.Just (0)) (S.Nothing)">
+    <input value="S.lift3 (S.reduce) (S.Just (S.add)) (S.Just (0)) (S.Nothing)">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -1757,11 +1757,11 @@ function.</p>
 <p>See also <a href="#apSecond"><code>apSecond</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.apFirst ([1, 2]) ([3, 4])">
+    <input value="S.apFirst ([1, 2]) ([3, 4])">
     <div class="output">[1, 1, 2, 2]</div>
   </form>
   <form>
-    > <input value="S.apFirst (S.Just (1)) (S.Just (2))">
+    <input value="S.apFirst (S.Just (1)) (S.Just (2))">
     <div class="output">Just (1)</div>
   </form>
 </div>
@@ -1775,11 +1775,11 @@ function.</p>
 <p>See also <a href="#apFirst"><code>apFirst</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.apSecond ([1, 2]) ([3, 4])">
+    <input value="S.apSecond ([1, 2]) ([3, 4])">
     <div class="output">[3, 4, 3, 4]</div>
   </form>
   <form>
-    > <input value="S.apSecond (S.Just (1)) (S.Just (2))">
+    <input value="S.apSecond (S.Just (1)) (S.Just (2))">
     <div class="output">Just (2)</div>
   </form>
 </div>
@@ -1790,19 +1790,19 @@ function.</p>
 <p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#of"><code>Z.of</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.of (Array) (42)">
+    <input value="S.of (Array) (42)">
     <div class="output">[42]</div>
   </form>
   <form>
-    > <input value="S.of (Function) (42) (null)">
+    <input value="S.of (Function) (42) (null)">
     <div class="output">42</div>
   </form>
   <form>
-    > <input value="S.of (S.Maybe) (42)">
+    <input value="S.of (S.Maybe) (42)">
     <div class="output">Just (42)</div>
   </form>
   <form>
-    > <input value="S.of (S.Either) (42)">
+    <input value="S.of (S.Either) (42)">
     <div class="output">Right (42)</div>
   </form>
 </div>
@@ -1813,19 +1813,19 @@ function.</p>
 <p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#chain"><code>Z.chain</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.chain (x => [x, x]) ([1, 2, 3])">
+    <input value="S.chain (x => [x, x]) ([1, 2, 3])">
     <div class="output">[1, 1, 2, 2, 3, 3]</div>
   </form>
   <form>
-    > <input value="S.chain (n => s => s.slice (0, n)) (s => Math.ceil (s.length / 2)) ('slice')">
+    <input value="S.chain (n => s => s.slice (0, n)) (s => Math.ceil (s.length / 2)) ('slice')">
     <div class="output">&quot;sli&quot;</div>
   </form>
   <form>
-    > <input value="S.chain (S.parseInt (10)) (S.Just ('123'))">
+    <input value="S.chain (S.parseInt (10)) (S.Just ('123'))">
     <div class="output">Just (123)</div>
   </form>
   <form>
-    > <input value="S.chain (S.parseInt (10)) (S.Just ('XXX'))">
+    <input value="S.chain (S.parseInt (10)) (S.Just ('XXX'))">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -1837,19 +1837,19 @@ function.</p>
 Removes one level of nesting from a nested monadic structure.</p>
 <div class="examples">
   <form>
-    > <input value="S.join ([[1], [2], [3]])">
+    <input value="S.join ([[1], [2], [3]])">
     <div class="output">[1, 2, 3]</div>
   </form>
   <form>
-    > <input value="S.join ([[[1, 2, 3]]])">
+    <input value="S.join ([[[1, 2, 3]]])">
     <div class="output">[[1, 2, 3]]</div>
   </form>
   <form>
-    > <input value="S.join (S.Just (S.Just (1)))">
+    <input value="S.join (S.Just (S.Just (1)))">
     <div class="output">Just (1)</div>
   </form>
   <form>
-    > <input value="S.join (S.Pair ('foo') (S.Pair ('bar') ('baz')))">
+    <input value="S.join (S.Pair ('foo') (S.Pair ('bar') ('baz')))">
     <div class="output">Pair (&quot;foobar&quot;) (&quot;baz&quot;)</div>
   </form>
 </div>
@@ -1861,7 +1861,7 @@ Function x (Function x a) -> Function x a
 (x -> x -> a) -> (x -> a)
 </code></pre><div class="examples">
   <form>
-    > <input value="S.join (S.concat) ('abc')">
+    <input value="S.join (S.concat) ('abc')">
     <div class="output">&quot;abcabc&quot;</div>
   </form>
 </div>
@@ -1874,7 +1874,7 @@ Similar to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/
 use of the Either type to indicate completion (via a Right).</p>
 <div class="examples">
   <form>
-    > <input value="S.chainRec (Array) (s => s.length === 2 ? S.map (S.Right) ([s + '!', s + '?']) : S.map (S.Left) ([s + 'o', s + 'n'])) ('')">
+    <input value="S.chainRec (Array) (s => s.length === 2 ? S.map (S.Right) ([s + '!', s + '?']) : S.map (S.Left) ([s + 'o', s + 'n'])) ('')">
     <div class="output">[&quot;oo!&quot;, &quot;oo?&quot;, &quot;on!&quot;, &quot;on?&quot;, &quot;no!&quot;, &quot;no?&quot;, &quot;nn!&quot;, &quot;nn?&quot;]</div>
   </form>
 </div>
@@ -1885,11 +1885,11 @@ use of the Either type to indicate completion (via a Right).</p>
 <p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#extend"><code>Z.extend</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.extend (S.joinWith ('')) (['x', 'y', 'z'])">
+    <input value="S.extend (S.joinWith ('')) (['x', 'y', 'z'])">
     <div class="output">[&quot;xyz&quot;, &quot;yz&quot;, &quot;z&quot;]</div>
   </form>
   <form>
-    > <input value="S.extend (f => f ([3, 4])) (S.reverse) ([1, 2])">
+    <input value="S.extend (f => f ([3, 4])) (S.reverse) ([1, 2])">
     <div class="output">[4, 3, 2, 1]</div>
   </form>
 </div>
@@ -1901,19 +1901,19 @@ use of the Either type to indicate completion (via a Right).</p>
 Adds one level of nesting to a comonadic structure.</p>
 <div class="examples">
   <form>
-    > <input value="S.duplicate (S.Just (1))">
+    <input value="S.duplicate (S.Just (1))">
     <div class="output">Just (Just (1))</div>
   </form>
   <form>
-    > <input value="S.duplicate ([1])">
+    <input value="S.duplicate ([1])">
     <div class="output">[[1]]</div>
   </form>
   <form>
-    > <input value="S.duplicate ([1, 2, 3])">
+    <input value="S.duplicate ([1, 2, 3])">
     <div class="output">[[1, 2, 3], [2, 3], [3]]</div>
   </form>
   <form>
-    > <input value="S.duplicate (S.reverse) ([1, 2]) ([3, 4])">
+    <input value="S.duplicate (S.reverse) ([1, 2]) ([3, 4])">
     <div class="output">[4, 3, 2, 1]</div>
   </form>
 </div>
@@ -1924,7 +1924,7 @@ Adds one level of nesting to a comonadic structure.</p>
 <p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.18.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#extract"><code>Z.extract</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.extract (S.Pair ('foo') ('bar'))">
+    <input value="S.extract (S.Pair ('foo') ('bar'))">
     <div class="output">&quot;bar&quot;</div>
   </form>
 </div>
@@ -1935,7 +1935,7 @@ Adds one level of nesting to a comonadic structure.</p>
 <p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.18.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v9.0.0#contramap"><code>Z.contramap</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.contramap (s => s.length) (Math.sqrt) ('Sanctuary')">
+    <input value="S.contramap (s => s.length) (Math.sqrt) ('Sanctuary')">
     <div class="output">3</div>
   </form>
 </div>
@@ -1949,7 +1949,7 @@ Adds one level of nesting to a comonadic structure.</p>
 function.</p>
 <div class="examples">
   <form>
-    > <input value="S.I ('foo')">
+    <input value="S.I ('foo')">
     <div class="output">&quot;foo&quot;</div>
   </form>
 </div>
@@ -1961,11 +1961,11 @@ function.</p>
 Haskell's <code>const</code> function.</p>
 <div class="examples">
   <form>
-    > <input value="S.K ('foo') ('bar')">
+    <input value="S.K ('foo') ('bar')">
     <div class="output">&quot;foo&quot;</div>
   </form>
   <form>
-    > <input value="S.map (S.K (42)) (S.range (0) (5))">
+    <input value="S.map (S.K (42)) (S.range (0) (5))">
     <div class="output">[42, 42, 42, 42, 42]</div>
   </form>
 </div>
@@ -1978,11 +1978,11 @@ the result of applying the function to the value. Equivalent to Haskell's
 <code>(&amp;)</code> function.</p>
 <div class="examples">
   <form>
-    > <input value="S.T (42) (S.add (1))">
+    <input value="S.T (42) (S.add (1))">
     <div class="output">43</div>
   </form>
   <form>
-    > <input value="S.map (S.T (100)) ([S.add (1), Math.sqrt])">
+    <input value="S.map (S.T (100)) ([S.add (1), Math.sqrt])">
     <div class="output">[101, 10]</div>
   </form>
 </div>
@@ -1995,7 +1995,7 @@ the result of applying the function to the value. Equivalent to Haskell's
 <p>Curries the given binary function.</p>
 <div class="examples">
   <form>
-    > <input value="S.map (S.curry2 (Math.pow) (10)) ([1, 2, 3])">
+    <input value="S.map (S.curry2 (Math.pow) (10)) ([1, 2, 3])">
     <div class="output">[10, 100, 1000]</div>
   </form>
 </div>
@@ -2006,11 +2006,11 @@ the result of applying the function to the value. Equivalent to Haskell's
 <p>Curries the given ternary function.</p>
 <div class="examples">
   <form>
-    > <input value="const replaceString = S.curry3 ((what, replacement, string) => string.replace (what, replacement))">
+    <input value="const replaceString = S.curry3 ((what, replacement, string) => string.replace (what, replacement))">
     <div class="output">undefined</div>
   </form>
   <form>
-    > <input value="replaceString ('banana') ('orange') ('banana icecream')">
+    <input value="replaceString ('banana') ('orange') ('banana icecream')">
     <div class="output">&quot;orange icecream&quot;</div>
   </form>
 </div>
@@ -2021,11 +2021,11 @@ the result of applying the function to the value. Equivalent to Haskell's
 <p>Curries the given quaternary function.</p>
 <div class="examples">
   <form>
-    > <input value="const createRect = S.curry4 ((x, y, width, height) => ({x, y, width, height}))">
+    <input value="const createRect = S.curry4 ((x, y, width, height) => ({x, y, width, height}))">
     <div class="output">undefined</div>
   </form>
   <form>
-    > <input value="createRect (0) (0) (10) (10)">
+    <input value="createRect (0) (0) (10) (10)">
     <div class="output">{&quot;height&quot;: 10, &quot;width&quot;: 10, &quot;x&quot;: 0, &quot;y&quot;: 0}</div>
   </form>
 </div>
@@ -2036,11 +2036,11 @@ the result of applying the function to the value. Equivalent to Haskell's
 <p>Curries the given quinary function.</p>
 <div class="examples">
   <form>
-    > <input value="const toUrl = S.curry5 ((protocol, creds, hostname, port, pathname) => protocol + '//' + S.maybe ('') (S.flip (S.concat) ('@')) (creds) + hostname + S.maybe ('') (S.concat (':')) (port) + pathname)">
+    <input value="const toUrl = S.curry5 ((protocol, creds, hostname, port, pathname) => protocol + '//' + S.maybe ('') (S.flip (S.concat) ('@')) (creds) + hostname + S.maybe ('') (S.concat (':')) (port) + pathname)">
     <div class="output">undefined</div>
   </form>
   <form>
-    > <input value="toUrl ('https:') (S.Nothing) ('example.com') (S.Just ('443')) ('/foo/bar')">
+    <input value="toUrl ('https:') (S.Nothing) ('example.com') (S.Just ('443')) ('/foo/bar')">
     <div class="output">&quot;https://example.com:443/foo/bar&quot;</div>
   </form>
 </div>
@@ -2058,7 +2058,7 @@ with any <a href="https://github.com/fantasyland/fantasy-land/tree/v3.5.0#semigr
 <p>See also <a href="#pipe"><code>pipe</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.compose (Math.sqrt) (S.add (1)) (99)">
+    <input value="S.compose (Math.sqrt) (S.add (1)) (99)">
     <div class="output">10</div>
   </form>
 </div>
@@ -2073,7 +2073,7 @@ to the initial value.</p>
 of functions. <code>pipe ([f, g, h]) (x)</code> is equivalent to <code>h (g (f (x)))</code>.</p>
 <div class="examples">
   <form>
-    > <input value="S.pipe ([S.add (1), Math.sqrt, S.sub (1)]) (99)">
+    <input value="S.pipe ([S.add (1), Math.sqrt, S.sub (1)]) (99)">
     <div class="output">9</div>
   </form>
 </div>
@@ -2089,7 +2089,7 @@ of an sequence of functions. <code>pipeK ([f, g, h]) (x)</code> is equivalent to
 <code>chain (h) (chain (g) (chain (f) (x)))</code>.</p>
 <div class="examples">
   <form>
-    > <input value="S.pipeK ([S.tail, S.tail, S.head]) (S.Just ([1, 2, 3, 4]))">
+    <input value="S.pipeK ([S.tail, S.tail, S.head]) (S.Just ([1, 2, 3, 4]))">
     <div class="output">Just (3)</div>
   </form>
 </div>
@@ -2102,7 +2102,7 @@ values <code>x</code> and <code>y</code>. Returns <code>f (g (x)) (g (y))</code>
 <p>This is the P combinator from combinatory logic.</p>
 <div class="examples">
   <form>
-    > <input value="S.on (S.concat) (S.reverse) ([1, 2, 3]) ([4, 5, 6])">
+    <input value="S.on (S.concat) (S.reverse) ([1, 2, 3]) ([4, 5, 6])">
     <div class="output">[3, 2, 1, 6, 5, 4]</div>
   </form>
 </div>
@@ -2123,7 +2123,7 @@ contains exactly two values: one of type <code>a</code>; one of type <code>b</co
 Pair <a href="https://github.com/fantasyland/fantasy-land/tree/v3.5.0#type-representatives">type representative</a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.Pair ('foo') (42)">
+    <input value="S.Pair ('foo') (42)">
     <div class="output">Pair (&quot;foo&quot;) (42)</div>
   </form>
 </div>
@@ -2134,7 +2134,7 @@ Pair <a href="https://github.com/fantasyland/fantasy-land/tree/v3.5.0#type-repre
 <p><code>fst (Pair (x) (y))</code> is equivalent to <code>x</code>.</p>
 <div class="examples">
   <form>
-    > <input value="S.fst (S.Pair ('foo') (42))">
+    <input value="S.fst (S.Pair ('foo') (42))">
     <div class="output">&quot;foo&quot;</div>
   </form>
 </div>
@@ -2145,7 +2145,7 @@ Pair <a href="https://github.com/fantasyland/fantasy-land/tree/v3.5.0#type-repre
 <p><code>snd (Pair (x) (y))</code> is equivalent to <code>y</code>.</p>
 <div class="examples">
   <form>
-    > <input value="S.snd (S.Pair ('foo') (42))">
+    <input value="S.snd (S.Pair ('foo') (42))">
     <div class="output">42</div>
   </form>
 </div>
@@ -2156,7 +2156,7 @@ Pair <a href="https://github.com/fantasyland/fantasy-land/tree/v3.5.0#type-repre
 <p><code>swap (Pair (x) (y))</code> is equivalent to <code>Pair (y) (x)</code>.</p>
 <div class="examples">
   <form>
-    > <input value="S.swap (S.Pair ('foo') (42))">
+    <input value="S.swap (S.Pair ('foo') (42))">
     <div class="output">Pair (42) (&quot;foo&quot;)</div>
   </form>
 </div>
@@ -2180,7 +2180,7 @@ either Nothing (the empty value) or a Just whose value is of type <code>a</code>
 <p>The empty value of type <code>Maybe a</code>.</p>
 <div class="examples">
   <form>
-    > <input value="S.Nothing">
+    <input value="S.Nothing">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -2191,7 +2191,7 @@ either Nothing (the empty value) or a Just whose value is of type <code>a</code>
 <p>Constructs a value of type <code>Maybe a</code> from a value of type <code>a</code>.</p>
 <div class="examples">
   <form>
-    > <input value="S.Just (42)">
+    <input value="S.Just (42)">
     <div class="output">Just (42)</div>
   </form>
 </div>
@@ -2202,11 +2202,11 @@ either Nothing (the empty value) or a Just whose value is of type <code>a</code>
 <p>Returns <code>true</code> if the given Maybe is Nothing; <code>false</code> if it is a Just.</p>
 <div class="examples">
   <form>
-    > <input value="S.isNothing (S.Nothing)">
+    <input value="S.isNothing (S.Nothing)">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.isNothing (S.Just (42))">
+    <input value="S.isNothing (S.Just (42))">
     <div class="output">false</div>
   </form>
 </div>
@@ -2217,11 +2217,11 @@ either Nothing (the empty value) or a Just whose value is of type <code>a</code>
 <p>Returns <code>true</code> if the given Maybe is a Just; <code>false</code> if it is Nothing.</p>
 <div class="examples">
   <form>
-    > <input value="S.isJust (S.Just (42))">
+    <input value="S.isJust (S.Just (42))">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.isJust (S.Nothing)">
+    <input value="S.isJust (S.Nothing)">
     <div class="output">false</div>
   </form>
 </div>
@@ -2235,11 +2235,11 @@ if the Maybe is a Just; the default value otherwise.</p>
 <a href="#maybeToNullable"><code>maybeToNullable</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.fromMaybe (0) (S.Just (42))">
+    <input value="S.fromMaybe (0) (S.Just (42))">
     <div class="output">42</div>
   </form>
   <form>
-    > <input value="S.fromMaybe (0) (S.Nothing)">
+    <input value="S.fromMaybe (0) (S.Nothing)">
     <div class="output">0</div>
   </form>
 </div>
@@ -2251,15 +2251,15 @@ if the Maybe is a Just; the default value otherwise.</p>
 value is only computed if required.</p>
 <div class="examples">
   <form>
-    > <input value="function fib(n) { return n &lt;= 1 ? n : fib (n - 2) + fib (n - 1); }">
+    <input value="function fib(n) { return n &lt;= 1 ? n : fib (n - 2) + fib (n - 1); }">
     <div class="output">undefined</div>
   </form>
   <form>
-    > <input value="S.fromMaybe_ (() => fib (30)) (S.Just (1000000))">
+    <input value="S.fromMaybe_ (() => fib (30)) (S.Just (1000000))">
     <div class="output">1000000</div>
   </form>
   <form>
-    > <input value="S.fromMaybe_ (() => fib (30)) (S.Nothing)">
+    <input value="S.fromMaybe_ (() => fib (30)) (S.Nothing)">
     <div class="output">832040</div>
   </form>
 </div>
@@ -2272,11 +2272,11 @@ value is only computed if required.</p>
 <p>See also <a href="#fromMaybe"><code>fromMaybe</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.maybeToNullable (S.Just (42))">
+    <input value="S.maybeToNullable (S.Just (42))">
     <div class="output">42</div>
   </form>
   <form>
-    > <input value="S.maybeToNullable (S.Nothing)">
+    <input value="S.maybeToNullable (S.Nothing)">
     <div class="output">null</div>
   </form>
 </div>
@@ -2288,11 +2288,11 @@ value is only computed if required.</p>
 Just the value otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.toMaybe (null)">
+    <input value="S.toMaybe (null)">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.toMaybe (42)">
+    <input value="S.toMaybe (42)">
     <div class="output">Just (42)</div>
   </form>
 </div>
@@ -2306,11 +2306,11 @@ the Just's value. Otherwise, the first argument is returned.</p>
 <p>See also <a href="#maybe_"><code>maybe_</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.maybe (0) (S.prop ('length')) (S.Just ('refuge'))">
+    <input value="S.maybe (0) (S.prop ('length')) (S.Just ('refuge'))">
     <div class="output">6</div>
   </form>
   <form>
-    > <input value="S.maybe (0) (S.prop ('length')) (S.Nothing)">
+    <input value="S.maybe (0) (S.prop ('length')) (S.Nothing)">
     <div class="output">0</div>
   </form>
 </div>
@@ -2322,15 +2322,15 @@ the Just's value. Otherwise, the first argument is returned.</p>
 is only computed if required.</p>
 <div class="examples">
   <form>
-    > <input value="function fib(n) { return n &lt;= 1 ? n : fib (n - 2) + fib (n - 1); }">
+    <input value="function fib(n) { return n &lt;= 1 ? n : fib (n - 2) + fib (n - 1); }">
     <div class="output">undefined</div>
   </form>
   <form>
-    > <input value="S.maybe_ (() => fib (30)) (Math.sqrt) (S.Just (1000000))">
+    <input value="S.maybe_ (() => fib (30)) (Math.sqrt) (S.Just (1000000))">
     <div class="output">1000</div>
   </form>
   <form>
-    > <input value="S.maybe_ (() => fib (30)) (Math.sqrt) (S.Nothing)">
+    <input value="S.maybe_ (() => fib (30)) (Math.sqrt) (S.Nothing)">
     <div class="output">832040</div>
   </form>
 </div>
@@ -2343,7 +2343,7 @@ a Just. Related to Haskell's <code>catMaybes</code> function.</p>
 <p>See also <a href="#lefts"><code>lefts</code></a> and <a href="#rights"><code>rights</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.justs ([S.Just ('foo'), S.Nothing, S.Just ('baz')])">
+    <input value="S.justs ([S.Just ('foo'), S.Nothing, S.Just ('baz')])">
     <div class="output">[&quot;foo&quot;, &quot;baz&quot;]</div>
   </form>
 </div>
@@ -2357,11 +2357,11 @@ applying the function to an element is Nothing, the result is discarded;
 if the result is a Just, the Just's value is included.</p>
 <div class="examples">
   <form>
-    > <input value="S.mapMaybe (S.head) ([[], [1, 2, 3], [], [4, 5, 6], []])">
+    <input value="S.mapMaybe (S.head) ([[], [1, 2, 3], [], [4, 5, 6], []])">
     <div class="output">[1, 4]</div>
   </form>
   <form>
-    > <input value="S.mapMaybe (S.head) ({x: [1, 2, 3], y: [], z: [4, 5, 6]})">
+    <input value="S.mapMaybe (S.head) ({x: [1, 2, 3], y: [], z: [4, 5, 6]})">
     <div class="output">{&quot;x&quot;: 1, &quot;z&quot;: 4}</div>
   </form>
 </div>
@@ -2376,11 +2376,11 @@ result of applying <code>f</code> to <code>x</code>.</p>
 <p>See also <a href="#encaseEither"><code>encaseEither</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.encase (eval) ('1 + 1')">
+    <input value="S.encase (eval) ('1 + 1')">
     <div class="output">Just (2)</div>
   </form>
   <form>
-    > <input value="S.encase (eval) ('1 +')">
+    <input value="S.encase (eval) ('1 +')">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -2401,11 +2401,11 @@ first argument); a Just becomes a Right.</p>
 <p>See also <a href="#eitherToMaybe"><code>eitherToMaybe</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.maybeToEither ('Expecting an integer') (S.parseInt (10) ('xyz'))">
+    <input value="S.maybeToEither ('Expecting an integer') (S.parseInt (10) ('xyz'))">
     <div class="output">Left (&quot;Expecting an integer&quot;)</div>
   </form>
   <form>
-    > <input value="S.maybeToEither ('Expecting an integer') (S.parseInt (10) ('42'))">
+    <input value="S.maybeToEither ('Expecting an integer') (S.parseInt (10) ('42'))">
     <div class="output">Right (42)</div>
   </form>
 </div>
@@ -2430,7 +2430,7 @@ value is of type <code>b</code>.</p>
 <p>Constructs a value of type <code>Either a b</code> from a value of type <code>a</code>.</p>
 <div class="examples">
   <form>
-    > <input value="S.Left ('Cannot divide by zero')">
+    <input value="S.Left ('Cannot divide by zero')">
     <div class="output">Left (&quot;Cannot divide by zero&quot;)</div>
   </form>
 </div>
@@ -2441,7 +2441,7 @@ value is of type <code>b</code>.</p>
 <p>Constructs a value of type <code>Either a b</code> from a value of type <code>b</code>.</p>
 <div class="examples">
   <form>
-    > <input value="S.Right (42)">
+    <input value="S.Right (42)">
     <div class="output">Right (42)</div>
   </form>
 </div>
@@ -2452,11 +2452,11 @@ value is of type <code>b</code>.</p>
 <p>Returns <code>true</code> if the given Either is a Left; <code>false</code> if it is a Right.</p>
 <div class="examples">
   <form>
-    > <input value="S.isLeft (S.Left ('Cannot divide by zero'))">
+    <input value="S.isLeft (S.Left ('Cannot divide by zero'))">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.isLeft (S.Right (42))">
+    <input value="S.isLeft (S.Right (42))">
     <div class="output">false</div>
   </form>
 </div>
@@ -2467,11 +2467,11 @@ value is of type <code>b</code>.</p>
 <p>Returns <code>true</code> if the given Either is a Right; <code>false</code> if it is a Left.</p>
 <div class="examples">
   <form>
-    > <input value="S.isRight (S.Right (42))">
+    <input value="S.isRight (S.Right (42))">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.isRight (S.Left ('Cannot divide by zero'))">
+    <input value="S.isRight (S.Left ('Cannot divide by zero'))">
     <div class="output">false</div>
   </form>
 </div>
@@ -2483,11 +2483,11 @@ value is of type <code>b</code>.</p>
 if the Either is a Right; the default value otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.fromEither (0) (S.Right (42))">
+    <input value="S.fromEither (0) (S.Right (42))">
     <div class="output">42</div>
   </form>
   <form>
-    > <input value="S.fromEither (0) (S.Left (42))">
+    <input value="S.fromEither (0) (S.Left (42))">
     <div class="output">0</div>
   </form>
 </div>
@@ -2500,19 +2500,19 @@ or <code>undefined</code>; a Right otherwise. The first argument specifies the
 value of the Left in the &quot;failure&quot; case.</p>
 <div class="examples">
   <form>
-    > <input value="S.toEither ('XYZ') (null)">
+    <input value="S.toEither ('XYZ') (null)">
     <div class="output">Left (&quot;XYZ&quot;)</div>
   </form>
   <form>
-    > <input value="S.toEither ('XYZ') ('ABC')">
+    <input value="S.toEither ('XYZ') ('ABC')">
     <div class="output">Right (&quot;ABC&quot;)</div>
   </form>
   <form>
-    > <input value="S.map (S.prop ('0')) (S.toEither ('Invalid protocol') ('ftp://example.com/'.match (/^https?:/)))">
+    <input value="S.map (S.prop ('0')) (S.toEither ('Invalid protocol') ('ftp://example.com/'.match (/^https?:/)))">
     <div class="output">Left (&quot;Invalid protocol&quot;)</div>
   </form>
   <form>
-    > <input value="S.map (S.prop ('0')) (S.toEither ('Invalid protocol') ('https://example.com/'.match (/^https?:/)))">
+    <input value="S.map (S.prop ('0')) (S.toEither ('Invalid protocol') ('https://example.com/'.match (/^https?:/)))">
     <div class="output">Right (&quot;https:&quot;)</div>
   </form>
 </div>
@@ -2526,11 +2526,11 @@ is a Left, or the result of applying the second function to the
 Right's value, if the Either is a Right.</p>
 <div class="examples">
   <form>
-    > <input value="S.either (S.toUpper) (S.show) (S.Left ('Cannot divide by zero'))">
+    <input value="S.either (S.toUpper) (S.show) (S.Left ('Cannot divide by zero'))">
     <div class="output">&quot;CANNOT DIVIDE BY ZERO&quot;</div>
   </form>
   <form>
-    > <input value="S.either (S.toUpper) (S.show) (S.Right (42))">
+    <input value="S.either (S.toUpper) (S.show) (S.Right (42))">
     <div class="output">&quot;42&quot;</div>
   </form>
 </div>
@@ -2543,7 +2543,7 @@ a Left.</p>
 <p>See also <a href="#rights"><code>rights</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.lefts ([S.Right (20), S.Left ('foo'), S.Right (10), S.Left ('bar')])">
+    <input value="S.lefts ([S.Right (20), S.Left ('foo'), S.Right (10), S.Left ('bar')])">
     <div class="output">[&quot;foo&quot;, &quot;bar&quot;]</div>
   </form>
 </div>
@@ -2556,7 +2556,7 @@ a Right.</p>
 <p>See also <a href="#lefts"><code>lefts</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.rights ([S.Right (20), S.Left ('foo'), S.Right (10), S.Left ('bar')])">
+    <input value="S.rights ([S.Right (20), S.Left ('foo'), S.Right (10), S.Left ('bar')])">
     <div class="output">[20, 10]</div>
   </form>
 </div>
@@ -2568,11 +2568,11 @@ a Right.</p>
 satisfies the predicate; a Left of the value otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.tagBy (S.odd) (0)">
+    <input value="S.tagBy (S.odd) (0)">
     <div class="output">Left (0)</div>
   </form>
   <form>
-    > <input value="S.tagBy (S.odd) (1)">
+    <input value="S.tagBy (S.odd) (1)">
     <div class="output">Right (1)</div>
   </form>
 </div>
@@ -2588,15 +2588,15 @@ value is a Right containing the result of applying <code>g</code> to <code>x</co
 <p>See also <a href="#encase"><code>encase</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.encaseEither (S.I) (JSON.parse) ('[&quot;foo&quot;,&quot;bar&quot;,&quot;baz&quot;]')">
+    <input value="S.encaseEither (S.I) (JSON.parse) ('[&quot;foo&quot;,&quot;bar&quot;,&quot;baz&quot;]')">
     <div class="output">Right ([&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;])</div>
   </form>
   <form>
-    > <input value="S.encaseEither (S.I) (JSON.parse) ('[')">
+    <input value="S.encaseEither (S.I) (JSON.parse) ('[')">
     <div class="output">Left (new SyntaxError (&quot;Unexpected end of JSON input&quot;))</div>
   </form>
   <form>
-    > <input value="S.encaseEither (S.prop ('message')) (JSON.parse) ('[')">
+    <input value="S.encaseEither (S.prop ('message')) (JSON.parse) ('[')">
     <div class="output">Left (&quot;Unexpected end of JSON input&quot;)</div>
   </form>
 </div>
@@ -2617,11 +2617,11 @@ a Just.</p>
 <p>See also <a href="#maybeToEither"><code>maybeToEither</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.eitherToMaybe (S.Left ('Cannot divide by zero'))">
+    <input value="S.eitherToMaybe (S.Left ('Cannot divide by zero'))">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.eitherToMaybe (S.Right (42))">
+    <input value="S.eitherToMaybe (S.Right (42))">
     <div class="output">Just (42)</div>
   </form>
 </div>
@@ -2634,19 +2634,19 @@ a Just.</p>
 <p>Boolean &quot;and&quot;.</p>
 <div class="examples">
   <form>
-    > <input value="S.and (false) (false)">
+    <input value="S.and (false) (false)">
     <div class="output">false</div>
   </form>
   <form>
-    > <input value="S.and (false) (true)">
+    <input value="S.and (false) (true)">
     <div class="output">false</div>
   </form>
   <form>
-    > <input value="S.and (true) (false)">
+    <input value="S.and (true) (false)">
     <div class="output">false</div>
   </form>
   <form>
-    > <input value="S.and (true) (true)">
+    <input value="S.and (true) (true)">
     <div class="output">true</div>
   </form>
 </div>
@@ -2657,19 +2657,19 @@ a Just.</p>
 <p>Boolean &quot;or&quot;.</p>
 <div class="examples">
   <form>
-    > <input value="S.or (false) (false)">
+    <input value="S.or (false) (false)">
     <div class="output">false</div>
   </form>
   <form>
-    > <input value="S.or (false) (true)">
+    <input value="S.or (false) (true)">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.or (true) (false)">
+    <input value="S.or (true) (false)">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.or (true) (true)">
+    <input value="S.or (true) (true)">
     <div class="output">true</div>
   </form>
 </div>
@@ -2681,11 +2681,11 @@ a Just.</p>
 <p>See also <a href="#complement"><code>complement</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.not (false)">
+    <input value="S.not (false)">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.not (true)">
+    <input value="S.not (true)">
     <div class="output">false</div>
   </form>
 </div>
@@ -2698,11 +2698,11 @@ negation of applying the predicate to the value.</p>
 <p>See also <a href="#not"><code>not</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="Number.isInteger (42)">
+    <input value="Number.isInteger (42)">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.complement (Number.isInteger) (42)">
+    <input value="S.complement (Number.isInteger) (42)">
     <div class="output">false</div>
   </form>
 </div>
@@ -2718,11 +2718,11 @@ value otherwise.</p>
 <p>See also <a href="#when"><code>when</code></a> and <a href="#unless"><code>unless</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.ifElse (x => x &lt; 0) (Math.abs) (Math.sqrt) (-1)">
+    <input value="S.ifElse (x => x &lt; 0) (Math.abs) (Math.sqrt) (-1)">
     <div class="output">1</div>
   </form>
   <form>
-    > <input value="S.ifElse (x => x &lt; 0) (Math.abs) (Math.sqrt) (16)">
+    <input value="S.ifElse (x => x &lt; 0) (Math.abs) (Math.sqrt) (16)">
     <div class="output">4</div>
   </form>
 </div>
@@ -2736,11 +2736,11 @@ satisfies the predicate; the value otherwise.</p>
 <p>See also <a href="#unless"><code>unless</code></a> and <a href="#ifElse"><code>ifElse</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.when (x => x >= 0) (Math.sqrt) (16)">
+    <input value="S.when (x => x >= 0) (Math.sqrt) (16)">
     <div class="output">4</div>
   </form>
   <form>
-    > <input value="S.when (x => x >= 0) (Math.sqrt) (-1)">
+    <input value="S.when (x => x >= 0) (Math.sqrt) (-1)">
     <div class="output">-1</div>
   </form>
 </div>
@@ -2754,11 +2754,11 @@ does not satisfy the predicate; the value otherwise.</p>
 <p>See also <a href="#when"><code>when</code></a> and <a href="#ifElse"><code>ifElse</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.unless (x => x &lt; 0) (Math.sqrt) (16)">
+    <input value="S.unless (x => x &lt; 0) (Math.sqrt) (16)">
     <div class="output">4</div>
   </form>
   <form>
-    > <input value="S.unless (x => x &lt; 0) (Math.sqrt) (-1)">
+    <input value="S.unless (x => x &lt; 0) (Math.sqrt) (-1)">
     <div class="output">-1</div>
   </form>
 </div>
@@ -2772,11 +2772,11 @@ predicates. None of the subsequent predicates will be applied after
 the first predicate not satisfied.</p>
 <div class="examples">
   <form>
-    > <input value="S.allPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('quiessence')">
+    <input value="S.allPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('quiessence')">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.allPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('fissiparous')">
+    <input value="S.allPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('fissiparous')">
     <div class="output">false</div>
   </form>
 </div>
@@ -2790,11 +2790,11 @@ predicates. None of the subsequent predicates will be applied after
 the first predicate satisfied.</p>
 <div class="examples">
   <form>
-    > <input value="S.anyPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('incandescent')">
+    <input value="S.anyPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('incandescent')">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.anyPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('empathy')">
+    <input value="S.anyPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('empathy')">
     <div class="output">false</div>
   </form>
 </div>
@@ -2811,15 +2811,15 @@ A negative index represents an offset from the length of the array.</p>
 and <a href="#dropLast"><code>dropLast</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.slice (1) (3) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.slice (1) (3) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just ([&quot;b&quot;, &quot;c&quot;])</div>
   </form>
   <form>
-    > <input value="S.slice (-3) (-1) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.slice (-3) (-1) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just ([&quot;c&quot;, &quot;d&quot;])</div>
   </form>
   <form>
-    > <input value="S.slice (1) (6) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.slice (1) (6) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -2832,15 +2832,15 @@ the index is within the array's bounds; Nothing otherwise. A negative
 index represents an offset from the length of the array.</p>
 <div class="examples">
   <form>
-    > <input value="S.at (2) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.at (2) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just (&quot;c&quot;)</div>
   </form>
   <form>
-    > <input value="S.at (5) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.at (5) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.at (-2) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.at (-2) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just (&quot;d&quot;)</div>
   </form>
 </div>
@@ -2852,11 +2852,11 @@ index represents an offset from the length of the array.</p>
 at least one element; Nothing otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.head ([1, 2, 3])">
+    <input value="S.head ([1, 2, 3])">
     <div class="output">Just (1)</div>
   </form>
   <form>
-    > <input value="S.head ([])">
+    <input value="S.head ([])">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -2868,11 +2868,11 @@ at least one element; Nothing otherwise.</p>
 at least one element; Nothing otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.last ([1, 2, 3])">
+    <input value="S.last ([1, 2, 3])">
     <div class="output">Just (3)</div>
   </form>
   <form>
-    > <input value="S.last ([])">
+    <input value="S.last ([])">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -2884,11 +2884,11 @@ at least one element; Nothing otherwise.</p>
 array contains at least one element; Nothing otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.tail ([1, 2, 3])">
+    <input value="S.tail ([1, 2, 3])">
     <div class="output">Just ([2, 3])</div>
   </form>
   <form>
-    > <input value="S.tail ([])">
+    <input value="S.tail ([])">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -2900,11 +2900,11 @@ array contains at least one element; Nothing otherwise.</p>
 array contains at least one element; Nothing otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.init ([1, 2, 3])">
+    <input value="S.init ([1, 2, 3])">
     <div class="output">Just ([1, 2])</div>
   </form>
   <form>
-    > <input value="S.init ([])">
+    <input value="S.init ([])">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -2917,15 +2917,15 @@ than or equal to zero and less than or equal to the length of the array;
 Nothing otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.take (2) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.take (2) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just ([&quot;a&quot;, &quot;b&quot;])</div>
   </form>
   <form>
-    > <input value="S.take (5) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.take (5) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just ([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;e&quot;])</div>
   </form>
   <form>
-    > <input value="S.take (6) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.take (6) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -2938,15 +2938,15 @@ than or equal to zero and less than or equal to the length of the array;
 Nothing otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.takeLast (2) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.takeLast (2) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just ([&quot;d&quot;, &quot;e&quot;])</div>
   </form>
   <form>
-    > <input value="S.takeLast (5) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.takeLast (5) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just ([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;e&quot;])</div>
   </form>
   <form>
-    > <input value="S.takeLast (6) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.takeLast (6) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -2959,15 +2959,15 @@ greater than or equal to zero and less than or equal to the length of
 the array; Nothing otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.drop (2) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.drop (2) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just ([&quot;c&quot;, &quot;d&quot;, &quot;e&quot;])</div>
   </form>
   <form>
-    > <input value="S.drop (5) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.drop (5) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just ([])</div>
   </form>
   <form>
-    > <input value="S.drop (6) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.drop (6) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -2980,15 +2980,15 @@ greater than or equal to zero and less than or equal to the length of
 the array; Nothing otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.dropLast (2) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.dropLast (2) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just ([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;])</div>
   </form>
   <form>
-    > <input value="S.dropLast (5) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.dropLast (5) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Just ([])</div>
   </form>
   <form>
-    > <input value="S.dropLast (6) (['a', 'b', 'c', 'd', 'e'])">
+    <input value="S.dropLast (6) (['a', 'b', 'c', 'd', 'e'])">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -2999,31 +2999,31 @@ the array; Nothing otherwise.</p>
 <p>Returns the number of elements of the given structure.</p>
 <div class="examples">
   <form>
-    > <input value="S.size ([])">
+    <input value="S.size ([])">
     <div class="output">0</div>
   </form>
   <form>
-    > <input value="S.size (['foo', 'bar', 'baz'])">
+    <input value="S.size (['foo', 'bar', 'baz'])">
     <div class="output">3</div>
   </form>
   <form>
-    > <input value="S.size (Nil)">
+    <input value="S.size (Nil)">
     <div class="output">0</div>
   </form>
   <form>
-    > <input value="S.size (Cons ('foo') (Cons ('bar') (Cons ('baz') (Nil))))">
+    <input value="S.size (Cons ('foo') (Cons ('bar') (Cons ('baz') (Nil))))">
     <div class="output">3</div>
   </form>
   <form>
-    > <input value="S.size (S.Nothing)">
+    <input value="S.size (S.Nothing)">
     <div class="output">0</div>
   </form>
   <form>
-    > <input value="S.size (S.Just ('quux'))">
+    <input value="S.size (S.Just ('quux'))">
     <div class="output">1</div>
   </form>
   <form>
-    > <input value="S.size (S.Pair ('ignored!') ('counted!'))">
+    <input value="S.size (S.Pair ('ignored!') ('counted!'))">
     <div class="output">1</div>
   </form>
 </div>
@@ -3035,19 +3035,19 @@ the array; Nothing otherwise.</p>
 <p>See also <a href="#prepend"><code>prepend</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.append (3) ([1, 2])">
+    <input value="S.append (3) ([1, 2])">
     <div class="output">[1, 2, 3]</div>
   </form>
   <form>
-    > <input value="S.append (3) (Cons (1) (Cons (2) (Nil)))">
+    <input value="S.append (3) (Cons (1) (Cons (2) (Nil)))">
     <div class="output">Cons (1) (Cons (2) (Cons (3) (Nil)))</div>
   </form>
   <form>
-    > <input value="S.append ([1]) (S.Nothing)">
+    <input value="S.append ([1]) (S.Nothing)">
     <div class="output">Just ([1])</div>
   </form>
   <form>
-    > <input value="S.append ([3]) (S.Just ([1, 2]))">
+    <input value="S.append ([3]) (S.Just ([1, 2]))">
     <div class="output">Just ([1, 2, 3])</div>
   </form>
 </div>
@@ -3059,19 +3059,19 @@ the array; Nothing otherwise.</p>
 <p>See also <a href="#append"><code>append</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.prepend (1) ([2, 3])">
+    <input value="S.prepend (1) ([2, 3])">
     <div class="output">[1, 2, 3]</div>
   </form>
   <form>
-    > <input value="S.prepend (1) (Cons (2) (Cons (3) (Nil)))">
+    <input value="S.prepend (1) (Cons (2) (Cons (3) (Nil)))">
     <div class="output">Cons (1) (Cons (2) (Cons (3) (Nil)))</div>
   </form>
   <form>
-    > <input value="S.prepend ([1]) (S.Nothing)">
+    <input value="S.prepend ([1]) (S.Nothing)">
     <div class="output">Just ([1])</div>
   </form>
   <form>
-    > <input value="S.prepend ([1]) (S.Just ([2, 3]))">
+    <input value="S.prepend ([1]) (S.Just ([2, 3]))">
     <div class="output">Just ([1, 2, 3])</div>
   </form>
 </div>
@@ -3088,7 +3088,7 @@ the array; Nothing otherwise.</p>
 <p>See also <a href="#splitOn"><code>splitOn</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.joinWith (':') (['foo', 'bar', 'baz'])">
+    <input value="S.joinWith (':') (['foo', 'bar', 'baz'])">
     <div class="output">&quot;foo:bar:baz&quot;</div>
   </form>
 </div>
@@ -3101,31 +3101,31 @@ element of the structure.</p>
 <p>See also <a href="#find"><code>find</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.elem ('c') (['a', 'b', 'c'])">
+    <input value="S.elem ('c') (['a', 'b', 'c'])">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.elem ('x') (['a', 'b', 'c'])">
+    <input value="S.elem ('x') (['a', 'b', 'c'])">
     <div class="output">false</div>
   </form>
   <form>
-    > <input value="S.elem (3) ({x: 1, y: 2, z: 3})">
+    <input value="S.elem (3) ({x: 1, y: 2, z: 3})">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.elem (8) ({x: 1, y: 2, z: 3})">
+    <input value="S.elem (8) ({x: 1, y: 2, z: 3})">
     <div class="output">false</div>
   </form>
   <form>
-    > <input value="S.elem (0) (S.Just (0))">
+    <input value="S.elem (0) (S.Just (0))">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.elem (0) (S.Just (1))">
+    <input value="S.elem (0) (S.Just (1))">
     <div class="output">false</div>
   </form>
   <form>
-    > <input value="S.elem (0) (S.Nothing)">
+    <input value="S.elem (0) (S.Nothing)">
     <div class="output">false</div>
   </form>
 </div>
@@ -3139,11 +3139,11 @@ such element.</p>
 <p>See also <a href="#elem"><code>elem</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.find (S.lt (0)) ([1, -2, 3, -4, 5])">
+    <input value="S.find (S.lt (0)) ([1, -2, 3, -4, 5])">
     <div class="output">Just (-2)</div>
   </form>
   <form>
-    > <input value="S.find (S.lt (0)) ([1, 2, 3, 4, 5])">
+    <input value="S.find (S.lt (0)) ([1, 2, 3, 4, 5])">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -3155,7 +3155,7 @@ such element.</p>
 every element to a monoid and concatenating the results.</p>
 <div class="examples">
   <form>
-    > <input value="S.foldMap (String) (f => f.name) ([Math.sin, Math.cos, Math.tan])">
+    <input value="S.foldMap (String) (f => f.name) ([Math.sin, Math.cos, Math.tan])">
     <div class="output">&quot;sincostan&quot;</div>
   </form>
 </div>
@@ -3176,7 +3176,7 @@ the array and the function is applied to the second element.</p>
 </ul>
 <div class="examples">
   <form>
-    > <input value="S.unfoldr (n => n &lt; 5 ? S.Just (S.Pair (n) (n + 1)) : S.Nothing) (1)">
+    <input value="S.unfoldr (n => n &lt; 5 ? S.Just (S.Pair (n) (n + 1)) : S.Nothing) (1)">
     <div class="output">[1, 2, 3, 4]</div>
   </form>
 </div>
@@ -3189,15 +3189,15 @@ and ending with the second argument minus one. Returns <code>[]</code> if the se
 argument is less than or equal to the first argument.</p>
 <div class="examples">
   <form>
-    > <input value="S.range (0) (10)">
+    <input value="S.range (0) (10)">
     <div class="output">[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</div>
   </form>
   <form>
-    > <input value="S.range (-5) (0)">
+    <input value="S.range (-5) (0)">
     <div class="output">[-5, -4, -3, -2, -1]</div>
   </form>
   <form>
-    > <input value="S.range (0) (-5)">
+    <input value="S.range (0) (-5)">
     <div class="output">[]</div>
   </form>
 </div>
@@ -3217,11 +3217,11 @@ for functions that aren't reflexive, transitive, and symmetric
 </ul>
 <div class="examples">
   <form>
-    > <input value="S.groupBy (S.equals) ([1, 1, 2, 1, 1])">
+    <input value="S.groupBy (S.equals) ([1, 1, 2, 1, 1])">
     <div class="output">[[1, 1], [2], [1, 1]]</div>
   </form>
   <form>
-    > <input value="S.groupBy (x => y => x + y === 0) ([2, -3, 3, 3, 3, 4, -4, 4])">
+    <input value="S.groupBy (x => y => x + y === 0) ([2, -3, 3, 3, 3, 4, -4, 4])">
     <div class="output">[[2], [-3, 3, 3, 3], [4, -4], [4]]</div>
   </form>
 </div>
@@ -3232,15 +3232,15 @@ for functions that aren't reflexive, transitive, and symmetric
 <p>Reverses the elements of the given structure.</p>
 <div class="examples">
   <form>
-    > <input value="S.reverse ([1, 2, 3])">
+    <input value="S.reverse ([1, 2, 3])">
     <div class="output">[3, 2, 1]</div>
   </form>
   <form>
-    > <input value="S.reverse (Cons (1) (Cons (2) (Cons (3) (Nil))))">
+    <input value="S.reverse (Cons (1) (Cons (2) (Cons (3) (Nil))))">
     <div class="output">Cons (3) (Cons (2) (Cons (1) (Nil)))</div>
   </form>
   <form>
-    > <input value="S.pipe ([S.splitOn (''), S.reverse, S.joinWith ('')]) ('abc')">
+    <input value="S.pipe ([S.splitOn (''), S.reverse, S.joinWith ('')]) ('abc')">
     <div class="output">&quot;cba&quot;</div>
   </form>
 </div>
@@ -3257,11 +3257,11 @@ for functions that aren't reflexive, transitive, and symmetric
 <p>See also <a href="#sortBy"><code>sortBy</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.sort (['foo', 'bar', 'baz'])">
+    <input value="S.sort (['foo', 'bar', 'baz'])">
     <div class="output">[&quot;bar&quot;, &quot;baz&quot;, &quot;foo&quot;]</div>
   </form>
   <form>
-    > <input value="S.sort ([S.Left (4), S.Right (3), S.Left (2), S.Right (1)])">
+    <input value="S.sort ([S.Left (4), S.Right (3), S.Left (2), S.Right (1)])">
     <div class="output">[Left (2), Left (4), Right (1), Right (3)]</div>
   </form>
 </div>
@@ -3279,11 +3279,11 @@ to each element of the structure.</p>
 <p>See also <a href="#sort"><code>sort</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.sortBy (S.prop ('rank')) ([{rank: 7, suit: 'spades'}, {rank: 5, suit: 'hearts'}, {rank: 2, suit: 'hearts'}, {rank: 5, suit: 'spades'}])">
+    <input value="S.sortBy (S.prop ('rank')) ([{rank: 7, suit: 'spades'}, {rank: 5, suit: 'hearts'}, {rank: 2, suit: 'hearts'}, {rank: 5, suit: 'spades'}])">
     <div class="output">[{&quot;rank&quot;: 2, &quot;suit&quot;: &quot;hearts&quot;}, {&quot;rank&quot;: 5, &quot;suit&quot;: &quot;hearts&quot;}, {&quot;rank&quot;: 5, &quot;suit&quot;: &quot;spades&quot;}, {&quot;rank&quot;: 7, &quot;suit&quot;: &quot;spades&quot;}]</div>
   </form>
   <form>
-    > <input value="S.sortBy (S.prop ('suit')) ([{rank: 7, suit: 'spades'}, {rank: 5, suit: 'hearts'}, {rank: 2, suit: 'hearts'}, {rank: 5, suit: 'spades'}])">
+    <input value="S.sortBy (S.prop ('suit')) ([{rank: 7, suit: 'spades'}, {rank: 5, suit: 'hearts'}, {rank: 2, suit: 'hearts'}, {rank: 5, suit: 'spades'}])">
     <div class="output">[{&quot;rank&quot;: 5, &quot;suit&quot;: &quot;hearts&quot;}, {&quot;rank&quot;: 2, &quot;suit&quot;: &quot;hearts&quot;}, {&quot;rank&quot;: 7, &quot;suit&quot;: &quot;spades&quot;}, {&quot;rank&quot;: 5, &quot;suit&quot;: &quot;spades&quot;}]</div>
   </form>
 </div>
@@ -3291,7 +3291,7 @@ to each element of the structure.</p>
 <p>If descending order is desired, one may use <a href="https://github.com/sanctuary-js/sanctuary-descending/tree/v1.0.0#Descending"><code>Descending</code></a>:</p>
 <div class="examples">
   <form>
-    > <input value="S.sortBy (Descending) ([83, 97, 110, 99, 116, 117, 97, 114, 121])">
+    <input value="S.sortBy (Descending) ([83, 97, 110, 99, 116, 117, 97, 114, 121])">
     <div class="output">[121, 117, 116, 114, 110, 99, 97, 97, 83]</div>
   </form>
 </div>
@@ -3305,11 +3305,11 @@ the shorter input array.</p>
 <p>See also <a href="#zipWith"><code>zipWith</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.zip (['a', 'b']) (['x', 'y', 'z'])">
+    <input value="S.zip (['a', 'b']) (['x', 'y', 'z'])">
     <div class="output">[Pair (&quot;a&quot;) (&quot;x&quot;), Pair (&quot;b&quot;) (&quot;y&quot;)]</div>
   </form>
   <form>
-    > <input value="S.zip ([1, 3, 5]) ([2, 4])">
+    <input value="S.zip ([1, 3, 5]) ([2, 4])">
     <div class="output">[Pair (1) (2), Pair (3) (4)]</div>
   </form>
 </div>
@@ -3323,11 +3323,11 @@ length of the shorter input array.</p>
 <p>See also <a href="#zip"><code>zip</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.zipWith (a => b => a + b) (['a', 'b']) (['x', 'y', 'z'])">
+    <input value="S.zipWith (a => b => a + b) (['a', 'b']) (['x', 'y', 'z'])">
     <div class="output">[&quot;ax&quot;, &quot;by&quot;]</div>
   </form>
   <form>
-    > <input value="S.zipWith (a => b => [a, b]) ([1, 3, 5]) ([2, 4])">
+    <input value="S.zipWith (a => b => [a, b]) ([1, 3, 5]) ([2, 4])">
     <div class="output">[[1, 2], [3, 4]]</div>
   </form>
 </div>
@@ -3343,7 +3343,7 @@ lacks the specified property, a type error is thrown.</p>
 <p>For accessing properties of uncertain objects, use <a href="#get"><code>get</code></a> instead.</p>
 <div class="examples">
   <form>
-    > <input value="S.prop ('a') ({a: 1, b: 2})">
+    <input value="S.prop ('a') ({a: 1, b: 2})">
     <div class="output">1</div>
   </form>
 </div>
@@ -3358,7 +3358,7 @@ reason the path does not exist, a type error is thrown.</p>
 instead.</p>
 <div class="examples">
   <form>
-    > <input value="S.props (['a', 'b', 'c']) ({a: {b: {c: 1}}})">
+    <input value="S.props (['a', 'b', 'c']) ({a: {b: {c: 1}}})">
     <div class="output">1</div>
   </form>
 </div>
@@ -3372,23 +3372,23 @@ satisfies the given predicate; Nothing otherwise.</p>
 <p>See also <a href="#gets"><code>gets</code></a> and <a href="#prop"><code>prop</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.get (S.is ($.Number)) ('x') ({x: 1, y: 2})">
+    <input value="S.get (S.is ($.Number)) ('x') ({x: 1, y: 2})">
     <div class="output">Just (1)</div>
   </form>
   <form>
-    > <input value="S.get (S.is ($.Number)) ('x') ({x: '1', y: '2'})">
+    <input value="S.get (S.is ($.Number)) ('x') ({x: '1', y: '2'})">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.get (S.is ($.Number)) ('x') ({})">
+    <input value="S.get (S.is ($.Number)) ('x') ({})">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.get (S.is ($.Array ($.Number))) ('x') ({x: [1, 2, 3]})">
+    <input value="S.get (S.is ($.Array ($.Number))) ('x') ({x: [1, 2, 3]})">
     <div class="output">Just ([1, 2, 3])</div>
   </form>
   <form>
-    > <input value="S.get (S.is ($.Array ($.Number))) ('x') ({x: [1, 2, 3, null]})">
+    <input value="S.get (S.is ($.Array ($.Number))) ('x') ({x: [1, 2, 3, null]})">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -3402,15 +3402,15 @@ exists and the value satisfies the given predicate; Nothing otherwise.</p>
 <p>See also <a href="#get"><code>get</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.gets (S.is ($.Number)) (['a', 'b', 'c']) ({a: {b: {c: 42}}})">
+    <input value="S.gets (S.is ($.Number)) (['a', 'b', 'c']) ({a: {b: {c: 42}}})">
     <div class="output">Just (42)</div>
   </form>
   <form>
-    > <input value="S.gets (S.is ($.Number)) (['a', 'b', 'c']) ({a: {b: {c: '42'}}})">
+    <input value="S.gets (S.is ($.Number)) (['a', 'b', 'c']) ({a: {b: {c: '42'}}})">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.gets (S.is ($.Number)) (['a', 'b', 'c']) ({})">
+    <input value="S.gets (S.is ($.Number)) (['a', 'b', 'c']) ({})">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -3429,7 +3429,7 @@ properties are all members of type <code>a</code>.</p>
 a single entry (mapping the key to the value).</p>
 <div class="examples">
   <form>
-    > <input value="S.singleton ('foo') (42)">
+    <input value="S.singleton ('foo') (42)">
     <div class="output">{&quot;foo&quot;: 42}</div>
   </form>
 </div>
@@ -3444,11 +3444,11 @@ entry specified by the first two arguments (which takes precedence).</p>
 function.</p>
 <div class="examples">
   <form>
-    > <input value="S.insert ('c') (3) ({a: 1, b: 2})">
+    <input value="S.insert ('c') (3) ({a: 1, b: 2})">
     <div class="output">{&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: 3}</div>
   </form>
   <form>
-    > <input value="S.insert ('a') (4) ({a: 1, b: 2})">
+    <input value="S.insert ('a') (4) ({a: 1, b: 2})">
     <div class="output">{&quot;a&quot;: 4, &quot;b&quot;: 2}</div>
   </form>
 </div>
@@ -3463,11 +3463,11 @@ given string (if such a key exists).</p>
 function.</p>
 <div class="examples">
   <form>
-    > <input value="S.remove ('c') ({a: 1, b: 2, c: 3})">
+    <input value="S.remove ('c') ({a: 1, b: 2, c: 3})">
     <div class="output">{&quot;a&quot;: 1, &quot;b&quot;: 2}</div>
   </form>
   <form>
-    > <input value="S.remove ('c') ({})">
+    <input value="S.remove ('c') ({})">
     <div class="output">{}</div>
   </form>
 </div>
@@ -3478,7 +3478,7 @@ function.</p>
 <p>Returns the keys of the given string map, in arbitrary order.</p>
 <div class="examples">
   <form>
-    > <input value="S.sort (S.keys ({b: 2, c: 3, a: 1}))">
+    <input value="S.sort (S.keys ({b: 2, c: 3, a: 1}))">
     <div class="output">[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]</div>
   </form>
 </div>
@@ -3489,7 +3489,7 @@ function.</p>
 <p>Returns the values of the given string map, in arbitrary order.</p>
 <div class="examples">
   <form>
-    > <input value="S.sort (S.values ({a: 1, c: 3, b: 2}))">
+    <input value="S.sort (S.values ({a: 1, c: 3, b: 2}))">
     <div class="output">[1, 2, 3]</div>
   </form>
 </div>
@@ -3500,7 +3500,7 @@ function.</p>
 <p>Returns the key–value pairs of the given string map, in arbitrary order.</p>
 <div class="examples">
   <form>
-    > <input value="S.sort (S.pairs ({b: 2, a: 1, c: 3}))">
+    <input value="S.sort (S.pairs ({b: 2, a: 1, c: 3}))">
     <div class="output">[Pair (&quot;a&quot;) (1), Pair (&quot;b&quot;) (2), Pair (&quot;c&quot;) (3)]</div>
   </form>
 </div>
@@ -3513,11 +3513,11 @@ given <a href="https://github.com/fantasyland/fantasy-land/tree/v3.5.0#foldable"
 pair takes precedence.</p>
 <div class="examples">
   <form>
-    > <input value="S.fromPairs ([S.Pair ('a') (1), S.Pair ('b') (2), S.Pair ('c') (3)])">
+    <input value="S.fromPairs ([S.Pair ('a') (1), S.Pair ('b') (2), S.Pair ('c') (3)])">
     <div class="output">{&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: 3}</div>
   </form>
   <form>
-    > <input value="S.fromPairs ([S.Pair ('x') (1), S.Pair ('x') (2)])">
+    <input value="S.fromPairs ([S.Pair ('x') (1), S.Pair ('x') (2)])">
     <div class="output">{&quot;x&quot;: 2}</div>
   </form>
 </div>
@@ -3530,11 +3530,11 @@ pair takes precedence.</p>
 <p>Negates its argument.</p>
 <div class="examples">
   <form>
-    > <input value="S.negate (12.5)">
+    <input value="S.negate (12.5)">
     <div class="output">-12.5</div>
   </form>
   <form>
-    > <input value="S.negate (-42)">
+    <input value="S.negate (-42)">
     <div class="output">42</div>
   </form>
 </div>
@@ -3545,7 +3545,7 @@ pair takes precedence.</p>
 <p>Returns the sum of two (finite) numbers.</p>
 <div class="examples">
   <form>
-    > <input value="S.add (1) (1)">
+    <input value="S.add (1) (1)">
     <div class="output">2</div>
   </form>
 </div>
@@ -3556,19 +3556,19 @@ pair takes precedence.</p>
 <p>Returns the sum of the given array of (finite) numbers.</p>
 <div class="examples">
   <form>
-    > <input value="S.sum ([1, 2, 3, 4, 5])">
+    <input value="S.sum ([1, 2, 3, 4, 5])">
     <div class="output">15</div>
   </form>
   <form>
-    > <input value="S.sum ([])">
+    <input value="S.sum ([])">
     <div class="output">0</div>
   </form>
   <form>
-    > <input value="S.sum (S.Just (42))">
+    <input value="S.sum (S.Just (42))">
     <div class="output">42</div>
   </form>
   <form>
-    > <input value="S.sum (S.Nothing)">
+    <input value="S.sum (S.Nothing)">
     <div class="output">0</div>
   </form>
 </div>
@@ -3579,7 +3579,7 @@ pair takes precedence.</p>
 <p>Takes a finite number <code>n</code> and returns the <em>subtract <code>n</code></em> function.</p>
 <div class="examples">
   <form>
-    > <input value="S.map (S.sub (1)) ([1, 2, 3])">
+    <input value="S.map (S.sub (1)) ([1, 2, 3])">
     <div class="output">[0, 1, 2]</div>
   </form>
 </div>
@@ -3590,7 +3590,7 @@ pair takes precedence.</p>
 <p>Returns the product of two (finite) numbers.</p>
 <div class="examples">
   <form>
-    > <input value="S.mult (4) (2)">
+    <input value="S.mult (4) (2)">
     <div class="output">8</div>
   </form>
 </div>
@@ -3601,19 +3601,19 @@ pair takes precedence.</p>
 <p>Returns the product of the given array of (finite) numbers.</p>
 <div class="examples">
   <form>
-    > <input value="S.product ([1, 2, 3, 4, 5])">
+    <input value="S.product ([1, 2, 3, 4, 5])">
     <div class="output">120</div>
   </form>
   <form>
-    > <input value="S.product ([])">
+    <input value="S.product ([])">
     <div class="output">1</div>
   </form>
   <form>
-    > <input value="S.product (S.Just (42))">
+    <input value="S.product (S.Just (42))">
     <div class="output">42</div>
   </form>
   <form>
-    > <input value="S.product (S.Nothing)">
+    <input value="S.product (S.Nothing)">
     <div class="output">1</div>
   </form>
 </div>
@@ -3625,7 +3625,7 @@ pair takes precedence.</p>
 function.</p>
 <div class="examples">
   <form>
-    > <input value="S.map (S.div (2)) ([0, 1, 2, 3])">
+    <input value="S.map (S.div (2)) ([0, 1, 2, 3])">
     <div class="output">[0, 0.5, 1, 1.5]</div>
   </form>
 </div>
@@ -3636,11 +3636,11 @@ function.</p>
 <p>Takes a finite number <code>n</code> and returns the <em>power of <code>n</code></em> function.</p>
 <div class="examples">
   <form>
-    > <input value="S.map (S.pow (2)) ([-3, -2, -1, 0, 1, 2, 3])">
+    <input value="S.map (S.pow (2)) ([-3, -2, -1, 0, 1, 2, 3])">
     <div class="output">[9, 4, 1, 0, 1, 4, 9]</div>
   </form>
   <form>
-    > <input value="S.map (S.pow (0.5)) ([1, 4, 9, 16, 25])">
+    <input value="S.map (S.pow (0.5)) ([1, 4, 9, 16, 25])">
     <div class="output">[1, 2, 3, 4, 5]</div>
   </form>
 </div>
@@ -3651,19 +3651,19 @@ function.</p>
 <p>Returns the mean of the given array of (finite) numbers.</p>
 <div class="examples">
   <form>
-    > <input value="S.mean ([1, 2, 3, 4, 5])">
+    <input value="S.mean ([1, 2, 3, 4, 5])">
     <div class="output">Just (3)</div>
   </form>
   <form>
-    > <input value="S.mean ([])">
+    <input value="S.mean ([])">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.mean (S.Just (42))">
+    <input value="S.mean (S.Just (42))">
     <div class="output">Just (42)</div>
   </form>
   <form>
-    > <input value="S.mean (S.Nothing)">
+    <input value="S.mean (S.Nothing)">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -3676,11 +3676,11 @@ function.</p>
 <p>Returns <code>true</code> if the given integer is even; <code>false</code> if it is odd.</p>
 <div class="examples">
   <form>
-    > <input value="S.even (42)">
+    <input value="S.even (42)">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.even (99)">
+    <input value="S.even (99)">
     <div class="output">false</div>
   </form>
 </div>
@@ -3691,11 +3691,11 @@ function.</p>
 <p>Returns <code>true</code> if the given integer is odd; <code>false</code> if it is even.</p>
 <div class="examples">
   <form>
-    > <input value="S.odd (99)">
+    <input value="S.odd (99)">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.odd (42)">
+    <input value="S.odd (42)">
     <div class="output">false</div>
   </form>
 </div>
@@ -3709,11 +3709,11 @@ function.</p>
 if it does in fact represent a date; Nothing otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.parseDate ('2011-01-19T17:40:00Z')">
+    <input value="S.parseDate ('2011-01-19T17:40:00Z')">
     <div class="output">Just (new Date (&quot;2011-01-19T17:40:00.000Z&quot;))</div>
   </form>
   <form>
-    > <input value="S.parseDate ('today')">
+    <input value="S.parseDate ('today')">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -3725,11 +3725,11 @@ if it does in fact represent a date; Nothing otherwise.</p>
 if it does in fact represent a number; Nothing otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.parseFloat ('-123.45')">
+    <input value="S.parseFloat ('-123.45')">
     <div class="output">Just (-123.45)</div>
   </form>
   <form>
-    > <input value="S.parseFloat ('foo.bar')">
+    <input value="S.parseFloat ('foo.bar')">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -3746,15 +3746,15 @@ is considered to represent an integer only if all its non-prefix
 characters are members of the character set specified by the radix.</p>
 <div class="examples">
   <form>
-    > <input value="S.parseInt (10) ('-42')">
+    <input value="S.parseInt (10) ('-42')">
     <div class="output">Just (-42)</div>
   </form>
   <form>
-    > <input value="S.parseInt (16) ('0xFF')">
+    <input value="S.parseInt (16) ('0xFF')">
     <div class="output">Just (255)</div>
   </form>
   <form>
-    > <input value="S.parseInt (16) ('0xGG')">
+    <input value="S.parseInt (16) ('0xGG')">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -3767,19 +3767,19 @@ returns Just the result of applying <code>JSON.parse</code> to the string <em>if
 result satisfies the predicate; Nothing otherwise.</p>
 <div class="examples">
   <form>
-    > <input value="S.parseJson (S.is ($.Array ($.Integer))) ('[')">
+    <input value="S.parseJson (S.is ($.Array ($.Integer))) ('[')">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.parseJson (S.is ($.Array ($.Integer))) ('[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;]')">
+    <input value="S.parseJson (S.is ($.Array ($.Integer))) ('[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;]')">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.parseJson (S.is ($.Array ($.Integer))) ('[0,1.5,3,4.5]')">
+    <input value="S.parseJson (S.is ($.Array ($.Integer))) ('[0,1.5,3,4.5]')">
     <div class="output">Nothing</div>
   </form>
   <form>
-    > <input value="S.parseJson (S.is ($.Array ($.Integer))) ('[1,2,3]')">
+    <input value="S.parseJson (S.is ($.Array ($.Integer))) ('[1,2,3]')">
     <div class="output">Just ([1, 2, 3])</div>
   </form>
 </div>
@@ -3792,7 +3792,7 @@ result satisfies the predicate; Nothing otherwise.</p>
 <p>Takes a <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.18.1#RegexFlags">RegexFlags</a> and a pattern, and returns a RegExp.</p>
 <div class="examples">
   <form>
-    > <input value="S.regex ('g') (':\\d+:')">
+    <input value="S.regex ('g') (':\\d+:')">
     <div class="output">/:\d+:/g</div>
   </form>
 </div>
@@ -3809,7 +3809,7 @@ and returns a string with those metacharacters escaped.</p>
 </ul>
 <div class="examples">
   <form>
-    > <input value="S.regexEscape ('-=*{XYZ}*=-')">
+    <input value="S.regexEscape ('-=*{XYZ}*=-')">
     <div class="output">&quot;\\-=\\*\\{XYZ\\}\\*=\\-&quot;</div>
   </form>
 </div>
@@ -3821,11 +3821,11 @@ and returns a string with those metacharacters escaped.</p>
 matches the string.</p>
 <div class="examples">
   <form>
-    > <input value="S.test (/^a/) ('abacus')">
+    <input value="S.test (/^a/) ('abacus')">
     <div class="output">true</div>
   </form>
   <form>
-    > <input value="S.test (/^a/) ('banana')">
+    <input value="S.test (/^a/) ('banana')">
     <div class="output">false</div>
   </form>
 </div>
@@ -3846,11 +3846,11 @@ capturing groups.</p>
 <p>See also <a href="#matchAll"><code>matchAll</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.match (/(good)?bye/) ('goodbye')">
+    <input value="S.match (/(good)?bye/) ('goodbye')">
     <div class="output">Just ({&quot;groups&quot;: [Just (&quot;good&quot;)], &quot;match&quot;: &quot;goodbye&quot;})</div>
   </form>
   <form>
-    > <input value="S.match (/(good)?bye/) ('bye')">
+    <input value="S.match (/(good)?bye/) ('bye')">
     <div class="output">Just ({&quot;groups&quot;: [Nothing], &quot;match&quot;: &quot;bye&quot;})</div>
   </form>
 </div>
@@ -3864,11 +3864,11 @@ capturing groups.</p>
 <p>See also <a href="#match"><code>match</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.matchAll (/@([a-z]+)/g) ('Hello, world!')">
+    <input value="S.matchAll (/@([a-z]+)/g) ('Hello, world!')">
     <div class="output">[]</div>
   </form>
   <form>
-    > <input value="S.matchAll (/@([a-z]+)/g) ('Hello, @foo! Hello, @bar! Hello, @baz!')">
+    <input value="S.matchAll (/@([a-z]+)/g) ('Hello, @foo! Hello, @bar! Hello, @baz!')">
     <div class="output">[{&quot;groups&quot;: [Just (&quot;foo&quot;)], &quot;match&quot;: &quot;@foo&quot;}, {&quot;groups&quot;: [Just (&quot;bar&quot;)], &quot;match&quot;: &quot;@bar&quot;}, {&quot;groups&quot;: [Just (&quot;baz&quot;)], &quot;match&quot;: &quot;@baz&quot;}]</div>
   </form>
 </div>
@@ -3882,7 +3882,7 @@ capturing groups.</p>
 <p>See also <a href="#toLower"><code>toLower</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.toUpper ('ABC def 123')">
+    <input value="S.toUpper ('ABC def 123')">
     <div class="output">&quot;ABC DEF 123&quot;</div>
   </form>
 </div>
@@ -3894,7 +3894,7 @@ capturing groups.</p>
 <p>See also <a href="#toUpper"><code>toUpper</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.toLower ('ABC def 123')">
+    <input value="S.toLower ('ABC def 123')">
     <div class="output">&quot;abc def 123&quot;</div>
   </form>
 </div>
@@ -3905,7 +3905,7 @@ capturing groups.</p>
 <p>Strips leading and trailing whitespace characters.</p>
 <div class="examples">
   <form>
-    > <input value="S.trim ('\t\t foo bar \n')">
+    <input value="S.trim ('\t\t foo bar \n')">
     <div class="output">&quot;foo bar&quot;</div>
   </form>
 </div>
@@ -3919,11 +3919,11 @@ with the prefix; Nothing otherwise.</p>
 <p>See also <a href="#stripSuffix"><code>stripSuffix</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.stripPrefix ('https://') ('https://sanctuary.js.org')">
+    <input value="S.stripPrefix ('https://') ('https://sanctuary.js.org')">
     <div class="output">Just (&quot;sanctuary.js.org&quot;)</div>
   </form>
   <form>
-    > <input value="S.stripPrefix ('https://') ('http://sanctuary.js.org')">
+    <input value="S.stripPrefix ('https://') ('http://sanctuary.js.org')">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -3937,11 +3937,11 @@ with the suffix; Nothing otherwise.</p>
 <p>See also <a href="#stripPrefix"><code>stripPrefix</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.stripSuffix ('.md') ('README.md')">
+    <input value="S.stripSuffix ('.md') ('README.md')">
     <div class="output">Just (&quot;README&quot;)</div>
   </form>
   <form>
-    > <input value="S.stripSuffix ('.md') ('README')">
+    <input value="S.stripSuffix ('.md') ('README')">
     <div class="output">Nothing</div>
   </form>
 </div>
@@ -3954,7 +3954,7 @@ with the suffix; Nothing otherwise.</p>
 <p>See also <a href="#unwords"><code>unwords</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.words (' foo bar baz ')">
+    <input value="S.words (' foo bar baz ')">
     <div class="output">[&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]</div>
   </form>
 </div>
@@ -3967,7 +3967,7 @@ with separating spaces.</p>
 <p>See also <a href="#words"><code>words</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.unwords (['foo', 'bar', 'baz'])">
+    <input value="S.unwords (['foo', 'bar', 'baz'])">
     <div class="output">&quot;foo bar baz&quot;</div>
   </form>
 </div>
@@ -3981,7 +3981,7 @@ The resulting strings do not contain newlines.</p>
 <p>See also <a href="#unlines"><code>unlines</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.lines ('foo\nbar\nbaz\n')">
+    <input value="S.lines ('foo\nbar\nbaz\n')">
     <div class="output">[&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]</div>
   </form>
 </div>
@@ -3994,7 +3994,7 @@ after appending a terminating line feed (<code>'\n'</code>) to each.</p>
 <p>See also <a href="#lines"><code>lines</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.unlines (['foo', 'bar', 'baz'])">
+    <input value="S.unlines (['foo', 'bar', 'baz'])">
     <div class="output">&quot;foo\nbar\nbaz\n&quot;</div>
   </form>
 </div>
@@ -4007,7 +4007,7 @@ of its first argument.</p>
 <p>See also <a href="#joinWith"><code>joinWith</code></a> and <a href="#splitOnRegex"><code>splitOnRegex</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.splitOn ('::') ('foo::bar::baz')">
+    <input value="S.splitOn ('::') ('foo::bar::baz')">
     <div class="output">[&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]</div>
   </form>
 </div>
@@ -4026,11 +4026,11 @@ string at every non-overlapping occurrence of the pattern.</p>
 <p>See also <a href="#splitOn"><code>splitOn</code></a>.</p>
 <div class="examples">
   <form>
-    > <input value="S.splitOnRegex (/[,;][ ]*/g) ('foo, bar, baz')">
+    <input value="S.splitOnRegex (/[,;][ ]*/g) ('foo, bar, baz')">
     <div class="output">[&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]</div>
   </form>
   <form>
-    > <input value="S.splitOnRegex (/[,;][ ]*/g) ('foo;bar;baz')">
+    <input value="S.splitOnRegex (/[,;][ ]*/g) ('foo;bar;baz')">
     <div class="output">[&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]</div>
   </form>
 </div>
