@@ -33,7 +33,7 @@ a code {
 }
 
 #css-header {
-  margin: 0 -9999px 0 -40px;
+  margin: 0 -40px;
   border-width: 1px 0;
   border-style: solid;
   border-color: #c36;
@@ -135,7 +135,7 @@ pre code {
 }
 
 .examples {
-  margin: 0 -9999px 0 -40px;
+  margin: 0 -40px;
   border-width: 1px 0;
   border-style: solid;
   border-color: #ada;
@@ -174,7 +174,7 @@ pre code {
 .examples input {
   display: inline;
   margin: 0;
-  width: 8888px;
+  width: 95%;
   border: none;
   background: none;
   padding: 0;
@@ -185,7 +185,7 @@ pre code {
 }
 
 .examples .output {
-  white-space: pre;
+  white-space: pre-wrap;
   color: #666;
 }
 
