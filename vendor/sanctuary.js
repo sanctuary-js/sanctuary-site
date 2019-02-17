@@ -43,6 +43,14 @@
 //.
 //. Sanctuary is designed to work in Node.js and in ES5-compatible browsers.
 //.
+//. ## Folktale
+//.
+//. [Folktale][], like Sanctuary, is a standard library for functional
+//. programming in JavaScript. It is well designed and well documented.
+//. Whereas Sanctuary treats JavaScript as a member of the ML language
+//. family, Folktale embraces JavaScript's object-oriented programming
+//. model. Programming with Folktale resembles programming with Scala.
+//.
 //. ## Ramda
 //.
 //. [Ramda][] provides several functions which return problematic values
@@ -95,7 +103,7 @@
 //. throws a descriptive error if a type error is encountered. This allows bugs
 //. to be caught and fixed early in the development cycle.
 //.
-//. Ramda operates on the [garbage in, garbage out][GIGO] principal. Functions
+//. Ramda operates on the [garbage in, garbage out][GIGO] principle. Functions
 //. are documented to take arguments of particular types, but these invariants
 //. are not enforced. The problem with this approach in a language as
 //. permissive as JavaScript is that there's no guarantee that garbage input
@@ -3330,6 +3338,9 @@
   //. ```javascript
   //. > S.foldMap (String) (f => f.name) ([Math.sin, Math.cos, Math.tan])
   //. 'sincostan'
+  //.
+  //. > S.foldMap (Array) (x => [x + 1, x + 2]) ([10, 20, 30])
+  //. [11, 12, 21, 22, 31, 32]
   //. ```
   _.foldMap = {
     consts: {b: [Z.Monoid], f: [Z.Foldable]},
@@ -3350,8 +3361,8 @@
   //.     the array and the function is applied to the second element.
   //.
   //. ```javascript
-  //. > S.unfoldr (n => n < 5 ? S.Just (S.Pair (n) (n + 1)) : S.Nothing) (1)
-  //. [1, 2, 3, 4]
+  //. > S.unfoldr (n => n < 1000 ? S.Just (S.Pair (n) (2 * n)) : S.Nothing) (1)
+  //. [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
   //. ```
   function unfoldr(f) {
     return function(x) {
@@ -4704,6 +4715,7 @@
 //. [Either]:                   #either-type
 //. [Fantasy Land]:             v:fantasyland/fantasy-land
 //. [Foldable]:                 v:fantasyland/fantasy-land#foldable
+//. [Folktale]:                 https://folktale.origamitower.com/
 //. [GIGO]:                     https://en.wikipedia.org/wiki/Garbage_in,_garbage_out
 //. [Haskell]:                  https://www.haskell.org/
 //. [Kleisli]:                  https://en.wikipedia.org/wiki/Kleisli_category
