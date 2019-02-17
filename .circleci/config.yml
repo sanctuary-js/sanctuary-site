@@ -11,4 +11,4 @@ jobs:
     parallelism: 1
     steps:
       - checkout
-      - run: make setup lint
+      - run: make setup test lint
