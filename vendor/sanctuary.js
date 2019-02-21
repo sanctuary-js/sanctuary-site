@@ -910,6 +910,29 @@
     impl: curry2 (Z.max)
   };
 
+  //# clamp :: Ord a => a -> a -> a -> a
+  //.
+  //. Takes a lower bound, an upper bound, and a value of the same type.
+  //. Returns the value if it is within the bounds; the nearer bound otherwise.
+  //.
+  //. See also [`min`](#min) and [`max`](#max).
+  //.
+  //. ```javascript
+  //. > S.clamp (0) (100) (42)
+  //. 42
+  //.
+  //. > S.clamp (0) (100) (-1)
+  //. 0
+  //.
+  //. > S.clamp ('A') ('Z') ('~')
+  //. 'Z'
+  //. ```
+  _.clamp = {
+    consts: {a: [Z.Ord]},
+    types: [a, a, a, a],
+    impl: curry3 (Z.clamp)
+  };
+
   //# id :: Category c => TypeRep c -> c
   //.
   //. [Type-safe][sanctuary-def] version of [`Z.id`][].
@@ -2767,6 +2790,31 @@
     impl: B (not)
   };
 
+  //# boolean :: a -> a -> Boolean -> a
+  //.
+  //. Case analysis for the `Boolean` type. `boolean (x) (y) (b)` evaluates
+  //. to `x` if `b` is `false`; to `y` if `b` is `true`.
+  //.
+  //. ```javascript
+  //. > S.boolean ('no') ('yes') (false)
+  //. 'no'
+  //.
+  //. > S.boolean ('no') ('yes') (true)
+  //. 'yes'
+  //. ```
+  function boolean(x) {
+    return function(y) {
+      return function(b) {
+        return b ? y : x;
+      };
+    };
+  }
+  _.boolean = {
+    consts: {},
+    types: [a, a, $.Boolean, a],
+    impl: boolean
+  };
+
   //# ifElse :: (a -> Boolean) -> (a -> b) -> (a -> b) -> a -> b
   //.
   //. Takes a unary predicate, a unary "if" function, a unary "else"
@@ -2899,6 +2947,36 @@
 
   //. ### Array
 
+  //# array :: b -> (a -> Array a -> b) -> Array a -> b
+  //.
+  //. Case analysis for the `Array a` type.
+  //.
+  //. ```javascript
+  //. > S.array (S.Nothing) (head => tail => S.Just (head)) ([])
+  //. Nothing
+  //.
+  //. > S.array (S.Nothing) (head => tail => S.Just (head)) ([1, 2, 3])
+  //. Just (1)
+  //.
+  //. > S.array (S.Nothing) (head => tail => S.Just (tail)) ([])
+  //. Nothing
+  //.
+  //. > S.array (S.Nothing) (head => tail => S.Just (tail)) ([1, 2, 3])
+  //. Just ([2, 3])
+  //. ```
+  function array(y) {
+    return function(f) {
+      return function(xs) {
+        return xs.length === 0 ? y : f (xs[0]) (xs.slice (1));
+      };
+    };
+  }
+  _.array = {
+    consts: {},
+    types: [b, Fn (a) (Fn ($.Array (a)) (b)), $.Array (a), b],
+    impl: array
+  };
+
   //# slice :: Integer -> Integer -> Array a -> Maybe (Array a)
   //.
   //. Takes a start index `i`, an end index `j`, and an array, and returns
@@ -2978,13 +3056,10 @@
   //. > S.head ([])
   //. Nothing
   //. ```
-  function head(xs) {
-    return xs.length > 0 ? Just (xs[0]) : Nothing;
-  }
   _.head = {
     consts: {},
     types: [$.Array (a), $Maybe (a)],
-    impl: head
+    impl: array (Nothing) (B (K) (Just))
   };
 
   //# last :: Array a -> Maybe a
@@ -3020,13 +3095,10 @@
   //. > S.tail ([])
   //. Nothing
   //. ```
-  function tail(xs) {
-    return xs.length > 0 ? Just (xs.slice (1)) : Nothing;
-  }
   _.tail = {
     consts: {},
     types: [$.Array (a), $Maybe ($.Array (a))],
-    impl: tail
+    impl: array (Nothing) (K (Just))
   };
 
   //# init :: Array a -> Maybe (Array a)
@@ -3190,6 +3262,83 @@
     consts: {f: [Z.Foldable]},
     types: [f (a), $.Integer],
     impl: Z.size
+  };
+
+  //# all :: Foldable f => (a -> Boolean) -> f a -> Boolean
+  //.
+  //. Returns `true` [iff][] all the elements of the structure satisfy the
+  //. predicate.
+  //.
+  //. See also [`any`](#any) and [`none`](#none).
+  //.
+  //. ```javascript
+  //. > S.all (S.odd) ([])
+  //. true
+  //.
+  //. > S.all (S.odd) ([1, 3, 5])
+  //. true
+  //.
+  //. > S.all (S.odd) ([1, 2, 3])
+  //. false
+  //. ```
+  _.all = {
+    consts: {f: [Z.Foldable]},
+    types: [$.Predicate (a), f (a), $.Boolean],
+    impl: curry2 (Z.all)
+  };
+
+  //# any :: Foldable f => (a -> Boolean) -> f a -> Boolean
+  //.
+  //. Returns `true` [iff][] any element of the structure satisfies the
+  //. predicate.
+  //.
+  //. See also [`all`](#all) and [`none`](#none).
+  //.
+  //. ```javascript
+  //. > S.any (S.odd) ([])
+  //. false
+  //.
+  //. > S.any (S.odd) ([2, 4, 6])
+  //. false
+  //.
+  //. > S.any (S.odd) ([1, 2, 3])
+  //. true
+  //. ```
+  _.any = {
+    consts: {f: [Z.Foldable]},
+    types: [$.Predicate (a), f (a), $.Boolean],
+    impl: curry2 (Z.any)
+  };
+
+  //# none :: Foldable f => (a -> Boolean) -> f a -> Boolean
+  //.
+  //. Returns `true` [iff][] none of the elements of the structure satisfies
+  //. the predicate.
+  //.
+  //. Properties:
+  //.
+  //.   - `forall p :: a -> Boolean, xs :: Foldable f => f a.
+  //.      S.none (p) (xs) = S.not (S.any (p) (xs))`
+  //.
+  //.   - `forall p :: a -> Boolean, xs :: Foldable f => f a.
+  //.      S.none (p) (xs) = S.all (S.complement (p)) (xs)`
+  //.
+  //. See also [`all`](#all) and [`any`](#any).
+  //.
+  //. ```javascript
+  //. > S.none (S.odd) ([])
+  //. true
+  //.
+  //. > S.none (S.odd) ([2, 4, 6])
+  //. true
+  //.
+  //. > S.none (S.odd) ([1, 2, 3])
+  //. false
+  //. ```
+  _.none = {
+    consts: {f: [Z.Foldable]},
+    types: [$.Predicate (a), f (a), $.Boolean],
+    impl: curry2 (Z.none)
   };
 
   //# append :: (Applicative f, Semigroup (f a)) => a -> f a -> f a
@@ -4126,8 +4275,18 @@
 
   //# parseDate :: String -> Maybe ValidDate
   //.
-  //. Takes a string and returns Just the date represented by the string
-  //. if it does in fact represent a date; Nothing otherwise.
+  //. Takes a string `s` and returns `Just (new Date (s))` if `new Date (s)`
+  //. evaluates to a [`ValidDate`][ValidDate] value; Nothing otherwise.
+  //.
+  //. As noted in [#488][], this function's behaviour is unspecified for some
+  //. inputs! [MDN][date parsing] warns against using the `Date` constructor
+  //. to parse date strings:
+  //.
+  //. > __Note:__ parsing of date strings with the `Date` constructor \[…] is
+  //. > strongly discouraged due to browser differences and inconsistencies.
+  //. > Support for RFC 2822 format strings is by convention only. Support for
+  //. > ISO 8601 formats differs in that date-only strings (e.g. "1970-01-01")
+  //. > are treated as UTC, not local.
   //.
   //. ```javascript
   //. > S.parseDate ('2011-01-19T17:40:00Z')
@@ -4709,6 +4868,7 @@
 }));
 
 //. [#438]:                     https://github.com/sanctuary-js/sanctuary/issues/438
+//. [#488]:                     https://github.com/sanctuary-js/sanctuary/issues/488
 //. [Apply]:                    v:fantasyland/fantasy-land#apply
 //. [BinaryType]:               v:sanctuary-js/sanctuary-def#BinaryType
 //. [Chain]:                    v:fantasyland/fantasy-land#chain
@@ -4726,6 +4886,7 @@
 //. [RegexFlags]:               v:sanctuary-js/sanctuary-def#RegexFlags
 //. [Semigroupoid]:             v:fantasyland/fantasy-land#semigroupoid
 //. [UnaryType]:                v:sanctuary-js/sanctuary-def#UnaryType
+//. [ValidDate]:                v:sanctuary-js/sanctuary-def#ValidDate
 //. [`$.test`]:                 v:sanctuary-js/sanctuary-def#test
 //. [`Descending`]:             v:sanctuary-js/sanctuary-descending#Descending
 //. [`R.__`]:                   http://ramdajs.com/docs/#__
@@ -4767,6 +4928,7 @@
 //. [`Z.traverse`]:             v:sanctuary-js/sanctuary-type-classes#traverse
 //. [`Z.zero`]:                 v:sanctuary-js/sanctuary-type-classes#zero
 //. [`show`]:                   v:sanctuary-js/sanctuary-show#show
+//. [date parsing]:             https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
 //. [equivalence]:              https://en.wikipedia.org/wiki/Equivalence_relation
 //. [iff]:                      https://en.wikipedia.org/wiki/If_and_only_if
 //. [parseInt]:                 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt
