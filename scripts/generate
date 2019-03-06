@@ -78,9 +78,15 @@ const splitOnRegex      = S.splitOnRegex;
 const test              = S.test;
 const when              = S.when;
 
-const reset             = '\u001B[0m';
-const red               = '\u001B[31m';
-const green             = '\u001B[32m';
+const ESCAPE            = '\u001B';
+const NO_BREAK_SPACE    = '\u00A0';
+const PILCROW_SIGN      = '\u00B6';
+const WORD_JOINER       = '\u2060';
+const SYMBOL_FOR_SPACE  = '\u2420';
+
+const reset             = ESCAPE + '[0m';
+const red               = ESCAPE + '[31m';
+const green             = ESCAPE + '[32m';
 
 //    Fn :: Type -> Type -> Type
 const Fn = x => y => $.Function ([x, y]);
@@ -171,18 +177,18 @@ const linkTokens =
 def ('linkTokens')
     ({})
     ([$.String, Html.Type])
-    (cond ([[test (/^[a-z]$/),     Html.encode],
-            [equals (''),          Html.encode],
-            [equals ('=>'),        Html.encode],
-            [equals ('~>'),        Html.encode],
-            [equals ('-\u2060>'),  K (Html.encode ('->'))],
-            [equals ('Either'),    anchor ('#EitherType')],
-            [equals ('Maybe'),     anchor ('#MaybeType')],
-            [equals ('Pair'),      anchor ('#PairType')],
-            [equals ('TypeRep'),   anchor ('https://github.com/fantasyland/fantasy-land#type-representatives')],
-            [flip (has) ($),       externalLink ('sanctuary-def')],
-            [flip (has) (Z),       externalLink ('sanctuary-type-classes')],
-            [K (true),             Html.encode]]));
+    (cond ([[test (/^[a-z]$/),                 Html.encode],
+            [equals (''),                      Html.encode],
+            [equals ('=>'),                    Html.encode],
+            [equals ('~>'),                    Html.encode],
+            [equals ('-' + WORD_JOINER + '>'), K (Html.encode ('->'))],
+            [equals ('Either'),                anchor ('#EitherType')],
+            [equals ('Maybe'),                 anchor ('#MaybeType')],
+            [equals ('Pair'),                  anchor ('#PairType')],
+            [equals ('TypeRep'),               anchor ('https://github.com/fantasyland/fantasy-land#type-representatives')],
+            [flip (has) ($),                   externalLink ('sanctuary-def')],
+            [flip (has) (Z),                   externalLink ('sanctuary-type-classes')],
+            [K (true),                         Html.encode]]));
 
 //    headingToMarkup :: String -> String -> String -> Html
 const headingToMarkup =
@@ -204,7 +210,7 @@ def ('headingToMarkup')
               {t: '', html: wrap (html) (Html.encode (c)) (linkTokens (t)), ctx: (ctx.replace (/:$/, '')).slice (0, -1)} :
             c === ',' ?
               {t: '', html: wrap (html) (Html.encode (c)) (linkTokens (t)), ctx: ctx.replace (/:$/, '')} :
-            c === ' ' || c === '\u00A0' || c === '?' ?
+            c === ' ' || c === NO_BREAK_SPACE || c === '?' ?
               {t: '', html: wrap (html) (Html.encode (c)) ((ctx.endsWith ('{') ? Html.encode : linkTokens) (t)), ctx} :
             // else
               {t: t + c, html, ctx})
@@ -385,16 +391,16 @@ def ('generate')
                     (($0, $1) => Html.unwrap (doctestsToMarkup ($1))),
             //  Replace NO-BREAK SPACE characters with SYMBOL FOR SPACE
             //  characters to work around chjj/marked#363.
-            replace (/\u00A0/g) ('\u2420'),
+            replace (regex ('g') (NO_BREAK_SPACE)) (SYMBOL_FOR_SPACE),
             s => marked (s, {pedantic: true}),
-            replace (/\u2420/g) ('\u00A0'),
+            replace (regex ('g') (SYMBOL_FOR_SPACE)) (NO_BREAK_SPACE),
             replace (/&#39;/g) ("'"),
             replace (/&gt;/g) ('>'),
             replace (/\n\n(?=\n<[/]code><[/]pre>)/g) (''),
             replace (regex ('g') ('(<pre><code class="lang-javascript">)([^]*?)(?=</code></pre>)'))
                     (($0, $1, $2) => $1 + Html.unwrap (highlight (Html ($2)))),
             replace (/(?=<(h[2-6]) id="([^"]*)")/g)
-                    ('<a class="pilcrow $1" href="#$2">\u00B6</a>\n'),
+                    ('<a class="pilcrow $1" href="#$2">' + PILCROW_SIGN + '</a>\n'),
             Html]));
 
 //    readFile :: String -> Either String String
