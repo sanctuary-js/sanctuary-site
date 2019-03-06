@@ -399,6 +399,7 @@ def ('generate')
             replace (/\n\n(?=\n<[/]code><[/]pre>)/g) (''),
             replace (regex ('g') ('(<pre><code class="lang-javascript">)([^]*?)(?=</code></pre>)'))
                     (($0, $1, $2) => $1 + Html.unwrap (highlight (Html ($2)))),
+            replace (regex ('gm') ('</code></pre>(?!$)')) ($0 => $0 + '\n'),
             replace (/(?=<(h[2-6]) id="([^"]*)")/g)
                     ('<a class="pilcrow $1" href="#$2">' + PILCROW_SIGN + '</a>\n'),
             Html]));
