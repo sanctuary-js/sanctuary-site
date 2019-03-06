@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "eslint": "4.9.x",
-    "marked": "0.3.9",
+    "marked": "0.6.1",
     "sanctuary-style": "2.0.x"
   }
 }
