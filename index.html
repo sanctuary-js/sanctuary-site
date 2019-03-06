@@ -774,7 +774,8 @@ necessitate the use of guards or null checks. In order to safely use
 } else {
   return f (R.head (xs));
 }
-</code></pre><p>Using the Maybe type renders such guards (and null checks) unnecessary.
+</code></pre>
+<p>Using the Maybe type renders such guards (and null checks) unnecessary.
 Changing functions such as <code>R.head</code> to return Maybe values was proposed
 in <a href="https://github.com/ramda/ramda/issues/683">ramda/ramda#683</a>, but was considered too much of a stretch for
 JavaScript programmers. Sanctuary was released the following month,
@@ -801,7 +802,8 @@ counterparts. Examples:</p>
 
 |> R.replace (/^x/) ('') ('xabc')   |> S.stripPrefix ('x') ('xabc')
 'abc'                               Just ('abc')
-</code></pre><a class="pilcrow h3" href="#invariants">¶</a>
+</code></pre>
+<a class="pilcrow h3" href="#invariants">¶</a>
 <h3 id="invariants">Invariants</h3>
 <p>Sanctuary performs rigorous <a href="#type-checking">type checking</a> of inputs and outputs, and
 throws a descriptive error if a type error is encountered. This allows bugs
@@ -857,12 +859,14 @@ a dynamically typed language, variadic functions are at odds with the type
 notation Ramda and Sanctuary both use, leading to some indecipherable type
 signatures such as this one:</p>
 <pre><code>R.lift :: (*... -> *...) -> ([*]... -> [*])
-</code></pre><p>Sanctuary has no variadic functions, nor any functions which take variadic
+</code></pre>
+<p>Sanctuary has no variadic functions, nor any functions which take variadic
 functions as arguments. Sanctuary provides two &quot;lift&quot; functions, each with
 a helpful type signature:</p>
 <pre><code>S.lift2 :: Apply f => (a -> b -> c) -> f a -> f b -> f c
 S.lift3 :: Apply f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
-</code></pre><a class="pilcrow h3" href="#implicit-context">¶</a>
+</code></pre>
+<a class="pilcrow h3" href="#implicit-context">¶</a>
 <h3 id="implicit-context">Implicit context</h3>
 <p>Ramda provides <a href="http://ramdajs.com/docs/#bind"><code>R.bind</code></a> and <a href="http://ramdajs.com/docs/#invoker"><code>R.invoker</code></a> for working with methods.
 Additionally, many Ramda functions use <code>Function#call</code> or <code>Function#apply</code>
@@ -888,22 +892,27 @@ values, including functions. <code>'foo'</code>, for example, is a member of <co
 to mean &quot;is a member of&quot;, so one could write:</p>
 <pre><code>'foo' :: String
 [1, 2, 3] :: Array Number
-</code></pre><p>An identifier may appear to the left of the double colon:</p>
+</code></pre>
+<p>An identifier may appear to the left of the double colon:</p>
 <pre><code>Math.PI :: Number
-</code></pre><p>The arrow (<code>-></code>) is used to express a function's type:</p>
+</code></pre>
+<p>The arrow (<code>-></code>) is used to express a function's type:</p>
 <pre><code>Math.abs :: Number -> Number
-</code></pre><p>That states that <code>Math.abs</code> is a unary function which takes an argument
+</code></pre>
+<p>That states that <code>Math.abs</code> is a unary function which takes an argument
 of type <code>Number</code> and returns a value of type <code>Number</code>.</p>
 <p>Some functions are parametrically polymorphic: their types are not fixed.
 Type variables are used in the representations of such functions:</p>
 <pre><code>S.I :: a -> a
-</code></pre><p><code>a</code> is a type variable. Type variables are not capitalized, so they
+</code></pre>
+<p><code>a</code> is a type variable. Type variables are not capitalized, so they
 are differentiable from type identifiers (which are always capitalized).
 By convention type variables have single-character names. The signature
 above states that <code>S.I</code> takes a value of any type and returns a value of
 the same type. Some signatures feature multiple type variables:</p>
 <pre><code>S.K :: a -> b -> a
-</code></pre><p>It must be possible to replace all occurrences of <code>a</code> with a concrete type.
+</code></pre>
+<p>It must be possible to replace all occurrences of <code>a</code> with a concrete type.
 The same applies for each other type variable. For the function above, the
 types with which <code>a</code> and <code>b</code> are replaced may be different, but needn't be.</p>
 <p>Since all Sanctuary functions are curried (they accept their arguments
@@ -1473,7 +1482,8 @@ from combinatory logic (i.e. <a href="#compose"><code>compose</code></a>):</p>
 (b -> c) -> Function x b -> Function x c
 (b -> c) -> Function a b -> Function a c
 (b -> c) -> (a -> b) -> (a -> c)
-</code></pre><div class="examples">
+</code></pre>
+<div class="examples">
   <form>
     <input value="S.map (Math.sqrt) (S.add (1)) (99)">
     <div class="output">10</div>
@@ -1493,7 +1503,8 @@ Function x (a -> c) -> a -> Function x c
 Function x (b -> c) -> b -> Function x c
 Function a (b -> c) -> b -> Function a c
 (a -> b -> c) -> b -> a -> c
-</code></pre><div class="examples">
+</code></pre>
+<div class="examples">
   <form>
     <input value="S.flip (S.concat) ('!') ('foo')">
     <div class="output">&quot;foo!&quot;</div>
@@ -1711,7 +1722,8 @@ Function x (a -> c) -> Function x a -> Function x c
 Function x (b -> c) -> Function x b -> Function x c
 Function a (b -> c) -> Function a b -> Function a c
 (a -> b -> c) -> (a -> b) -> (a -> c)
-</code></pre><div class="examples">
+</code></pre>
+<div class="examples">
   <form>
     <input value="S.ap (s => n => s.slice (0, n)) (s => Math.ceil (s.length / 2)) ('Haskell')">
     <div class="output">&quot;Hask&quot;</div>
@@ -1869,7 +1881,8 @@ from combinatory logic:</p>
 <pre><code>Chain m => m (m a) -> m a
 Function x (Function x a) -> Function x a
 (x -> x -> a) -> (x -> a)
-</code></pre><div class="examples">
+</code></pre>
+<div class="examples">
   <form>
     <input value="S.join (S.concat) ('abc')">
     <div class="output">&quot;abcabc&quot;</div>
