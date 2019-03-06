@@ -130,7 +130,7 @@
           var input = firstInput (el);
           input.focus ();
           //  Move the caret to the end of the text.
-          input.value = input.value;
+          input.value = input.value;  // eslint-disable-line no-self-assign
           break;
         }
         el = el.parentNode;
