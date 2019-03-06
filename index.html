@@ -992,7 +992,7 @@ See https://github.com/sanctuary-js/sanctuary-def/tree/v0.18.1#FiniteNumber for 
 disabled by default if <code>process.env.NODE_ENV</code> is <code>'production'</code>. If this
 rule is unsuitable for a given program, one may use <a href="#create"><code>create</code></a>
 to create a Sanctuary module based on a different rule. For example:</p>
-<pre><code class="lang-javascript"><span class="keyword">const</span> S = sanctuary.create ({
+<pre><code class="language-javascript"><span class="keyword">const</span> S = sanctuary.create ({
   checkTypes: localStorage.getItem (<span class="string-literal">'SANCTUARY_CHECK_TYPES'</span>) === <span class="string-literal">'true'</span>,
   env: sanctuary.env,
 });
@@ -1005,7 +1005,7 @@ via selective use of <a href="#unchecked"><code>unchecked</code></a> functions.<
 <p><code>npm install sanctuary</code> will install Sanctuary for use in Node.js.</p>
 <p>Running Sanctuary in the browser is more involved. One must include a
 <code>&lt;script></code> for each dependency in addition to one for Sanctuary itself:</p>
-<pre><code class="lang-html">&lt;script src=&quot;vendor/sanctuary-show.js&quot;>&lt;/script>
+<pre><code class="language-html">&lt;script src=&quot;vendor/sanctuary-show.js&quot;>&lt;/script>
 &lt;script src=&quot;vendor/sanctuary-type-identifiers.js&quot;>&lt;/script>
 &lt;script src=&quot;vendor/sanctuary-type-classes.js&quot;>&lt;/script>
 &lt;script src=&quot;vendor/sanctuary-either.js&quot;>&lt;/script>
@@ -1017,7 +1017,7 @@ via selective use of <a href="#unchecked"><code>unchecked</code></a> functions.<
 <p>To ensure compatibility one should use the dependency versions specified
 in <strong>package.json</strong>.</p>
 <p>For convenience one could define aliases for various modules:</p>
-<pre><code class="lang-javascript"><span class="keyword">const</span> S = window.sanctuary;
+<pre><code class="language-javascript"><span class="keyword">const</span> S = window.sanctuary;
 <span class="keyword">const</span> $ = window.sanctuaryDef;
 <span class="comment">// ...</span>
 </code></pre>
@@ -1038,7 +1038,7 @@ is enabled, a badly typed application will produce an exception with a
 descriptive error message.</p>
 <p>The following snippet demonstrates defining a custom type and using
 <code>create</code> to produce a Sanctuary module which is aware of that type:</p>
-<pre><code class="lang-javascript"><span class="keyword">const</span> {create, env} = require (<span class="string-literal">'sanctuary'</span>);
+<pre><code class="language-javascript"><span class="keyword">const</span> {create, env} = require (<span class="string-literal">'sanctuary'</span>);
 <span class="keyword">const</span> $ = require (<span class="string-literal">'sanctuary-def'</span>);
 <span class="keyword">const</span> type = require (<span class="string-literal">'sanctuary-type-identifiers'</span>);
 

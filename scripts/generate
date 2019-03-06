@@ -81,6 +81,7 @@ const when              = S.when;
 const ESCAPE            = '\u001B';
 const NO_BREAK_SPACE    = '\u00A0';
 const PILCROW_SIGN      = '\u00B6';
+const ZERO_WIDTH_SPACE  = '\u200B';
 const WORD_JOINER       = '\u2060';
 const SYMBOL_FOR_SPACE  = '\u2420';
 
@@ -249,6 +250,7 @@ def ('toOutputMarkup')
                                                    $context,
                                                    {displayErrors: false})),
             either (pipe ([concat ('! '),
+                           replace (/^$/gm) (ZERO_WIDTH_SPACE),
                            Html.encode,
                            Just,
                            el ('div') ({'class': 'output',
@@ -390,14 +392,15 @@ def ('generate')
             replace (regex ('gm') ('^```javascript\\n(> [^]*?)^```\\n'))
                     (($0, $1) => Html.unwrap (doctestsToMarkup ($1))),
             //  Replace NO-BREAK SPACE characters with SYMBOL FOR SPACE
-            //  characters to work around chjj/marked#363.
+            //  characters to work around markedjs/marked#363.
             replace (regex ('g') (NO_BREAK_SPACE)) (SYMBOL_FOR_SPACE),
-            s => marked (s, {pedantic: true}),
+            s => marked (s, {}),
             replace (regex ('g') (SYMBOL_FOR_SPACE)) (NO_BREAK_SPACE),
+            replace (regex ('g') (ZERO_WIDTH_SPACE)) (''),
             replace (/&#39;/g) ("'"),
             replace (/&gt;/g) ('>'),
-            replace (/\n\n(?=\n<[/]code><[/]pre>)/g) (''),
-            replace (regex ('g') ('(<pre><code class="lang-javascript">)([^]*?)(?=</code></pre>)'))
+            replace (regex ('gm') ('(?!^)(?=</code></pre>)')) ('\n'),
+            replace (regex ('g') ('(<pre><code class="language-javascript">)([^]*?)(?=</code></pre>)'))
                     (($0, $1, $2) => $1 + Html.unwrap (highlight (Html ($2)))),
             replace (regex ('gm') ('</code></pre>(?!$)')) ($0 => $0 + '\n'),
             replace (/(?=<(h[2-6]) id="([^"]*)")/g)

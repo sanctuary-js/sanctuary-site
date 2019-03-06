@@ -196,29 +196,29 @@ pre code {
   color: #c36;
 }
 
-code.lang-javascript {
+code.language-javascript {
   color: #333;
 }
 
-code.lang-javascript .boolean-literal {
+code.language-javascript .boolean-literal {
   color: #963;
 }
 
-code.lang-javascript .comment,
-code.lang-javascript .punctuation {
+code.language-javascript .comment,
+code.language-javascript .punctuation {
   color: #999;
 }
 
-code.lang-javascript .keyword {
+code.language-javascript .keyword {
   color: #c36;
 }
 
-code.lang-javascript .number-literal {
+code.language-javascript .number-literal {
   color: #069;
 }
 
-code.lang-javascript .string-literal,
-code.lang-javascript .template-literal {
+code.language-javascript .string-literal,
+code.language-javascript .template-literal {
   color: #080;
 }
 
