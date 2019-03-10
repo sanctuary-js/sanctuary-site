@@ -368,7 +368,7 @@
     this.url = url;
   }
 
-  _Type['@@type'] = 'sanctuary-def/Type';
+  _Type['@@type'] = 'sanctuary-def/Type@1';
 
   //  Type#fantasy-land/equals :: Type ~> Type -> Boolean
   _Type.prototype['fantasy-land/equals'] = function(other) {
@@ -439,7 +439,7 @@
 
   //  functionUrl :: String -> String
   function functionUrl(name) {
-    var version = '0.18.1';  // updated programmatically
+    var version = '0.19.0';  // updated programmatically
     return 'https://github.com/sanctuary-js/sanctuary-def/tree/v' + version +
            '#' + stripNamespace (name);
   }
@@ -815,14 +815,14 @@
   //# Type :: Type
   //.
   //. Type comprising every `Type` value.
-  var Type = NullaryTypeWithUrl ('Type', typeEq ('sanctuary-def/Type'));
+  var Type = NullaryTypeWithUrl ('Type', typeEq ('sanctuary-def/Type@1'));
 
   //# TypeClass :: Type
   //.
   //. Type comprising every [`TypeClass`][] value.
   var TypeClass = NullaryTypeWithUrl (
     'TypeClass',
-    typeEq ('sanctuary-type-classes/TypeClass')
+    typeEq ('sanctuary-type-classes/TypeClass@1')
   );
 
   //# Undefined :: Type
