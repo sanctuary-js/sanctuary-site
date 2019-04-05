@@ -487,11 +487,6 @@
     };
   }
 
-  //  value :: { value :: a } -> a
-  function value(r) {
-    return r.value;
-  }
-
   //  :: Type
   var a = $.TypeVariable ('a');
   var b = $.TypeVariable ('b');
@@ -1992,6 +1987,25 @@
     impl: Pair
   };
 
+  //# pair :: (a -> b -> c) -> Pair a b -> c
+  //.
+  //. Case analysis for the `Pair a b` type.
+  //.
+  //. ```javascript
+  //. > S.pair (S.concat) (S.Pair ('foo') ('bar'))
+  //. 'foobar'
+  //. ```
+  function pair(f) {
+    return function(pair) {
+      return f (pair.fst) (pair.snd);
+    };
+  }
+  _.pair = {
+    consts: {},
+    types: [Fn (a) (Fn (b) (c)), $Pair (a) (b), c],
+    impl: pair
+  };
+
   //# fst :: Pair a b -> a
   //.
   //. `fst (Pair (x) (y))` is equivalent to `x`.
@@ -2003,7 +2017,7 @@
   _.fst = {
     consts: {},
     types: [$Pair (a) (b), a],
-    impl: Pair.fst
+    impl: pair (K)
   };
 
   //# snd :: Pair a b -> b
@@ -2017,7 +2031,7 @@
   _.snd = {
     consts: {},
     types: [$Pair (a) (b), b],
-    impl: Pair.snd
+    impl: pair (C (K))
   };
 
   //# swap :: Pair a b -> Pair b a
@@ -2031,7 +2045,7 @@
   _.swap = {
     consts: {},
     types: [$Pair (a) (b), $Pair (b) (a)],
-    impl: Pair.swap
+    impl: pair (C (Pair))
   };
 
   //. ### Maybe type
@@ -2264,7 +2278,7 @@
   //. ['foo', 'baz']
   //. ```
   function justs(maybes) {
-    return map (value) (filter (isJust) (maybes));
+    return map (prop ('value')) (filter (isJust) (maybes));
   }
   _.justs = {
     consts: {f: [Z.Filterable, Z.Functor]},
@@ -2538,7 +2552,7 @@
   _.lefts = {
     consts: {f: [Z.Filterable, Z.Functor]},
     types: [f ($Either (a) (b)), f (a)],
-    impl: B (map (value)) (filter (isLeft))
+    impl: B (map (prop ('value'))) (filter (isLeft))
   };
 
   //# rights :: (Filterable f, Functor f) => f (Either a b) -> f b
@@ -2555,7 +2569,7 @@
   _.rights = {
     consts: {f: [Z.Filterable, Z.Functor]},
     types: [f ($Either (a) (b)), f (b)],
-    impl: B (map (value)) (filter (isRight))
+    impl: B (map (prop ('value'))) (filter (isRight))
   };
 
   //# tagBy :: (a -> Boolean) -> a -> Either a a
@@ -3044,10 +3058,10 @@
     impl: at
   };
 
-  //# head :: Array a -> Maybe a
+  //# head :: Foldable f => f a -> Maybe a
   //.
-  //. Returns Just the first element of the given array if the array contains
-  //. at least one element; Nothing otherwise.
+  //. Returns Just the first element of the given structure if the structure
+  //. contains at least one element; Nothing otherwise.
   //.
   //. ```javascript
   //. > S.head ([1, 2, 3])
@@ -3055,17 +3069,32 @@
   //.
   //. > S.head ([])
   //. Nothing
+  //.
+  //. > S.head (Cons (1) (Cons (2) (Cons (3) (Nil))))
+  //. Just (1)
+  //.
+  //. > S.head (Nil)
+  //. Nothing
   //. ```
+  function head(foldable) {
+    //  Fast path for arrays.
+    if (Array.isArray (foldable)) {
+      return foldable.length > 0 ? Just (foldable[0]) : Nothing;
+    }
+    return Z.reduce (function(m, x) { return m.isJust ? m : Just (x); },
+                     Nothing,
+                     foldable);
+  }
   _.head = {
-    consts: {},
-    types: [$.Array (a), $Maybe (a)],
-    impl: array (Nothing) (B (K) (Just))
+    consts: {f: [Z.Foldable]},
+    types: [f (a), $Maybe (a)],
+    impl: head
   };
 
-  //# last :: Array a -> Maybe a
+  //# last :: Foldable f => f a -> Maybe a
   //.
-  //. Returns Just the last element of the given array if the array contains
-  //. at least one element; Nothing otherwise.
+  //. Returns Just the last element of the given structure if the structure
+  //. contains at least one element; Nothing otherwise.
   //.
   //. ```javascript
   //. > S.last ([1, 2, 3])
@@ -3073,20 +3102,31 @@
   //.
   //. > S.last ([])
   //. Nothing
+  //.
+  //. > S.last (Cons (1) (Cons (2) (Cons (3) (Nil))))
+  //. Just (3)
+  //.
+  //. > S.last (Nil)
+  //. Nothing
   //. ```
-  function last(xs) {
-    return xs.length > 0 ? Just (xs[xs.length - 1]) : Nothing;
+  function last(foldable) {
+    //  Fast path for arrays.
+    if (Array.isArray (foldable)) {
+      return foldable.length > 0 ? Just (foldable[foldable.length - 1])
+                                 : Nothing;
+    }
+    return Z.reduce (function(_, x) { return Just (x); }, Nothing, foldable);
   }
   _.last = {
-    consts: {},
-    types: [$.Array (a), $Maybe (a)],
+    consts: {f: [Z.Foldable]},
+    types: [f (a), $Maybe (a)],
     impl: last
   };
 
-  //# tail :: Array a -> Maybe (Array a)
+  //# tail :: (Applicative f, Foldable f, Monoid (f a)) => f a -> Maybe (f a)
   //.
-  //. Returns Just all but the first of the given array's elements if the
-  //. array contains at least one element; Nothing otherwise.
+  //. Returns Just all but the first of the given structure's elements if the
+  //. structure contains at least one element; Nothing otherwise.
   //.
   //. ```javascript
   //. > S.tail ([1, 2, 3])
@@ -3094,17 +3134,33 @@
   //.
   //. > S.tail ([])
   //. Nothing
+  //.
+  //. > S.tail (Cons (1) (Cons (2) (Cons (3) (Nil))))
+  //. Just (Cons (2) (Cons (3) (Nil)))
+  //
+  //. > S.tail (Nil)
+  //. Nothing
   //. ```
+  function tail(foldable) {
+    //  Fast path for arrays.
+    if (Array.isArray (foldable)) {
+      return foldable.length > 0 ? Just (foldable.slice (1)) : Nothing;
+    }
+    var empty = Z.empty (foldable.constructor);
+    return Z.reduce (function(m, x) {
+      return Just (maybe (empty) (append (x)) (m));
+    }, Nothing, foldable);
+  }
   _.tail = {
-    consts: {},
-    types: [$.Array (a), $Maybe ($.Array (a))],
-    impl: array (Nothing) (K (Just))
+    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    types: [f (a), $Maybe (f (a))],
+    impl: tail
   };
 
-  //# init :: Array a -> Maybe (Array a)
+  //# init :: (Applicative f, Foldable f, Monoid (f a)) => f a -> Maybe (f a)
   //.
-  //. Returns Just all but the last of the given array's elements if the
-  //. array contains at least one element; Nothing otherwise.
+  //. Returns Just all but the last of the given structure's elements if the
+  //. structure contains at least one element; Nothing otherwise.
   //.
   //. ```javascript
   //. > S.init ([1, 2, 3])
@@ -3112,13 +3168,26 @@
   //.
   //. > S.init ([])
   //. Nothing
+  //.
+  //. > S.init (Cons (1) (Cons (2) (Cons (3) (Nil))))
+  //. Just (Cons (1) (Cons (2) (Nil)))
+  //.
+  //. > S.init (Nil)
+  //. Nothing
   //. ```
-  function init(xs) {
-    return xs.length > 0 ? Just (xs.slice (0, -1)) : Nothing;
+  function init(foldable) {
+    //  Fast path for arrays.
+    if (Array.isArray (foldable)) {
+      return foldable.length > 0 ? Just (foldable.slice (0, -1)) : Nothing;
+    }
+    var empty = Z.empty (foldable.constructor);
+    return Z.map (Pair.snd, Z.reduce (function(m, x) {
+      return Just (Pair (x) (maybe (empty) (pair (append)) (m)));
+    }, Nothing, foldable));
   }
   _.init = {
-    consts: {},
-    types: [$.Array (a), $Maybe ($.Array (a))],
+    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    types: [f (a), $Maybe (f (a))],
     impl: init
   };
 
@@ -3360,10 +3429,15 @@
   //. > S.append ([3]) (S.Just ([1, 2]))
   //. Just ([1, 2, 3])
   //. ```
+  function append(x) {
+    return function(xs) {
+      return Z.append (x, xs);
+    };
+  }
   _.append = {
     consts: {f: [Z.Applicative, Z.Semigroup]},
     types: [a, f (a), f (a)],
-    impl: curry2 (Z.append)
+    impl: append
   };
 
   //# prepend :: (Applicative f, Semigroup (f a)) => a -> f a -> f a
@@ -3751,6 +3825,7 @@
   //. lacks the specified property, a type error is thrown.
   //.
   //. For accessing properties of uncertain objects, use [`get`](#get) instead.
+  //. For accessing string map values by key, use [`value`](#value) instead.
   //.
   //. ```javascript
   //. > S.prop ('a') ({a: 1, b: 2})
@@ -3805,7 +3880,7 @@
   //. value of the specified object property if it exists and the value
   //. satisfies the given predicate; Nothing otherwise.
   //.
-  //. See also [`gets`](#gets) and [`prop`](#prop).
+  //. See also [`gets`](#gets), [`prop`](#prop), and [`value`](#value).
   //.
   //. ```javascript
   //. > S.get (S.is ($.Number)) ('x') ({x: 1, y: 2})
@@ -3872,6 +3947,38 @@
   //. the same type. Formally, a value is a member of type `StrMap a` if its
   //. [type identifier][] is `'Object'` and the values of its enumerable own
   //. properties are all members of type `a`.
+
+  //# value :: String -> StrMap a -> Maybe a
+  //.
+  //. Retrieve the value associated with the given key in the given string map.
+  //.
+  //. Formally, `value (k) (m)` evaluates to `Just (m[k])` if `k` is an
+  //. enumerable own property of `m`; `Nothing` otherwise.
+  //.
+  //. See also [`prop`](#prop) and [`get`](#get).
+  //.
+  //. ```javascript
+  //. > S.value ('foo') ({foo: 1, bar: 2})
+  //. Just (1)
+  //.
+  //. > S.value ('bar') ({foo: 1, bar: 2})
+  //. Just (2)
+  //.
+  //. > S.value ('baz') ({foo: 1, bar: 2})
+  //. Nothing
+  //. ```
+  function value(key) {
+    return function(strMap) {
+      return Object.prototype.propertyIsEnumerable.call (strMap, key) ?
+             Just (strMap[key]) :
+             Nothing;
+    };
+  }
+  _.value = {
+    consts: {},
+    types: [$.String, $.StrMap (a), $Maybe (a)],
+    impl: value
+  };
 
   //# singleton :: String -> a -> StrMap a
   //.
@@ -4282,7 +4389,7 @@
   //. inputs! [MDN][date parsing] warns against using the `Date` constructor
   //. to parse date strings:
   //.
-  //. > __Note:__ parsing of date strings with the `Date` constructor \[…] is
+  //. > __Note:__ parsing of date strings with the `Date` constructor […] is
   //. > strongly discouraged due to browser differences and inconsistencies.
   //. > Support for RFC 2822 format strings is by convention only. Support for
   //. > ISO 8601 formats differs in that date-only strings (e.g. "1970-01-01")
