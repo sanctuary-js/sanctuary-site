@@ -3,13 +3,18 @@
   'use strict';
 
   if (typeof module === 'object' && typeof module.exports === 'object') {
-    module.exports = f (require ('sanctuary-show'),
-                        require ('sanctuary-type-classes'));
+    module.exports = f (require ('sanctuary-def'),
+                        require ('sanctuary-show'),
+                        require ('sanctuary-type-classes'),
+                        require ('sanctuary-type-identifiers'));
   } else {
-    self.Sum = f (self.sanctuaryShow, self.sanctuaryTypeClasses);
+    self.Sum = f (self.sanctuaryDef,
+                  self.sanctuaryShow,
+                  self.sanctuaryTypeClasses,
+                  self.sanctuaryTypeIdentifiers);
   }
 
-} (function(show, Z) {
+} (function($, show, Z, type) {
 
   'use strict';
 
@@ -38,6 +43,13 @@
   Sum.prototype['@@show'] = function() {
     return 'Sum (' + show (this.value) + ')';
   };
+
+  //  Sum.Type :: Type
+  Sum.Type = $.NullaryType
+    ('Sum')
+    ('https://github.com/sanctuary-js/sanctuary-site/blob/gh-pages/adt/Sum.js')
+    ([])
+    (function(x) { return type (x) === Sum['@@type']; });
 
   return Sum;
 

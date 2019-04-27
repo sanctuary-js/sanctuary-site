@@ -28,36 +28,36 @@ const checkTypes        = process.env.NODE_ENV !== 'production';
 const S                 = S_.create ({checkTypes, env});
 const def               = $.create ({checkTypes, env});
 
-const Either            = S.EitherType;
+const Either            = S.Either;
 const I                 = S.I;
 const Just              = S.Just;
 const K                 = S.K;
 const Left              = S.Left;
-const Maybe             = S.MaybeType;
 const Nothing           = S.Nothing;
 const Right             = S.Right;
-const allPass           = S.allPass;
 const ap                = S.ap;
-const at                = S.at;
+const bimap             = S.bimap;
 const chain             = S.chain;
 const compose           = S.compose;
 const concat            = S.concat;
 const cond              = R.cond;
 const curry2            = S.curry2;
+const drop              = S.drop;
 const either            = S.either;
 const empty             = S.empty;
-const encaseEither      = S.encaseEither;
-const encaseEither2     = S.encaseEither2;
+const encase            = S.encase;
 const equals            = S.equals;
 const flip              = S.flip;
 const fst               = S.fst;
 const get               = S.get;
 const has               = R.has;
+const head              = S.head;
 const ifElse            = S.ifElse;
 const is                = S.is;
 const join              = S.join;
 const lift2             = S.lift2;
 const map               = S.map;
+const mapLeft           = S.mapLeft;
 const matchAll          = S.matchAll;
 const maybe             = S.maybe;
 const maybe_            = S.maybe_;
@@ -99,7 +99,7 @@ const a = $.TypeVariable ('a');
 const fromJust =
 def ('fromJust')
     ({})
-    ([Maybe (a), a])
+    ([$.Maybe (a), a])
     (maybe_ (() => { throw new Error ('fromJust applied to Nothing'); }) (I));
 
 //    wrap :: Semigroup a => a -> a -> a -> a
@@ -113,7 +113,7 @@ def ('wrap')
 const el =
 def ('el')
     ({})
-    ([$.String, $.StrMap ($.String), S.MaybeType (Html.Type), Html.Type])
+    ([$.String, $.StrMap ($.String), $.Maybe (Html.Type), Html.Type])
     (tagName => attrs => html =>
        reduce (concat)
               (empty (Html))
@@ -147,22 +147,23 @@ def ('spanClass')
 
 //    Version :: Type
 const Version = $.NullaryType
-  ('sanctuary-site/Version')
+  ('Version')
   ('')
-  (allPass ([is ($.String), test (/^\d+[.]\d+[.]\d+$/)]));
+  ([$.String])
+  (test (/^\d+[.]\d+[.]\d+$/));
 
 //    dependencyVersion :: String -> Maybe Version
 const dependencyVersion =
 def ('dependencyVersion')
     ({})
-    ([$.String, Maybe (Version)])
+    ([$.String, $.Maybe (Version)])
     (name => get (is (Version)) (name) (pkg.dependencies));
 
 //    dependencyUrl :: String -> Maybe String
 const dependencyUrl =
 def ('dependencyUrl')
     ({})
-    ([$.String, Maybe ($.String)])
+    ([$.String, $.Maybe ($.String)])
     (name => map (concat (`https://github.com/sanctuary-js/${name}/tree/v`))
                  (dependencyVersion (name)));
 
@@ -183,9 +184,6 @@ def ('linkTokens')
             [equals ('=>'),                    Html.encode],
             [equals ('~>'),                    Html.encode],
             [equals ('-' + WORD_JOINER + '>'), K (Html.encode ('->'))],
-            [equals ('Either'),                anchor ('#EitherType')],
-            [equals ('Maybe'),                 anchor ('#MaybeType')],
-            [equals ('Pair'),                  anchor ('#PairType')],
             [equals ('TypeRep'),               anchor ('https://github.com/fantasyland/fantasy-land#type-representatives')],
             [flip (has) ($),                   externalLink ('sanctuary-def')],
             [flip (has) (Z),                   externalLink ('sanctuary-type-classes')],
@@ -245,11 +243,11 @@ const toOutputMarkup =
 def ('toOutputMarkup')
     ({})
     ([$.String, Html.Type])
-    (pipe ([encaseEither (prop ('message'))
-                         (code => vm.runInContext (code,
-                                                   $context,
-                                                   {displayErrors: false})),
-            either (pipe ([concat ('! '),
+    (pipe ([encase (code => vm.runInContext (code,
+                                             $context,
+                                             {displayErrors: false})),
+            either (pipe ([prop ('message'),
+                           concat ('! '),
                            replace (/^$/gm) (ZERO_WIDTH_SPACE),
                            Html.encode,
                            Just,
@@ -411,29 +409,28 @@ def ('generate')
 const readFile =
 def ('readFile')
     ({})
-    ([$.String, Either ($.String) ($.String)])
-    (encaseEither (prop ('message')) (s => fs.readFileSync (s, 'utf8')));
+    ([$.String, $.Either ($.String) ($.String)])
+    (compose (mapLeft (prop ('message')))
+             (encase (s => fs.readFileSync (s, 'utf8'))));
 
 //    writeFile :: String -> String -> Either String String
 const writeFile =
 def ('writeFile')
     ({})
-    ([$.String, $.String, Either ($.String) ($.String)])
+    ([$.String, $.String, $.Either ($.String) ($.String)])
     (filename => s =>
-       map (K (filename))
-           (encaseEither2 (prop ('message'))
-                          (curry2 (fs.writeFileSync))
-                          (filename)
-                          (s)));
+       bimap (prop ('message'))
+             (K (filename))
+             (encase (curry2 (fs.writeFileSync) (filename)) (s)));
 
 //    version :: String -> Either String String
 const version =
 def ('version')
     ({})
-    ([$.String, Either ($.String) ($.String)])
+    ([$.String, $.Either ($.String) ($.String)])
     (pipe ([s => path.join (s, 'package.json'),
             readFile,
-            chain (encaseEither (prop ('message')) (JSON.parse)),
+            chain (compose (mapLeft (prop ('message'))) (encase (JSON.parse))),
             map (get (is ($.String)) ('version')),
             chain (maybeToEither ('Invalid "version"'))]));
 
@@ -441,10 +438,10 @@ def ('version')
 const description =
 def ('description')
     ({})
-    ([$.String, Either ($.String) ($.String)])
+    ([$.String, $.Either ($.String) ($.String)])
     (pipe ([s => path.join (s, 'package.json'),
             readFile,
-            chain (encaseEither (prop ('message')) (JSON.parse)),
+            chain (compose (mapLeft (prop ('message'))) (encase (JSON.parse))),
             map (get (is ($.String)) ('description')),
             chain (maybeToEither ('Invalid "description"'))]));
 
@@ -453,7 +450,7 @@ const customize =
 def ('customize')
     ({})
     ([$.String,
-      Either ($.String) (Fn ($.String) (Either ($.String) ($.String)))])
+      $.Either ($.String) (Fn ($.String) ($.Either ($.String) ($.String)))])
     (pipe ([readFile,
             map (splitOnRegex (/\n={79}\n\n/g)),
             chain (ifElse (compose (equals (2)) (prop ('length')))
@@ -468,7 +465,7 @@ def ('customize')
 const readme =
 def ('readme')
     ({})
-    ([$.String, Either ($.String) ($.String)])
+    ([$.String, $.Either ($.String) ($.String)])
     (pipe ([s => path.join (s, 'README.md'),
             readFile,
             ap (customize ('custom/preamble.md')),
@@ -493,6 +490,7 @@ const Heading = $.RecordType ({
   html: Html.Type,
   subheads: $.Array ($.NullaryType ('Heading')
                                    ('')
+                                   ([])
                                    (x => $.test ([]) (Heading) (x))),
 });
 
@@ -641,11 +639,12 @@ const success = s => {
   process.exit (0);
 };
 
-pipe ([at (2),
+pipe ([drop (2),
+       chain (head),
        maybeToEither ('Missing command-line argument'),
        map (of (Array)),
        map (ap ([version, description, readme])),
-       chain (sequence (S.Either)),
+       chain (sequence (Either)),
        map (([version, tagline, content]) =>
               Html.unwrap (toDocument (version) (tagline) (content))),
        chain (writeFile ('index.html')),

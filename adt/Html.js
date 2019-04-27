@@ -19,8 +19,9 @@
   var def = $.create ({checkTypes: true, env: []});
 
   var HtmlType = $.NullaryType
-    ('sanctuary-site/Html')
+    ('Html')
     ('https://github.com/sanctuary-js/sanctuary-site/blob/gh-pages/adt/Html.js')
+    ([])
     (function(x) { return type (x) === Html['@@type']; });
 
   //  Html :: String -> Html

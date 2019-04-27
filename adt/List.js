@@ -3,13 +3,18 @@
   'use strict';
 
   if (typeof module === 'object' && typeof module.exports === 'object') {
-    module.exports = f (require ('sanctuary-show'),
-                        require ('sanctuary-type-classes'));
+    module.exports = f (require ('sanctuary-def'),
+                        require ('sanctuary-show'),
+                        require ('sanctuary-type-classes'),
+                        require ('sanctuary-type-identifiers'));
   } else {
-    self.List = f (self.sanctuaryShow, self.sanctuaryTypeClasses);
+    self.List = f (self.sanctuaryDef,
+                   self.sanctuaryShow,
+                   self.sanctuaryTypeClasses,
+                   self.sanctuaryTypeIdentifiers);
   }
 
-} (function(show, Z) {
+} (function($, show, Z, type) {
 
   'use strict';
 
@@ -96,6 +101,14 @@
       'Nil' :
       'Cons (' + show (this.head) + ') (' + show (this.tail) + ')';
   };
+
+  //  List.Type :: Type -> Type
+  List.Type = $.UnaryType
+    ('List')
+    ('https://github.com/sanctuary-js/sanctuary-site/blob/gh-pages/adt/List.js')
+    ([])
+    (function(x) { return type (x) === List['@@type']; })
+    (function(list) { return list; });
 
   return List;
 
