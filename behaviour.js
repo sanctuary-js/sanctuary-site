@@ -1,5 +1,3 @@
-/* eslint-env browser */
-
 (function() {
 
   'use strict';
@@ -17,13 +15,14 @@
   }
 
   //  evaluate :: String -> Either String Any
-  var evaluate = S.encaseEither
-    (S.prop ('message'))
-    (S.pipe ([S.Right,
-              S.chain (replace (/^const ([^ ]*) = (.*)/) ('window.$1 = $2')),
-              S.chain (replace (/^function ([^(]*).*/) ('window.$1 = $&')),
-              S.either (S.I) (S.concat ('return ')),
-              function(body) { return new Function (body) (); }]));
+  var evaluate = S.pipe ([
+    S.Right,
+    S.chain (replace (/^const ([^ ]*) = (.*)/) ('window.$1 = $2')),
+    S.chain (replace (/^function ([^(]*).*/) ('window.$1 = $&')),
+    S.either (S.I) (S.concat ('return ')),
+    S.encase (function(body) { return new Function (body) (); }),
+    S.mapLeft (S.prop ('message'))
+  ]);
 
   //  firstInput :: Element -> Element
   function firstInput(el) {

@@ -3,8 +3,12 @@
   "extends": ["./node_modules/sanctuary-style/eslint-es3.json"],
   "overrides": [
     {
-      "files": ["adt/*.js"],
-      "globals": {"define": false, "module": false, "require": false, "self": false}
+      "files": ["adt/*.js", "env.js"],
+      "globals": {"module": false, "require": false, "self": false}
+    },
+    {
+      "files": ["behaviour.js"],
+      "env": {"browser": true}
     }
   ]
 }

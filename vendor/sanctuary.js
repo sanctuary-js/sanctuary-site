@@ -24,7 +24,7 @@
 //.
 //. Sanctuary provides two data types, [Maybe][] and [Either][], both of
 //. which are compatible with [Fantasy Land][]. Thanks to these data types
-//. even Sanctuary functions which may fail, such as [`head`](#head), are
+//. even Sanctuary functions that may fail, such as [`head`](#head), are
 //. composable.
 //.
 //. Sanctuary makes it possible to write safe code without null checks.
@@ -53,7 +53,7 @@
 //.
 //. ## Ramda
 //.
-//. [Ramda][] provides several functions which return problematic values
+//. [Ramda][] provides several functions that return problematic values
 //. such as `undefined`, `Infinity`, or `NaN` when applied to unsuitable
 //. inputs. These are known as [partial functions][]. Partial functions
 //. necessitate the use of guards or null checks. In order to safely use
@@ -76,7 +76,7 @@
 //.
 //. ### Totality
 //.
-//. Every Sanctuary function is defined for every value which is a member of
+//. Every Sanctuary function is defined for every value that is a member of
 //. the function's input type. Such functions are known as [total functions][].
 //. Ramda, on the other hand, contains a number of [partial functions][].
 //.
@@ -139,7 +139,7 @@
 //. solution to this problem, proposed in [#438][], is to include a space when
 //. applying a function: `f (x) (y) (z)`.
 //.
-//. Ramda also provides a special placeholder value, [`R.__`][], which removes
+//. Ramda also provides a special placeholder value, [`R.__`][], that removes
 //. the restriction that a function must be applied to its arguments in order.
 //. The following expressions are equivalent:
 //.
@@ -152,16 +152,16 @@
 //.
 //. ### Variadic functions
 //.
-//. Ramda provides several functions which take any number of arguments. These
+//. Ramda provides several functions that take any number of arguments. These
 //. are known as [variadic functions][]. Additionally, Ramda provides several
-//. functions which take variadic functions as arguments. Although natural in
+//. functions that take variadic functions as arguments. Although natural in
 //. a dynamically typed language, variadic functions are at odds with the type
 //. notation Ramda and Sanctuary both use, leading to some indecipherable type
 //. signatures such as this one:
 //.
 //.     R.lift :: (*... -> *...) -> ([*]... -> [*])
 //.
-//. Sanctuary has no variadic functions, nor any functions which take variadic
+//. Sanctuary has no variadic functions, nor any functions that take variadic
 //. functions as arguments. Sanctuary provides two "lift" functions, each with
 //. a helpful type signature:
 //.
@@ -207,7 +207,7 @@
 //.
 //.     Math.abs :: Number -> Number
 //.
-//. That states that `Math.abs` is a unary function which takes an argument
+//. That states that `Math.abs` is a unary function that takes an argument
 //. of type `Number` and returns a value of type `Number`.
 //.
 //. Some functions are parametrically polymorphic: their types are not fixed.
@@ -228,7 +228,7 @@
 //. types with which `a` and `b` are replaced may be different, but needn't be.
 //.
 //. Since all Sanctuary functions are curried (they accept their arguments
-//. one at a time), a binary function is represented as a unary function which
+//. one at a time), a binary function is represented as a unary function that
 //. returns a unary function: `* -> * -> *`. This aligns neatly with Haskell,
 //. which uses curried functions exclusively. In JavaScript, though, we may
 //. wish to represent the types of functions with arities less than or greater
@@ -242,12 +242,8 @@
 //.
 //. `Number -> Number` can thus be seen as shorthand for `(Number) -> Number`.
 //.
-//. The question mark (`?`) is used to represent types which include `null`
-//. and `undefined` as members. `String?`, for example, represents the type
-//. comprising `null`, `undefined`, and all strings.
-//.
 //. Sanctuary embraces types. JavaScript doesn't support algebraic data types,
-//. but these can be simulated by providing a group of data constructors which
+//. but these can be simulated by providing a group of data constructors that
 //. return values with the same set of methods. A value of the Either type, for
 //. example, is created via the Left constructor or the Right constructor.
 //.
@@ -270,7 +266,7 @@
 //.
 //. Sanctuary supports type classes: constraints on type variables. Whereas
 //. `a -> a` implicitly supports every type, `Functor f => (a -> b) -> f a ->
-//. f b` requires that `f` be a type which satisfies the requirements of the
+//. f b` requires that `f` be a type that satisfies the requirements of the
 //. Functor type class. Type-class constraints appear at the beginning of a
 //. type signature, separated from the rest of the signature by a fat arrow
 //. (`=>`).
@@ -294,7 +290,7 @@
 //. //
 //. //   The value at position 1 is not a member of ‘FiniteNumber’.
 //. //
-//. //   See v:sanctuary-js/sanctuary-def#FiniteNumber for information about the sanctuary-def/FiniteNumber type.
+//. //   See v:sanctuary-js/sanctuary-def#FiniteNumber for information about the FiniteNumber type.
 //. ```
 //.
 //. Compare this to the behaviour of Ramda's unchecked equivalent:
@@ -316,7 +312,7 @@
 //. });
 //. ```
 //.
-//. Occasionally one may wish to perform an operation which is not type safe,
+//. Occasionally one may wish to perform an operation that is not type safe,
 //. such as mapping over an object with heterogeneous values. This is possible
 //. via selective use of [`unchecked`](#unchecked) functions.
 //.
@@ -395,17 +391,9 @@
     var Cons = (__doctest.require ('./test/internal/List')).Cons;
     var Sum = __doctest.require ('./test/internal/Sum');
     var S = (function(S) {
-      //  DescendingType :: Type -> Type
-      var DescendingType = $.UnaryType
-        ('sanctuary/Descending')
-        ('')
-        (typeEq (Descending['@@type']))
-        (B (of (Array)) (Z.extract));
-
       var S_ = S.create ({
         checkTypes: true,
         env: S.env.concat ([
-          DescendingType ($.Unknown),
           (__doctest.require ('./test/internal/List')).Type ($.Unknown),
           Sum.Type
         ])
@@ -446,13 +434,6 @@
     };
   }
 
-  //  Fn :: Type -> Type -> Type
-  function Fn(x) {
-    return function(y) {
-      return $.Function ([x, y]);
-    };
-  }
-
   //  get_ :: String -> a -> Maybe b
   function get_(key) {
     return B (function(obj) { return key in obj ? Just (obj[key]) : Nothing; })
@@ -480,13 +461,6 @@
     return x == null ? Object.create (null) : Object (x);
   }
 
-  //  typeEq :: String -> a -> Boolean
-  function typeEq(typeIdent) {
-    return function(x) {
-      return type (x) === typeIdent;
-    };
-  }
-
   //  :: Type
   var a = $.TypeVariable ('a');
   var b = $.TypeVariable ('b');
@@ -494,7 +468,6 @@
   var d = $.TypeVariable ('d');
   var e = $.TypeVariable ('e');
   var g = $.TypeVariable ('g');
-  var l = $.TypeVariable ('l');
   var r = $.TypeVariable ('r');
 
   //  :: Type -> Type
@@ -507,36 +480,14 @@
   var p = $.BinaryTypeVariable ('p');
   var s = $.BinaryTypeVariable ('s');
 
-  //  $Either :: Type -> Type -> Type
-  var $Either = $.BinaryType
-    ('sanctuary/Either')
-    ('https://github.com/sanctuary-js/sanctuary-either')
-    (typeEq ('sanctuary-either/Either@1'))
-    (either (of (Array)) (K ([])))
-    (either (K ([])) (of (Array)));
-
-  //  $Maybe :: Type -> Type
-  var $Maybe = $.UnaryType
-    ('sanctuary/Maybe')
-    ('https://github.com/sanctuary-js/sanctuary-maybe')
-    (typeEq ('sanctuary-maybe/Maybe@1'))
-    (maybe ([]) (of (Array)));
-
-  //  $Pair :: Type -> Type -> Type
-  var $Pair = $.BinaryType
-    ('sanctuary/Pair')
-    ('https://github.com/sanctuary-js/sanctuary-pair')
-    (typeEq ('sanctuary-pair/Pair@1'))
-    (function(pair) { return [pair.fst]; })
-    (function(pair) { return [pair.snd]; });
-
   //  TypeRep :: Type -> Type
   var TypeRep = $.UnaryType
-    ('sanctuary/TypeRep')
+    ('TypeRep')
     ('https://github.com/fantasyland/fantasy-land#type-representatives')
+    ([])
     (function(x) {
-       return $.AnyFunction._test (x) ||
-              x != null && $.String._test (x['@@type']);
+       return $.test ([]) ($.AnyFunction) (x) ||
+              x != null && $.test ([]) ($.String) (x['@@type']);
      })
     (K ([]));
 
@@ -560,7 +511,7 @@
   //. descriptive error message.
   //.
   //. The following snippet demonstrates defining a custom type and using
-  //. `create` to produce a Sanctuary module which is aware of that type:
+  //. `create` to produce a Sanctuary module that is aware of that type:
   //.
   //. ```javascript
   //. const {create, env} = require ('sanctuary');
@@ -584,8 +535,9 @@
   //.
   //. //    IdentityType :: Type -> Type
   //. const IdentityType = $.UnaryType
-  //.   (Identity['@@type'])
+  //.   ('Identity')
   //.   ('http://example.com/my-package#Identity')
+  //.   ([])
   //.   (x => type (x) === Identity['@@type'])
   //.   (identity => [identity.value]);
   //.
@@ -604,12 +556,9 @@
     var S = {
       env: opts.env,
       is: def ('is') ({}) ([$.Type, $.Any, $.Boolean]) ($.test (opts.env)),
-      MaybeType: $Maybe,
       Maybe: Maybe,
       Nothing: Nothing,
-      EitherType: $Either,
-      Either: Either,
-      PairType: $Pair
+      Either: Either
     };
     (Object.keys (_)).forEach (function(name) {
       S[name] = def (name) (_[name].consts) (_[name].types) (_[name].impl);
@@ -634,40 +583,33 @@
   //. [ $.AnyFunction,
   //. . $.Arguments,
   //. . $.Array ($.Unknown),
+  //. . $.Array2 ($.Unknown) ($.Unknown),
   //. . $.Boolean,
   //. . $.Date,
+  //. . $.Descending ($.Unknown),
+  //. . $.Either ($.Unknown) ($.Unknown),
   //. . $.Error,
+  //. . $.Fn ($.Unknown) ($.Unknown),
   //. . $.HtmlElement,
+  //. . $.Identity ($.Unknown),
+  //. . $.Maybe ($.Unknown),
   //. . $.Null,
   //. . $.Number,
   //. . $.Object,
+  //. . $.Pair ($.Unknown) ($.Unknown),
   //. . $.RegExp,
   //. . $.StrMap ($.Unknown),
   //. . $.String,
   //. . $.Symbol,
-  //. . $.Undefined,
-  //. . $.FiniteNumber,
-  //. . $.NonZeroFiniteNumber,
-  //. . S.EitherType ($.Unknown) ($.Unknown),
-  //. . $.Function ([$.Unknown, $.Unknown]),
-  //. . $.GlobalRegExp,
-  //. . $.NonGlobalRegExp,
-  //. . $.Integer,
-  //. . $.NonNegativeInteger,
-  //. . S.MaybeType ($.Unknown),
-  //. . $.Array2 ($.Unknown) ($.Unknown),
-  //. . S.PairType ($.Unknown) ($.Unknown),
-  //. . $.RegexFlags,
   //. . $.Type,
   //. . $.TypeClass,
-  //. . $.ValidDate,
-  //. . $.ValidNumber ]
+  //. . $.Undefined ]
   //. ```
 
   //# unchecked :: Module
   //.
-  //. A complete Sanctuary module which performs no type checking. This is
-  //. useful as it permits operations which Sanctuary's type checking would
+  //. A complete Sanctuary module that performs no type checking. This is
+  //. useful as it permits operations that Sanctuary's type checking would
   //. disallow, such as mapping over an object with heterogeneous values.
   //.
   //. See also [`create`](#create).
@@ -699,13 +641,13 @@
   //. ```
   function type_(x) {
     var r = type.parse (type (x));
-    r.namespace = toMaybe (r.namespace);
+    r.namespace = Z.reject (equals (null), Just (r.namespace));
     return r;
   }
   _.type = {
     consts: {},
     types: [$.Any,
-            $.RecordType ({namespace: $Maybe ($.String),
+            $.RecordType ({namespace: $.Maybe ($.String),
                            name: $.String,
                            version: $.NonNegativeInteger})],
     impl: type_
@@ -755,7 +697,7 @@
 
   //# equals :: Setoid a => a -> a -> Boolean
   //.
-  //. Curried version of [`Z.equals`][] which requires two arguments of the
+  //. Curried version of [`Z.equals`][] that requires two arguments of the
   //. same type.
   //.
   //. To compare values of different types first use [`create`](#create) to
@@ -775,10 +717,15 @@
   //. > S.equals (S.Just ([1, 2, 3])) (S.Just ([1, 2, 4]))
   //. false
   //. ```
+  function equals(x) {
+    return function(y) {
+      return Z.equals (x, y);
+    };
+  }
   _.equals = {
     consts: {a: [Z.Setoid]},
     types: [a, a, $.Boolean],
-    impl: curry2 (Z.equals)
+    impl: equals
   };
 
   //# lt :: Ord a => a -> a -> Boolean
@@ -1007,7 +954,7 @@
 
   //# filter :: Filterable f => (a -> Boolean) -> f a -> f a
   //.
-  //. Curried version of [`Z.filter`][]. Discards every element which does not
+  //. Curried version of [`Z.filter`][]. Discards every element that does not
   //. satisfy the predicate.
   //.
   //. See also [`reject`](#reject).
@@ -1041,7 +988,7 @@
 
   //# reject :: Filterable f => (a -> Boolean) -> f a -> f a
   //.
-  //. Curried version of [`Z.reject`][]. Discards every element which satisfies
+  //. Curried version of [`Z.reject`][]. Discards every element that satisfies
   //. the predicate.
   //.
   //. See also [`filter`](#filter).
@@ -1062,50 +1009,15 @@
   //. > S.reject (S.odd) (S.Just (1))
   //. Nothing
   //. ```
+  function reject(pred) {
+    return function(filterable) {
+      return Z.reject (pred, filterable);
+    };
+  }
   _.reject = {
     consts: {f: [Z.Filterable]},
     types: [$.Predicate (a), f (a), f (a)],
-    impl: curry2 (Z.reject)
-  };
-
-  //# takeWhile :: Filterable f => (a -> Boolean) -> f a -> f a
-  //.
-  //. Curried version of [`Z.takeWhile`][]. Discards the first element which
-  //. does not satisfy the predicate, and all subsequent elements.
-  //.
-  //. See also [`dropWhile`](#dropWhile).
-  //.
-  //. ```javascript
-  //. > S.takeWhile (S.odd) ([3, 3, 3, 7, 6, 3, 5, 4])
-  //. [3, 3, 3, 7]
-  //.
-  //. > S.takeWhile (S.even) ([3, 3, 3, 7, 6, 3, 5, 4])
-  //. []
-  //. ```
-  _.takeWhile = {
-    consts: {f: [Z.Filterable]},
-    types: [$.Predicate (a), f (a), f (a)],
-    impl: curry2 (Z.takeWhile)
-  };
-
-  //# dropWhile :: Filterable f => (a -> Boolean) -> f a -> f a
-  //.
-  //. Curried version of [`Z.dropWhile`][]. Retains the first element which
-  //. does not satisfy the predicate, and all subsequent elements.
-  //.
-  //. See also [`takeWhile`](#takeWhile).
-  //.
-  //. ```javascript
-  //. > S.dropWhile (S.odd) ([3, 3, 3, 7, 6, 3, 5, 4])
-  //. [6, 3, 5, 4]
-  //.
-  //. > S.dropWhile (S.even) ([3, 3, 3, 7, 6, 3, 5, 4])
-  //. [3, 3, 3, 7, 6, 3, 5, 4]
-  //. ```
-  _.dropWhile = {
-    consts: {f: [Z.Filterable]},
-    types: [$.Predicate (a), f (a), f (a)],
-    impl: curry2 (Z.dropWhile)
+    impl: reject
   };
 
   //# map :: Functor f => (a -> b) -> f a -> f b
@@ -1150,7 +1062,7 @@
   }
   _.map = {
     consts: {f: [Z.Functor]},
-    types: [Fn (a) (b), f (a), f (b)],
+    types: [$.Fn (a) (b), f (a), f (b)],
     impl: map
   };
 
@@ -1184,7 +1096,7 @@
   //. ```
   _.flip = {
     consts: {f: [Z.Functor]},
-    types: [f (Fn (a) (b)), a, f (b)],
+    types: [f ($.Fn (a) (b)), a, f (b)],
     impl: curry2 (Z.flip)
   };
 
@@ -1204,7 +1116,7 @@
   //. ```
   _.bimap = {
     consts: {p: [Z.Bifunctor]},
-    types: [Fn (a) (b), Fn (c) (d), p (a) (c), p (b) (d)],
+    types: [$.Fn (a) (b), $.Fn (c) (d), p (a) (c), p (b) (d)],
     impl: curry3 (Z.bimap)
   };
 
@@ -1225,7 +1137,7 @@
   //. ```
   _.mapLeft = {
     consts: {p: [Z.Bifunctor]},
-    types: [Fn (a) (b), p (a) (c), p (b) (c)],
+    types: [$.Fn (a) (b), p (a) (c), p (b) (c)],
     impl: curry2 (Z.mapLeft)
   };
 
@@ -1239,31 +1151,37 @@
   //. ```
   _.promap = {
     consts: {p: [Z.Profunctor]},
-    types: [Fn (a) (b), Fn (c) (d), p (b) (c), p (a) (d)],
+    types: [$.Fn (a) (b), $.Fn (c) (d), p (b) (c), p (a) (d)],
     impl: curry3 (Z.promap)
   };
 
   //# alt :: Alt f => f a -> f a -> f a
   //.
-  //. Curried version of [`Z.alt`][].
+  //. Curried version of [`Z.alt`][] with arguments flipped to facilitate
+  //. partial application.
   //.
   //. ```javascript
-  //. > S.alt (S.Nothing) (S.Just (1))
-  //. Just (1)
+  //. > S.alt (S.Just ('default')) (S.Nothing)
+  //. Just ('default')
   //.
-  //. > S.alt (S.Just (2)) (S.Just (3))
-  //. Just (2)
+  //. > S.alt (S.Just ('default')) (S.Just ('hello'))
+  //. Just ('hello')
   //.
-  //. > S.alt (S.Left ('X')) (S.Right (1))
+  //. > S.alt (S.Right (0)) (S.Left ('X'))
+  //. Right (0)
+  //.
+  //. > S.alt (S.Right (0)) (S.Right (1))
   //. Right (1)
-  //.
-  //. > S.alt (S.Right (2)) (S.Right (3))
-  //. Right (2)
   //. ```
+  function alt(y) {
+    return function(x) {
+      return Z.alt (x, y);
+    };
+  }
   _.alt = {
     consts: {f: [Z.Alt]},
     types: [f (a), f (a), f (a)],
-    impl: curry2 (Z.alt)
+    impl: alt
   };
 
   //# zero :: Plus f => TypeRep f -> f a
@@ -1282,7 +1200,7 @@
   //. ```
   _.zero = {
     consts: {f: [Z.Plus]},
-    types: [TypeRep ($.TypeVariable ('f')), f (a)],
+    types: [TypeRep (f (a)), f (a)],
     impl: Z.zero
   };
 
@@ -1314,7 +1232,7 @@
   }
   _.reduce = {
     consts: {f: [Z.Foldable]},
-    types: [Fn (a) (Fn (b) (a)), a, f (b), a],
+    types: [$.Fn (a) ($.Fn (b) (a)), a, f (b), a],
     impl: reduce
   };
 
@@ -1343,7 +1261,7 @@
   //. ```
   _.traverse = {
     consts: {f: [Z.Applicative], t: [Z.Traversable]},
-    types: [TypeRep ($.TypeVariable ('f')), Fn (a) (f (b)), t (a), f (t (b))],
+    types: [TypeRep (f (b)), $.Fn (a) (f (b)), t (a), f (t (b))],
     impl: curry3 (Z.traverse)
   };
 
@@ -1370,7 +1288,7 @@
   //. ```
   _.sequence = {
     consts: {f: [Z.Applicative], t: [Z.Traversable]},
-    types: [TypeRep ($.TypeVariable ('f')), t (f (a)), f (t (a))],
+    types: [TypeRep (f (a)), t (f (a)), f (t (a))],
     impl: curry2 (Z.sequence)
   };
 
@@ -1405,13 +1323,13 @@
   //. ```
   _.ap = {
     consts: {f: [Z.Apply]},
-    types: [f (Fn (a) (b)), f (a), f (b)],
+    types: [f ($.Fn (a) (b)), f (a), f (b)],
     impl: curry2 (Z.ap)
   };
 
   //# lift2 :: Apply f => (a -> b -> c) -> f a -> f b -> f c
   //.
-  //. Promotes a curried binary function to a function which operates on two
+  //. Promotes a curried binary function to a function that operates on two
   //. [Apply][]s.
   //.
   //. ```javascript
@@ -1429,13 +1347,13 @@
   //. ```
   _.lift2 = {
     consts: {f: [Z.Apply]},
-    types: [Fn (a) (Fn (b) (c)), f (a), f (b), f (c)],
+    types: [$.Fn (a) ($.Fn (b) (c)), f (a), f (b), f (c)],
     impl: curry3 (Z.lift2)
   };
 
   //# lift3 :: Apply f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
   //.
-  //. Promotes a curried ternary function to a function which operates on three
+  //. Promotes a curried ternary function to a function that operates on three
   //. [Apply][]s.
   //.
   //. ```javascript
@@ -1447,7 +1365,7 @@
   //. ```
   _.lift3 = {
     consts: {f: [Z.Apply]},
-    types: [Fn (a) (Fn (b) (Fn (c) (d))), f (a), f (b), f (c), f (d)],
+    types: [$.Fn (a) ($.Fn (b) ($.Fn (c) (d))), f (a), f (b), f (c), f (d)],
     impl: curry4 (Z.lift3)
   };
 
@@ -1517,7 +1435,7 @@
   }
   _.of = {
     consts: {f: [Z.Applicative]},
-    types: [TypeRep ($.TypeVariable ('f')), a, f (a)],
+    types: [TypeRep (f (a)), a, f (a)],
     impl: of
   };
 
@@ -1540,7 +1458,7 @@
   //. ```
   _.chain = {
     consts: {m: [Z.Chain]},
-    types: [Fn (a) (m (b)), m (a), m (b)],
+    types: [$.Fn (a) (m (b)), m (a), m (b)],
     impl: curry2 (Z.chain)
   };
 
@@ -1605,10 +1523,7 @@
   }
   _.chainRec = {
     consts: {m: [Z.ChainRec]},
-    types: [TypeRep ($.TypeVariable ('m')),
-            Fn (a) (m ($Either (a) (b))),
-            a,
-            m (b)],
+    types: [TypeRep (m (b)), $.Fn (a) (m ($.Either (a) (b))), a, m (b)],
     impl: chainRec
   };
 
@@ -1625,7 +1540,7 @@
   //. ```
   _.extend = {
     consts: {w: [Z.Extend]},
-    types: [Fn (w (a)) (b), w (a), w (b)],
+    types: [$.Fn (w (a)) (b), w (a), w (b)],
     impl: curry2 (Z.extend)
   };
 
@@ -1677,7 +1592,7 @@
   //. ```
   _.contramap = {
     consts: {f: [Z.Contravariant]},
-    types: [Fn (b) (a), f (a), f (b)],
+    types: [$.Fn (b) (a), f (a), f (b)],
     impl: curry2 (Z.contramap)
   };
 
@@ -1744,7 +1659,7 @@
   }
   _.T = {
     consts: {},
-    types: [a, Fn (a) (b), b],
+    types: [a, $.Fn (a) (b), b],
     impl: T
   };
 
@@ -1906,13 +1821,13 @@
   }
   _.pipe = {
     consts: {f: [Z.Foldable]},
-    types: [f (Fn ($.Any) ($.Any)), a, b],
+    types: [f ($.Fn ($.Any) ($.Any)), a, b],
     impl: pipe
   };
 
   //# pipeK :: (Foldable f, Chain m) => f (Any -> m Any) -> m a -> m b
   //.
-  //. Takes a sequence of functions assumed to be unary which return values
+  //. Takes a sequence of functions assumed to be unary that return values
   //. with a [Chain][], and a value of that Chain, and returns the result
   //. of applying the sequence of transformations to the initial value.
   //.
@@ -1931,7 +1846,7 @@
   }
   _.pipeK = {
     consts: {f: [Z.Foldable], m: [Z.Chain]},
-    types: [f (Fn ($.Any) (m ($.Any))), m (a), m (b)],
+    types: [f ($.Fn ($.Any) (m ($.Any))), m (a), m (b)],
     impl: pipeK
   };
 
@@ -1957,7 +1872,7 @@
   }
   _.on = {
     consts: {},
-    types: [Fn (b) (Fn (b) (c)), Fn (a) (b), a, a, c],
+    types: [$.Fn (b) ($.Fn (b) (c)), $.Fn (a) (b), a, a, c],
     impl: on
   };
 
@@ -1967,10 +1882,6 @@
   //. contains exactly two values: one of type `a`; one of type `b`.
   //.
   //. The implementation is provided by [sanctuary-pair][].
-
-  //# PairType :: Type -> Type -> Type
-  //.
-  //. A [`BinaryType`][BinaryType] for use with [sanctuary-def][].
 
   //# Pair :: a -> b -> Pair a b
   //.
@@ -1983,7 +1894,7 @@
   //. ```
   _.Pair = {
     consts: {},
-    types: [a, b, $Pair (a) (b)],
+    types: [a, b, $.Pair (a) (b)],
     impl: Pair
   };
 
@@ -2002,7 +1913,7 @@
   }
   _.pair = {
     consts: {},
-    types: [Fn (a) (Fn (b) (c)), $Pair (a) (b), c],
+    types: [$.Fn (a) ($.Fn (b) (c)), $.Pair (a) (b), c],
     impl: pair
   };
 
@@ -2016,7 +1927,7 @@
   //. ```
   _.fst = {
     consts: {},
-    types: [$Pair (a) (b), a],
+    types: [$.Pair (a) (b), a],
     impl: pair (K)
   };
 
@@ -2030,7 +1941,7 @@
   //. ```
   _.snd = {
     consts: {},
-    types: [$Pair (a) (b), b],
+    types: [$.Pair (a) (b), b],
     impl: pair (C (K))
   };
 
@@ -2044,7 +1955,7 @@
   //. ```
   _.swap = {
     consts: {},
-    types: [$Pair (a) (b), $Pair (b) (a)],
+    types: [$.Pair (a) (b), $.Pair (b) (a)],
     impl: pair (C (Pair))
   };
 
@@ -2054,10 +1965,6 @@
   //. either Nothing (the empty value) or a Just whose value is of type `a`.
   //.
   //. The implementation is provided by [sanctuary-maybe][].
-
-  //# MaybeType :: Type -> Type
-  //.
-  //. A [`UnaryType`][UnaryType] for use with [sanctuary-def][].
 
   //# Maybe :: TypeRep Maybe
   //.
@@ -2082,7 +1989,7 @@
   //. ```
   _.Just = {
     consts: {},
-    types: [a, $Maybe (a)],
+    types: [a, $.Maybe (a)],
     impl: Just
   };
 
@@ -2102,7 +2009,7 @@
   }
   _.isNothing = {
     consts: {},
-    types: [$Maybe (a), $.Boolean],
+    types: [$.Maybe (a), $.Boolean],
     impl: isNothing
   };
 
@@ -2122,7 +2029,7 @@
   }
   _.isJust = {
     consts: {},
-    types: [$Maybe (a), $.Boolean],
+    types: [$.Maybe (a), $.Boolean],
     impl: isJust
   };
 
@@ -2143,13 +2050,13 @@
   //. ```
   _.fromMaybe = {
     consts: {},
-    types: [a, $Maybe (a), a],
+    types: [a, $.Maybe (a), a],
     impl: C (maybe) (I)
   };
 
   //# fromMaybe_ :: (() -> a) -> Maybe a -> a
   //.
-  //. Variant of [`fromMaybe`](#fromMaybe) which takes a thunk so the default
+  //. Variant of [`fromMaybe`](#fromMaybe) that takes a thunk so the default
   //. value is only computed if required.
   //.
   //. ```javascript
@@ -2163,7 +2070,7 @@
   //. ```
   _.fromMaybe_ = {
     consts: {},
-    types: [$.Thunk (a), $Maybe (a), a],
+    types: [$.Thunk (a), $.Maybe (a), a],
     impl: C (maybe_) (I)
   };
 
@@ -2186,29 +2093,8 @@
   }
   _.maybeToNullable = {
     consts: {},
-    types: [$Maybe (a), $.Nullable (a)],
+    types: [$.Maybe (a), $.Nullable (a)],
     impl: maybeToNullable
-  };
-
-  //# toMaybe :: a? -> Maybe a
-  //.
-  //. Takes a value and returns Nothing if the value is `null` or `undefined`;
-  //. Just the value otherwise.
-  //.
-  //. ```javascript
-  //. > S.toMaybe (null)
-  //. Nothing
-  //.
-  //. > S.toMaybe (42)
-  //. Just (42)
-  //. ```
-  function toMaybe(x) {
-    return x == null ? Nothing : Just (x);
-  }
-  _.toMaybe = {
-    consts: {},
-    types: [a, $Maybe (a)],
-    impl: toMaybe
   };
 
   //# maybe :: b -> (a -> b) -> Maybe a -> b
@@ -2235,13 +2121,13 @@
   }
   _.maybe = {
     consts: {},
-    types: [b, Fn (a) (b), $Maybe (a), b],
+    types: [b, $.Fn (a) (b), $.Maybe (a), b],
     impl: maybe
   };
 
   //# maybe_ :: (() -> b) -> (a -> b) -> Maybe a -> b
   //.
-  //. Variant of [`maybe`](#maybe) which takes a thunk so the default value
+  //. Variant of [`maybe`](#maybe) that takes a thunk so the default value
   //. is only computed if required.
   //.
   //. ```javascript
@@ -2262,13 +2148,13 @@
   }
   _.maybe_ = {
     consts: {},
-    types: [$.Thunk (b), Fn (a) (b), $Maybe (a), b],
+    types: [$.Thunk (b), $.Fn (a) (b), $.Maybe (a), b],
     impl: maybe_
   };
 
   //# justs :: (Filterable f, Functor f) => f (Maybe a) -> f a
   //.
-  //. Discards each element which is Nothing, and unwraps each element which is
+  //. Discards each element that is Nothing, and unwraps each element that is
   //. a Just. Related to Haskell's `catMaybes` function.
   //.
   //. See also [`lefts`](#lefts) and [`rights`](#rights).
@@ -2282,7 +2168,7 @@
   }
   _.justs = {
     consts: {f: [Z.Filterable, Z.Functor]},
-    types: [f ($Maybe (a)), f (a)],
+    types: [f ($.Maybe (a)), f (a)],
     impl: justs
   };
 
@@ -2302,51 +2188,8 @@
   //. ```
   _.mapMaybe = {
     consts: {f: [Z.Filterable, Z.Functor]},
-    types: [Fn (a) ($Maybe (b)), f (a), f (b)],
+    types: [$.Fn (a) ($.Maybe (b)), f (a), f (b)],
     impl: B (B (justs)) (map)
-  };
-
-  //# encase :: (a -> b) -> a -> Maybe b
-  //.
-  //. Takes a unary function `f` which may throw and a value `x` of any type,
-  //. and applies `f` to `x` inside a `try` block. If an exception is caught,
-  //. the return value is Nothing; otherwise the return value is Just the
-  //. result of applying `f` to `x`.
-  //.
-  //. See also [`encaseEither`](#encaseEither).
-  //.
-  //. ```javascript
-  //. > S.encase (eval) ('1 + 1')
-  //. Just (2)
-  //.
-  //. > S.encase (eval) ('1 +')
-  //. Nothing
-  //. ```
-  function encase(f) {
-    return B (eitherToMaybe) (encaseEither (I) (f));
-  }
-  _.encase = {
-    consts: {},
-    types: [Fn (a) (b), a, $Maybe (b)],
-    impl: encase
-  };
-
-  //# encase2 :: (a -> b -> c) -> a -> b -> Maybe c
-  //.
-  //. Binary version of [`encase`](#encase).
-  _.encase2 = {
-    consts: {},
-    types: [Fn (a) (Fn (b) (c)), a, b, $Maybe (c)],
-    impl: B (B (B (eitherToMaybe))) (encaseEither2 (I))
-  };
-
-  //# encase3 :: (a -> b -> c -> d) -> a -> b -> c -> Maybe d
-  //.
-  //. Ternary version of [`encase`](#encase).
-  _.encase3 = {
-    consts: {},
-    types: [Fn (a) (Fn (b) (Fn (c) (d))), a, b, c, $Maybe (d)],
-    impl: B (B (B (B (eitherToMaybe)))) (encaseEither3 (I))
   };
 
   //# maybeToEither :: a -> Maybe b -> Either a b
@@ -2368,7 +2211,7 @@
   }
   _.maybeToEither = {
     consts: {},
-    types: [a, $Maybe (b), $Either (a) (b)],
+    types: [a, $.Maybe (b), $.Either (a) (b)],
     impl: maybeToEither
   };
 
@@ -2379,10 +2222,6 @@
   //. value is of type `b`.
   //.
   //. The implementation is provided by [sanctuary-either][].
-
-  //# EitherType :: Type -> Type -> Type
-  //.
-  //. A [`BinaryType`][BinaryType] for use with [sanctuary-def][].
 
   //# Either :: TypeRep Either
   //.
@@ -2398,7 +2237,7 @@
   //. ```
   _.Left = {
     consts: {},
-    types: [a, $Either (a) (b)],
+    types: [a, $.Either (a) (b)],
     impl: Left
   };
 
@@ -2412,7 +2251,7 @@
   //. ```
   _.Right = {
     consts: {},
-    types: [b, $Either (a) (b)],
+    types: [b, $.Either (a) (b)],
     impl: Right
   };
 
@@ -2432,7 +2271,7 @@
   }
   _.isLeft = {
     consts: {},
-    types: [$Either (a) (b), $.Boolean],
+    types: [$.Either (a) (b), $.Boolean],
     impl: isLeft
   };
 
@@ -2452,7 +2291,7 @@
   }
   _.isRight = {
     consts: {},
-    types: [$Either (a) (b), $.Boolean],
+    types: [$.Either (a) (b), $.Boolean],
     impl: isRight
   };
 
@@ -2473,42 +2312,8 @@
   }
   _.fromEither = {
     consts: {},
-    types: [b, $Either (a) (b), b],
+    types: [b, $.Either (a) (b), b],
     impl: fromEither
-  };
-
-  //# toEither :: a -> b? -> Either a b
-  //.
-  //. Converts an arbitrary value to an Either: a Left if the value is `null`
-  //. or `undefined`; a Right otherwise. The first argument specifies the
-  //. value of the Left in the "failure" case.
-  //.
-  //. ```javascript
-  //. > S.toEither ('XYZ') (null)
-  //. Left ('XYZ')
-  //.
-  //. > S.toEither ('XYZ') ('ABC')
-  //. Right ('ABC')
-  //.
-  //. > S.map (S.prop ('0'))
-  //. .       (S.toEither ('Invalid protocol')
-  //. .                   ('ftp://example.com/'.match (/^https?:/)))
-  //. Left ('Invalid protocol')
-  //.
-  //. > S.map (S.prop ('0'))
-  //. .       (S.toEither ('Invalid protocol')
-  //. .                   ('https://example.com/'.match (/^https?:/)))
-  //. Right ('https:')
-  //. ```
-  function toEither(x) {
-    return function(y) {
-      return y == null ? Left (x) : Right (y);
-    };
-  }
-  _.toEither = {
-    consts: {},
-    types: [a, b, $Either (a) (b)],
-    impl: toEither
   };
 
   //# either :: (a -> c) -> (b -> c) -> Either a b -> c
@@ -2534,13 +2339,13 @@
   }
   _.either = {
     consts: {},
-    types: [Fn (a) (c), Fn (b) (c), $Either (a) (b), c],
+    types: [$.Fn (a) (c), $.Fn (b) (c), $.Either (a) (b), c],
     impl: either
   };
 
   //# lefts :: (Filterable f, Functor f) => f (Either a b) -> f a
   //.
-  //. Discards each element which is a Right, and unwraps each element which is
+  //. Discards each element that is a Right, and unwraps each element that is
   //. a Left.
   //.
   //. See also [`rights`](#rights).
@@ -2551,13 +2356,13 @@
   //. ```
   _.lefts = {
     consts: {f: [Z.Filterable, Z.Functor]},
-    types: [f ($Either (a) (b)), f (a)],
+    types: [f ($.Either (a) (b)), f (a)],
     impl: B (map (prop ('value'))) (filter (isLeft))
   };
 
   //# rights :: (Filterable f, Functor f) => f (Either a b) -> f b
   //.
-  //. Discards each element which is a Left, and unwraps each element which is
+  //. Discards each element that is a Left, and unwraps each element that is
   //. a Right.
   //.
   //. See also [`lefts`](#lefts).
@@ -2568,7 +2373,7 @@
   //. ```
   _.rights = {
     consts: {f: [Z.Filterable, Z.Functor]},
-    types: [f ($Either (a) (b)), f (b)],
+    types: [f ($.Either (a) (b)), f (b)],
     impl: B (map (prop ('value'))) (filter (isRight))
   };
 
@@ -2589,96 +2394,34 @@
   }
   _.tagBy = {
     consts: {},
-    types: [$.Predicate (a), a, $Either (a) (a)],
+    types: [$.Predicate (a), a, $.Either (a) (a)],
     impl: tagBy
   };
 
-  //# encaseEither :: (Error -> l) -> (a -> r) -> a -> Either l r
+  //# encase :: (a -> b) -> a -> Either Error b
   //.
-  //. Takes two unary functions, `f` and `g`, the second of which may throw,
-  //. and a value `x` of any type. Applies `g` to `x` inside a `try` block.
-  //. If an exception is caught, the return value is a Left containing the
-  //. result of applying `f` to the caught Error object; otherwise the return
-  //. value is a Right containing the result of applying `g` to `x`.
-  //.
-  //. See also [`encase`](#encase).
+  //. Takes a function that may throw and returns a pure function.
   //.
   //. ```javascript
-  //. > S.encaseEither (S.I) (JSON.parse) ('["foo","bar","baz"]')
+  //. > S.encase (JSON.parse) ('["foo","bar","baz"]')
   //. Right (['foo', 'bar', 'baz'])
   //.
-  //. > S.encaseEither (S.I) (JSON.parse) ('[')
+  //. > S.encase (JSON.parse) ('[')
   //. Left (new SyntaxError ('Unexpected end of JSON input'))
-  //.
-  //. > S.encaseEither (S.prop ('message')) (JSON.parse) ('[')
-  //. Left ('Unexpected end of JSON input')
   //. ```
-  function encaseEither(f) {
-    return function(g) {
-      return function(x) {
-        try {
-          return Right (g (x));
-        } catch (err) {
-          return Left (f (err));
-        }
-      };
+  function encase(f) {
+    return function(x) {
+      try {
+        return Right (f (x));
+      } catch (err) {
+        return Left (err);
+      }
     };
   }
-  _.encaseEither = {
+  _.encase = {
     consts: {},
-    types: [Fn ($.Error) (l), Fn (a) (r), a, $Either (l) (r)],
-    impl: encaseEither
-  };
-
-  //# encaseEither2 :: (Error -> l) -> (a -> b -> r) -> a -> b -> Either l r
-  //.
-  //. Binary version of [`encaseEither`](#encaseEither).
-  function encaseEither2(f) {
-    return function(g) {
-      return function(x) {
-        return function(y) {
-          try {
-            return Right (g (x) (y));
-          } catch (err) {
-            return Left (f (err));
-          }
-        };
-      };
-    };
-  }
-  _.encaseEither2 = {
-    consts: {},
-    types: [Fn ($.Error) (l), Fn (a) (Fn (b) (r)), a, b, $Either (l) (r)],
-    impl: encaseEither2
-  };
-
-  //# encaseEither3 :: (Error -> l) -> (a -> b -> c -> r) -> a -> b -> c -> Either l r
-  //.
-  //. Ternary version of [`encaseEither`](#encaseEither).
-  function encaseEither3(f) {
-    return function(g) {
-      return function(x) {
-        return function(y) {
-          return function(z) {
-            try {
-              return Right (g (x) (y) (z));
-            } catch (err) {
-              return Left (f (err));
-            }
-          };
-        };
-      };
-    };
-  }
-  _.encaseEither3 = {
-    consts: {},
-    types: [Fn ($.Error) (l),
-            Fn (a) (Fn (b) (Fn (c) (r))),
-            a,
-            b,
-            c,
-            $Either (l) (r)],
-    impl: encaseEither3
+    types: [$.Fn (a) (b), a, $.Either ($.Error) (b)],
+    impl: encase
   };
 
   //# eitherToMaybe :: Either a b -> Maybe b
@@ -2700,7 +2443,7 @@
   }
   _.eitherToMaybe = {
     consts: {},
-    types: [$Either (a) (b), $Maybe (b)],
+    types: [$.Either (a) (b), $.Maybe (b)],
     impl: eitherToMaybe
   };
 
@@ -2857,7 +2600,7 @@
   }
   _.ifElse = {
     consts: {},
-    types: [$.Predicate (a), Fn (a) (b), Fn (a) (b), a, b],
+    types: [$.Predicate (a), $.Fn (a) (b), $.Fn (a) (b), a, b],
     impl: ifElse
   };
 
@@ -2881,7 +2624,7 @@
   }
   _.when = {
     consts: {},
-    types: [$.Predicate (a), Fn (a) (a), a, a],
+    types: [$.Predicate (a), $.Fn (a) (a), a, a],
     impl: when
   };
 
@@ -2905,58 +2648,8 @@
   }
   _.unless = {
     consts: {},
-    types: [$.Predicate (a), Fn (a) (a), a, a],
+    types: [$.Predicate (a), $.Fn (a) (a), a, a],
     impl: unless
-  };
-
-  //# allPass :: Foldable f => f (a -> Boolean) -> a -> Boolean
-  //.
-  //. Takes a structure containing zero or more predicates, and a value
-  //. of any type. Returns `true` [iff][] the value satisfies all of the
-  //. predicates. None of the subsequent predicates will be applied after
-  //. the first predicate not satisfied.
-  //.
-  //. ```javascript
-  //. > S.allPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('quiessence')
-  //. true
-  //.
-  //. > S.allPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('fissiparous')
-  //. false
-  //. ```
-  function allPass(preds) {
-    return function(x) {
-      return Z.reduce (function(b, p) { return b && p (x); }, true, preds);
-    };
-  }
-  _.allPass = {
-    consts: {f: [Z.Foldable]},
-    types: [f ($.Predicate (a)), a, $.Boolean],
-    impl: allPass
-  };
-
-  //# anyPass :: Foldable f => f (a -> Boolean) -> a -> Boolean
-  //.
-  //. Takes a structure containing zero or more predicates, and a value
-  //. of any type. Returns `true` [iff][] the value satisfies any of the
-  //. predicates. None of the subsequent predicates will be applied after
-  //. the first predicate satisfied.
-  //.
-  //. ```javascript
-  //. > S.anyPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('incandescent')
-  //. true
-  //.
-  //. > S.anyPass ([S.test (/q/), S.test (/u/), S.test (/i/)]) ('empathy')
-  //. false
-  //. ```
-  function anyPass(preds) {
-    return function(x) {
-      return Z.reduce (function(b, p) { return b || p (x); }, false, preds);
-    };
-  }
-  _.anyPass = {
-    consts: {f: [Z.Foldable]},
-    types: [f ($.Predicate (a)), a, $.Boolean],
-    impl: anyPass
   };
 
   //. ### Array
@@ -2987,75 +2680,8 @@
   }
   _.array = {
     consts: {},
-    types: [b, Fn (a) (Fn ($.Array (a)) (b)), $.Array (a), b],
+    types: [b, $.Fn (a) ($.Fn ($.Array (a)) (b)), $.Array (a), b],
     impl: array
-  };
-
-  //# slice :: Integer -> Integer -> Array a -> Maybe (Array a)
-  //.
-  //. Takes a start index `i`, an end index `j`, and an array, and returns
-  //. Just the `[i,j)` slice of the array if possible; Nothing otherwise.
-  //. A negative index represents an offset from the length of the array.
-  //.
-  //. See also [`take`](#take), [`drop`](#drop), [`takeLast`](#takeLast),
-  //. and [`dropLast`](#dropLast).
-  //.
-  //. ```javascript
-  //. > S.slice (1) (3) (['a', 'b', 'c', 'd', 'e'])
-  //. Just (['b', 'c'])
-  //.
-  //. > S.slice (-3) (-1) (['a', 'b', 'c', 'd', 'e'])
-  //. Just (['c', 'd'])
-  //.
-  //. > S.slice (1) (6) (['a', 'b', 'c', 'd', 'e'])
-  //. Nothing
-  //. ```
-  function slice(start) {
-    return function(end) {
-      return function(xs) {
-        var fromIdx = start < 0 ? start + xs.length : start;
-        var toIdx = end < 0 ? end + xs.length : end;
-
-        return Math.abs (start) <= xs.length &&
-               Math.abs (end) <= xs.length &&
-               fromIdx <= toIdx ?
-                 Just (xs.slice (fromIdx, toIdx)) :
-                 Nothing;
-      };
-    };
-  }
-  _.slice = {
-    consts: {},
-    types: [$.Integer, $.Integer, $.Array (a), $Maybe ($.Array (a))],
-    impl: slice
-  };
-
-  //# at :: Integer -> Array a -> Maybe a
-  //.
-  //. Returns Just the element of the given array at the specified index if
-  //. the index is within the array's bounds; Nothing otherwise. A negative
-  //. index represents an offset from the length of the array.
-  //.
-  //. ```javascript
-  //. > S.at (2) (['a', 'b', 'c', 'd', 'e'])
-  //. Just ('c')
-  //.
-  //. > S.at (5) (['a', 'b', 'c', 'd', 'e'])
-  //. Nothing
-  //.
-  //. > S.at (-2) (['a', 'b', 'c', 'd', 'e'])
-  //. Just ('d')
-  //. ```
-  function at(n) {
-    return function(xs) {
-      var idx = n < 0 ? xs.length + n : n;
-      return idx < 0 || idx >= xs.length ? Nothing : Just (xs[idx]);
-    };
-  }
-  _.at = {
-    consts: {},
-    types: [$.Integer, $.Array (a), $Maybe (a)],
-    impl: at
   };
 
   //# head :: Foldable f => f a -> Maybe a
@@ -3087,7 +2713,7 @@
   }
   _.head = {
     consts: {f: [Z.Foldable]},
-    types: [f (a), $Maybe (a)],
+    types: [f (a), $.Maybe (a)],
     impl: head
   };
 
@@ -3119,7 +2745,7 @@
   }
   _.last = {
     consts: {f: [Z.Foldable]},
-    types: [f (a), $Maybe (a)],
+    types: [f (a), $.Maybe (a)],
     impl: last
   };
 
@@ -3153,7 +2779,7 @@
   }
   _.tail = {
     consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
-    types: [f (a), $Maybe (f (a))],
+    types: [f (a), $.Maybe (f (a))],
     impl: tail
   };
 
@@ -3187,118 +2813,215 @@
   }
   _.init = {
     consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
-    types: [f (a), $Maybe (f (a))],
+    types: [f (a), $.Maybe (f (a))],
     impl: init
   };
 
-  //# take :: Integer -> Array a -> Maybe (Array a)
+  //# take :: (Applicative f, Foldable f, Monoid (f a)) => Integer -> f a -> Maybe (f a)
   //.
-  //. Returns Just the first N elements of the given array if N is greater
-  //. than or equal to zero and less than or equal to the length of the array;
+  //. Returns Just the first N elements of the given structure if N is
+  //. non-negative and less than or equal to the size of the structure;
   //. Nothing otherwise.
   //.
   //. ```javascript
-  //. > S.take (2) (['a', 'b', 'c', 'd', 'e'])
-  //. Just (['a', 'b'])
+  //. > S.take (0) (['foo', 'bar'])
+  //. Just ([])
   //.
-  //. > S.take (5) (['a', 'b', 'c', 'd', 'e'])
-  //. Just (['a', 'b', 'c', 'd', 'e'])
+  //. > S.take (1) (['foo', 'bar'])
+  //. Just (['foo'])
   //.
-  //. > S.take (6) (['a', 'b', 'c', 'd', 'e'])
+  //. > S.take (2) (['foo', 'bar'])
+  //. Just (['foo', 'bar'])
+  //.
+  //. > S.take (3) (['foo', 'bar'])
   //. Nothing
+  //.
+  //. > S.take (3) (Cons (1) (Cons (2) (Cons (3) (Cons (4) (Cons (5) (Nil))))))
+  //. Just (Cons (1) (Cons (2) (Cons (3) (Nil))))
   //. ```
-  function take(n) {
-    return function(xs) {
-      return n >= 0 && n <= xs.length ? Just (xs.slice (0, n)) : Nothing;
+  function _takeDrop(arrayCase, generalCase) {
+    return function(n) {
+      return function(xs) {
+        if (n < 0) return Nothing;
+
+        //  Fast path for arrays.
+        if (Array.isArray (xs)) {
+          return n <= xs.length ? Just (arrayCase (n, xs)) : Nothing;
+        }
+
+        //  m :: Maybe (Pair Integer (f a))
+        var m = Z.reduce (function(m, x) {
+          return Z.map (function(pair) {
+            var n = pair.fst;
+            var xs = pair.snd;
+            return Pair (n - 1) (generalCase (n, xs, x));
+          }, m);
+        }, Just (Pair (n) (Z.empty (xs.constructor))), xs);
+
+        return Z.map (Pair.snd, Z.reject (B (gt (0)) (Pair.fst), m));
+      };
     };
   }
+  var take = _takeDrop (
+    function(n, xs) { return xs.slice (0, n); },
+    function(n, xs, x) { return n > 0 ? Z.append (x, xs) : xs; }
+  );
   _.take = {
-    consts: {},
-    types: [$.Integer, $.Array (a), $Maybe ($.Array (a))],
+    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    types: [$.Integer, f (a), $.Maybe (f (a))],
     impl: take
   };
 
-  //# takeLast :: Integer -> Array a -> Maybe (Array a)
+  //# drop :: (Applicative f, Foldable f, Monoid (f a)) => Integer -> f a -> Maybe (f a)
   //.
-  //. Returns Just the last N elements of the given array if N is greater
-  //. than or equal to zero and less than or equal to the length of the array;
+  //. Returns Just all but the first N elements of the given structure if
+  //. N is non-negative and less than or equal to the size of the structure;
   //. Nothing otherwise.
   //.
   //. ```javascript
-  //. > S.takeLast (2) (['a', 'b', 'c', 'd', 'e'])
-  //. Just (['d', 'e'])
+  //. > S.drop (0) (['foo', 'bar'])
+  //. Just (['foo', 'bar'])
   //.
-  //. > S.takeLast (5) (['a', 'b', 'c', 'd', 'e'])
-  //. Just (['a', 'b', 'c', 'd', 'e'])
+  //. > S.drop (1) (['foo', 'bar'])
+  //. Just (['bar'])
   //.
-  //. > S.takeLast (6) (['a', 'b', 'c', 'd', 'e'])
-  //. Nothing
-  //. ```
-  function takeLast(n) {
-    return function(xs) {
-      return n >= 0 && n <= xs.length ? Just (xs.slice (xs.length - n))
-                                      : Nothing;
-    };
-  }
-  _.takeLast = {
-    consts: {},
-    types: [$.Integer, $.Array (a), $Maybe ($.Array (a))],
-    impl: takeLast
-  };
-
-  //# drop :: Integer -> Array a -> Maybe (Array a)
-  //.
-  //. Returns Just all but the first N elements of the given array if N is
-  //. greater than or equal to zero and less than or equal to the length of
-  //. the array; Nothing otherwise.
-  //.
-  //. ```javascript
-  //. > S.drop (2) (['a', 'b', 'c', 'd', 'e'])
-  //. Just (['c', 'd', 'e'])
-  //.
-  //. > S.drop (5) (['a', 'b', 'c', 'd', 'e'])
+  //. > S.drop (2) (['foo', 'bar'])
   //. Just ([])
   //.
-  //. > S.drop (6) (['a', 'b', 'c', 'd', 'e'])
+  //. > S.drop (3) (['foo', 'bar'])
   //. Nothing
+  //.
+  //. > S.drop (3) (Cons (1) (Cons (2) (Cons (3) (Cons (4) (Cons (5) (Nil))))))
+  //. Just (Cons (4) (Cons (5) (Nil)))
   //. ```
-  function drop(n) {
-    return function(xs) {
-      return n >= 0 && n <= xs.length ? Just (xs.slice (n)) : Nothing;
-    };
-  }
+  var drop = _takeDrop (
+    function(n, xs) { return xs.slice (n); },
+    function(n, xs, x) { return n > 0 ? xs : Z.append (x, xs); }
+  );
   _.drop = {
-    consts: {},
-    types: [$.Integer, $.Array (a), $Maybe ($.Array (a))],
+    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    types: [$.Integer, f (a), $.Maybe (f (a))],
     impl: drop
   };
 
-  //# dropLast :: Integer -> Array a -> Maybe (Array a)
+  //# takeLast :: (Applicative f, Foldable f, Monoid (f a)) => Integer -> f a -> Maybe (f a)
   //.
-  //. Returns Just all but the last N elements of the given array if N is
-  //. greater than or equal to zero and less than or equal to the length of
-  //. the array; Nothing otherwise.
+  //. Returns Just the last N elements of the given structure if N is
+  //. non-negative and less than or equal to the size of the structure;
+  //. Nothing otherwise.
   //.
   //. ```javascript
-  //. > S.dropLast (2) (['a', 'b', 'c', 'd', 'e'])
-  //. Just (['a', 'b', 'c'])
-  //.
-  //. > S.dropLast (5) (['a', 'b', 'c', 'd', 'e'])
+  //. > S.takeLast (0) (['foo', 'bar'])
   //. Just ([])
   //.
-  //. > S.dropLast (6) (['a', 'b', 'c', 'd', 'e'])
+  //. > S.takeLast (1) (['foo', 'bar'])
+  //. Just (['bar'])
+  //.
+  //. > S.takeLast (2) (['foo', 'bar'])
+  //. Just (['foo', 'bar'])
+  //.
+  //. > S.takeLast (3) (['foo', 'bar'])
   //. Nothing
+  //.
+  //. > S.takeLast (3) (Cons (1) (Cons (2) (Cons (3) (Cons (4) (Nil)))))
+  //. Just (Cons (2) (Cons (3) (Cons (4) (Nil))))
+  //. ```
+  function takeLast(n) {
+    return function(xs) {
+      return Z.map (Z.reverse, take (n) (Z.reverse (xs)));
+    };
+  }
+  _.takeLast = {
+    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    types: [$.Integer, f (a), $.Maybe (f (a))],
+    impl: takeLast
+  };
+
+  //# dropLast :: (Applicative f, Foldable f, Monoid (f a)) => Integer -> f a -> Maybe (f a)
+  //.
+  //. Returns Just all but the last N elements of the given structure if
+  //. N is non-negative and less than or equal to the size of the structure;
+  //. Nothing otherwise.
+  //.
+  //. ```javascript
+  //. > S.dropLast (0) (['foo', 'bar'])
+  //. Just (['foo', 'bar'])
+  //.
+  //. > S.dropLast (1) (['foo', 'bar'])
+  //. Just (['foo'])
+  //.
+  //. > S.dropLast (2) (['foo', 'bar'])
+  //. Just ([])
+  //.
+  //. > S.dropLast (3) (['foo', 'bar'])
+  //. Nothing
+  //.
+  //. > S.dropLast (3) (Cons (1) (Cons (2) (Cons (3) (Cons (4) (Nil)))))
+  //. Just (Cons (1) (Nil))
   //. ```
   function dropLast(n) {
     return function(xs) {
-      return n >= 0 && n <= xs.length ? Just (xs.slice (0, xs.length - n))
-                                      : Nothing;
+      return Z.map (Z.reverse, drop (n) (Z.reverse (xs)));
     };
   }
   _.dropLast = {
-    consts: {},
-    types: [$.Integer, $.Array (a), $Maybe ($.Array (a))],
+    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    types: [$.Integer, f (a), $.Maybe (f (a))],
     impl: dropLast
+  };
+
+  //# takeWhile :: (a -> Boolean) -> Array a -> Array a
+  //.
+  //. Discards the first element that does not satisfy the predicate,
+  //. and all subsequent elements.
+  //.
+  //. See also [`dropWhile`](#dropWhile).
+  //.
+  //. ```javascript
+  //. > S.takeWhile (S.odd) ([3, 3, 3, 7, 6, 3, 5, 4])
+  //. [3, 3, 3, 7]
+  //.
+  //. > S.takeWhile (S.even) ([3, 3, 3, 7, 6, 3, 5, 4])
+  //. []
+  //. ```
+  function takeWhile(pred) {
+    return function(xs) {
+      var idx = 0;
+      while (idx < xs.length && pred (xs[idx])) idx += 1;
+      return xs.slice (0, idx);
+    };
+  }
+  _.takeWhile = {
+    consts: {},
+    types: [$.Predicate (a), $.Array (a), $.Array (a)],
+    impl: takeWhile
+  };
+
+  //# dropWhile :: (a -> Boolean) -> Array a -> Array a
+  //.
+  //. Retains the first element that does not satisfy the predicate,
+  //. and all subsequent elements.
+  //.
+  //. See also [`takeWhile`](#takeWhile).
+  //.
+  //. ```javascript
+  //. > S.dropWhile (S.odd) ([3, 3, 3, 7, 6, 3, 5, 4])
+  //. [6, 3, 5, 4]
+  //.
+  //. > S.dropWhile (S.even) ([3, 3, 3, 7, 6, 3, 5, 4])
+  //. [3, 3, 3, 7, 6, 3, 5, 4]
+  //. ```
+  function dropWhile(pred) {
+    return function(xs) {
+      var idx = 0;
+      while (idx < xs.length && pred (xs[idx])) idx += 1;
+      return xs.slice (idx);
+    };
+  }
+  _.dropWhile = {
+    consts: {},
+    types: [$.Predicate (a), $.Array (a), $.Array (a)],
+    impl: dropWhile
   };
 
   //# size :: Foldable f => f a -> Integer
@@ -3524,7 +3247,7 @@
   //# find :: Foldable f => (a -> Boolean) -> f a -> Maybe a
   //.
   //. Takes a predicate and a structure and returns Just the leftmost element
-  //. of the structure which satisfies the predicate; Nothing if there is no
+  //. of the structure that satisfies the predicate; Nothing if there is no
   //. such element.
   //.
   //. See also [`elem`](#elem).
@@ -3549,7 +3272,7 @@
   }
   _.find = {
     consts: {f: [Z.Foldable]},
-    types: [$.Predicate (a), f (a), $Maybe (a)],
+    types: [$.Predicate (a), f (a), $.Maybe (a)],
     impl: find
   };
 
@@ -3567,7 +3290,7 @@
   //. ```
   _.foldMap = {
     consts: {b: [Z.Monoid], f: [Z.Foldable]},
-    types: [TypeRep (b), Fn (a) (b), f (a), b],
+    types: [TypeRep (b), $.Fn (a) (b), f (a), b],
     impl: curry3 (Z.foldMap)
   };
 
@@ -3598,7 +3321,7 @@
   }
   _.unfoldr = {
     consts: {},
-    types: [Fn (b) ($Maybe ($Pair (a) (b))), b, $.Array (a)],
+    types: [$.Fn (b) ($.Maybe ($.Pair (a) (b))), b, $.Array (a)],
     impl: unfoldr
   };
 
@@ -3666,7 +3389,7 @@
   }
   _.groupBy = {
     consts: {},
-    types: [Fn (a) ($.Predicate (a)), $.Array (a), $.Array ($.Array (a))],
+    types: [$.Fn (a) ($.Predicate (a)), $.Array (a), $.Array ($.Array (a))],
     impl: groupBy
   };
 
@@ -3758,7 +3481,7 @@
   //. ```
   _.sortBy = {
     consts: {b: [Z.Ord], m: [Z.Applicative, Z.Foldable, Z.Monoid]},
-    types: [Fn (a) (b), m (a), m (a)],
+    types: [$.Fn (a) (b), m (a), m (a)],
     impl: curry2 (Z.sortBy)
   };
 
@@ -3779,7 +3502,7 @@
   //. ```
   _.zip = {
     consts: {},
-    types: [$.Array (a), $.Array (b), $.Array ($Pair (a) (b))],
+    types: [$.Array (a), $.Array (b), $.Array ($.Pair (a) (b))],
     impl: zipWith (Pair)
   };
 
@@ -3812,7 +3535,7 @@
   }
   _.zipWith = {
     consts: {},
-    types: [Fn (a) (Fn (b) (c)), $.Array (a), $.Array (b), $.Array (c)],
+    types: [$.Fn (a) ($.Fn (b) (c)), $.Array (a), $.Array (b), $.Array (c)],
     impl: zipWith
   };
 
@@ -3903,7 +3626,7 @@
   }
   _.get = {
     consts: {},
-    types: [$.Predicate ($.Any), $.String, a, $Maybe (b)],
+    types: [$.Predicate ($.Any), $.String, a, $.Maybe (b)],
     impl: get
   };
 
@@ -3936,7 +3659,7 @@
   }
   _.gets = {
     consts: {},
-    types: [$.Predicate ($.Any), $.Array ($.String), a, $Maybe (b)],
+    types: [$.Predicate ($.Any), $.Array ($.String), a, $.Maybe (b)],
     impl: gets
   };
 
@@ -3976,7 +3699,7 @@
   }
   _.value = {
     consts: {},
-    types: [$.String, $.StrMap (a), $Maybe (a)],
+    types: [$.String, $.StrMap (a), $.Maybe (a)],
     impl: value
   };
 
@@ -4105,7 +3828,7 @@
   }
   _.pairs = {
     consts: {},
-    types: [$.StrMap (a), $.Array ($Pair ($.String) (a))],
+    types: [$.StrMap (a), $.Array ($.Pair ($.String) (a))],
     impl: pairs
   };
 
@@ -4130,7 +3853,7 @@
   }
   _.fromPairs = {
     consts: {f: [Z.Foldable]},
-    types: [f ($Pair ($.String) (a)), $.StrMap (a)],
+    types: [f ($.Pair ($.String) (a)), $.StrMap (a)],
     impl: fromPairs
   };
 
@@ -4332,7 +4055,7 @@
   }
   _.mean = {
     consts: {f: [Z.Foldable]},
-    types: [f ($.FiniteNumber), $Maybe ($.FiniteNumber)],
+    types: [f ($.FiniteNumber), $.Maybe ($.FiniteNumber)],
     impl: mean
   };
 
@@ -4408,7 +4131,7 @@
   }
   _.parseDate = {
     consts: {},
-    types: [$.String, $Maybe ($.ValidDate)],
+    types: [$.String, $.Maybe ($.ValidDate)],
     impl: parseDate
   };
 
@@ -4463,15 +4186,16 @@
   }
   _.parseFloat = {
     consts: {},
-    types: [$.String, $Maybe ($.Number)],
+    types: [$.String, $.Maybe ($.Number)],
     impl: parseFloat_
   };
 
   //  Radix :: Type
   var Radix = $.NullaryType
-    ('sanctuary/Radix')
+    ('Radix')
     ('')
-    (function(x) { return $.Integer._test (x) && x >= 2 && x <= 36; });
+    ([$.Integer])
+    (function(x) { return x >= 2 && x <= 36; });
 
   //# parseInt :: Radix -> String -> Maybe Integer
   //.
@@ -4502,20 +4226,20 @@
       var t = s.replace (/^[+-]/, '');
       if (pattern.test (radix === 16 ? t.replace (/^0x/i, '') : t)) {
         var n = parseInt (s, radix);
-        if ($.Integer._test (n)) return Just (n);
+        if ($.test ([]) ($.Integer) (n)) return Just (n);
       }
       return Nothing;
     };
   }
   _.parseInt = {
     consts: {},
-    types: [Radix, $.String, $Maybe ($.Integer)],
+    types: [Radix, $.String, $.Maybe ($.Integer)],
     impl: parseInt_
   };
 
   //# parseJson :: (Any -> Boolean) -> String -> Maybe a
   //.
-  //. Takes a predicate and a string which may or may not be valid JSON, and
+  //. Takes a predicate and a string that may or may not be valid JSON, and
   //. returns Just the result of applying `JSON.parse` to the string *if* the
   //. result satisfies the predicate; Nothing otherwise.
   //.
@@ -4533,11 +4257,11 @@
   //. Just ([1, 2, 3])
   //. ```
   function parseJson(pred) {
-    return B (filter (pred)) (encase (JSON.parse));
+    return B (filter (pred)) (B (eitherToMaybe) (encase (JSON.parse)));
   }
   _.parseJson = {
     consts: {},
-    types: [$.Predicate ($.Any), $.String, $Maybe (a)],
+    types: [$.Predicate ($.Any), $.String, $.Maybe (a)],
     impl: parseJson
   };
 
@@ -4546,12 +4270,15 @@
   //  Match :: Type
   var Match = $.RecordType ({
     match: $.String,
-    groups: $.Array ($Maybe ($.String))
+    groups: $.Array ($.Maybe ($.String))
   });
 
   //  toMatch :: Array String? -> Match
   function toMatch(ss) {
-    return {match: ss[0], groups: Z.map (toMaybe, ss.slice (1))};
+    return {
+      match: ss[0],
+      groups: Z.map (B (reject (equals (undefined))) (Just), ss.slice (1))
+    };
   }
 
   //  withRegex :: (RegExp, () -> a) -> a
@@ -4583,7 +4310,7 @@
 
   //# regexEscape :: String -> String
   //.
-  //. Takes a string which may contain regular expression metacharacters,
+  //. Takes a string that may contain regular expression metacharacters,
   //. and returns a string with those metacharacters escaped.
   //.
   //. Properties:
@@ -4652,12 +4379,13 @@
   //. ```
   function match(pattern) {
     return function(s) {
-      return Z.map (toMatch, toMaybe (s.match (pattern)));
+      return Z.map (toMatch,
+                    Z.reject (equals (null), Just (s.match (pattern))));
     };
   }
   _.match = {
     consts: {},
-    types: [$.NonGlobalRegExp, $.String, $Maybe (Match)],
+    types: [$.NonGlobalRegExp, $.String, $.Maybe (Match)],
     impl: match
   };
 
@@ -4685,7 +4413,7 @@
         return unfoldr (function(_) {
           return Z.map (function(ss) {
             return Pair (toMatch (ss)) (null);
-          }, toMaybe (pattern.exec (s)));
+          }, Z.reject (equals (null), Just (pattern.exec (s))));
         }) ([]);
       });
     };
@@ -4767,7 +4495,7 @@
   }
   _.stripPrefix = {
     consts: {},
-    types: [$.String, $.String, $Maybe ($.String)],
+    types: [$.String, $.String, $.Maybe ($.String)],
     impl: stripPrefix
   };
 
@@ -4794,7 +4522,7 @@
   }
   _.stripSuffix = {
     consts: {},
-    types: [$.String, $.String, $Maybe ($.String)],
+    types: [$.String, $.String, $.Maybe ($.String)],
     impl: stripSuffix
   };
 
@@ -4945,31 +4673,11 @@
   };
 
   return create ({
-    checkTypes: (
-      /* global process:false */
-      typeof process === 'undefined'
-      || process == null
-      || process.env == null
-      || process.env.NODE_ENV !== 'production'
-    ),
-    env: Z.concat ($.env, [
-      $.FiniteNumber,
-      $.NonZeroFiniteNumber,
-      $Either ($.Unknown) ($.Unknown),
-      Fn ($.Unknown) ($.Unknown),
-      $.GlobalRegExp,
-      $.NonGlobalRegExp,
-      $.Integer,
-      $.NonNegativeInteger,
-      $Maybe ($.Unknown),
-      $.Array2 ($.Unknown) ($.Unknown),
-      $Pair ($.Unknown) ($.Unknown),
-      $.RegexFlags,
-      $.Type,
-      $.TypeClass,
-      $.ValidDate,
-      $.ValidNumber
-    ])
+    checkTypes: typeof process === 'undefined'
+                || process == null
+                || process.env == null
+                || process.env.NODE_ENV !== 'production',
+    env: $.env
   });
 
 }));
@@ -4977,7 +4685,6 @@
 //. [#438]:                     https://github.com/sanctuary-js/sanctuary/issues/438
 //. [#488]:                     https://github.com/sanctuary-js/sanctuary/issues/488
 //. [Apply]:                    v:fantasyland/fantasy-land#apply
-//. [BinaryType]:               v:sanctuary-js/sanctuary-def#BinaryType
 //. [Chain]:                    v:fantasyland/fantasy-land#chain
 //. [Either]:                   #either-type
 //. [Fantasy Land]:             v:fantasyland/fantasy-land
@@ -4992,7 +4699,6 @@
 //. [Ramda]:                    http://ramdajs.com/
 //. [RegexFlags]:               v:sanctuary-js/sanctuary-def#RegexFlags
 //. [Semigroupoid]:             v:fantasyland/fantasy-land#semigroupoid
-//. [UnaryType]:                v:sanctuary-js/sanctuary-def#UnaryType
 //. [ValidDate]:                v:sanctuary-js/sanctuary-def#ValidDate
 //. [`$.test`]:                 v:sanctuary-js/sanctuary-def#test
 //. [`Descending`]:             v:sanctuary-js/sanctuary-descending#Descending
@@ -5009,7 +4715,6 @@
 //. [`Z.compose`]:              v:sanctuary-js/sanctuary-type-classes#compose
 //. [`Z.concat`]:               v:sanctuary-js/sanctuary-type-classes#concat
 //. [`Z.contramap`]:            v:sanctuary-js/sanctuary-type-classes#contramap
-//. [`Z.dropWhile`]:            v:sanctuary-js/sanctuary-type-classes#dropWhile
 //. [`Z.duplicate`]:            v:sanctuary-js/sanctuary-type-classes#duplicate
 //. [`Z.empty`]:                v:sanctuary-js/sanctuary-type-classes#empty
 //. [`Z.equals`]:               v:sanctuary-js/sanctuary-type-classes#equals
@@ -5031,7 +4736,6 @@
 //. [`Z.promap`]:               v:sanctuary-js/sanctuary-type-classes#promap
 //. [`Z.reject`]:               v:sanctuary-js/sanctuary-type-classes#reject
 //. [`Z.sequence`]:             v:sanctuary-js/sanctuary-type-classes#sequence
-//. [`Z.takeWhile`]:            v:sanctuary-js/sanctuary-type-classes#takeWhile
 //. [`Z.traverse`]:             v:sanctuary-js/sanctuary-type-classes#traverse
 //. [`Z.zero`]:                 v:sanctuary-js/sanctuary-type-classes#zero
 //. [`show`]:                   v:sanctuary-js/sanctuary-show#show

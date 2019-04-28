@@ -19,17 +19,24 @@
 
   'use strict';
 
+  var util = {inspect: {}};
+
   /* istanbul ignore else */
   if (typeof module === 'object' && typeof module.exports === 'object') {
-    module.exports = f (require ('sanctuary-show'),
+    module.exports = f (require ('util'),
+                        require ('sanctuary-show'),
                         require ('sanctuary-type-classes'));
   } else if (typeof define === 'function' && define.amd != null) {
-    define (['sanctuary-show', 'sanctuary-type-classes'], f);
+    define (['sanctuary-show', 'sanctuary-type-classes'], function(show, Z) {
+      return f (util, show, Z);
+    });
   } else {
-    self.sanctuaryMaybe = f (self.sanctuaryShow, self.sanctuaryTypeClasses);
+    self.sanctuaryMaybe = f (util,
+                             self.sanctuaryShow,
+                             self.sanctuaryTypeClasses);
   }
 
-} (function(show, Z) {
+} (function(util, show, Z) {
 
   'use strict';
 
@@ -88,16 +95,15 @@
     /* eslint-enable key-spacing */
   };
 
-  var util =
-    typeof module === 'object' && typeof module.exports === 'object' ?
-    require ('util') :
-    /* istanbul ignore next */ {};
-  var inspect =
-    util.inspect != null && typeof util.inspect.custom === 'symbol' ?
-    /* istanbul ignore next */ util.inspect.custom :
-    /* istanbul ignore next */ 'inspect';
-  Nothing$prototype[inspect] = Nothing$prototype$show;
-  Just$prototype[inspect] = Just$prototype$show;
+  var custom = util.inspect.custom;
+  /* istanbul ignore else */
+  if (typeof custom === 'symbol') {
+    Nothing$prototype[custom] = Nothing$prototype$show;
+    Just$prototype[custom] = Just$prototype$show;
+  } else {
+    Nothing$prototype.inspect = Nothing$prototype$show;
+    Just$prototype.inspect = Just$prototype$show;
+  }
 
   //. `Maybe a` satisfies the following [Fantasy Land][] specifications:
   //.
@@ -108,7 +114,7 @@
   //. .             (Z[k].test (Just (Useless)) ? '\u2705   ' :
   //. .              Z[k].test (Nothing)        ? '\u2705 * ' :
   //. .              /* otherwise */              '\u274C   '))
-  //. .       (S.keys (Z.filter ($.test ([]) ($.TypeClass), Z)))
+  //. .       (S.keys (S.unchecked.filter (S.is ($.TypeClass)) (Z)))
   //. [ 'Setoid          ✅ * ',  // if ‘a’ satisfies Setoid
   //. . 'Ord             ✅ * ',  // if ‘a’ satisfies Ord
   //. . 'Semigroupoid    ❌   ',
@@ -344,18 +350,17 @@
 
   //# Maybe#fantasy-land/filter :: Maybe a ~> (a -> Boolean) -> Maybe a
   //.
-  //.   - `filterM (p) (Nothing)` is equivalent to `Nothing`
-  //.   - `filterM (p) (Just (x))` is equivalent to
-  //.     `p (x) ? Just (x) : Nothing`
+  //.   - `filter (p) (Nothing)` is equivalent to `Nothing`
+  //.   - `filter (p) (Just (x))` is equivalent to `p (x) ? Just (x) : Nothing`
   //.
   //. ```javascript
-  //. > S.filterM (isFinite) (Nothing)
+  //. > S.filter (isFinite) (Nothing)
   //. Nothing
   //.
-  //. > S.filterM (isFinite) (Just (Infinity))
+  //. > S.filter (isFinite) (Just (Infinity))
   //. Nothing
   //.
-  //. > S.filterM (isFinite) (Just (Number.MAX_SAFE_INTEGER))
+  //. > S.filter (isFinite) (Just (Number.MAX_SAFE_INTEGER))
   //. Just (9007199254740991)
   //. ```
   function Nothing$prototype$filter(pred) {
