@@ -89,9 +89,6 @@ const reset             = ESCAPE + '[0m';
 const red               = ESCAPE + '[31m';
 const green             = ESCAPE + '[32m';
 
-//    Fn :: Type -> Type -> Type
-const Fn = x => y => $.Function ([x, y]);
-
 //    a :: Type
 const a = $.TypeVariable ('a');
 
@@ -282,7 +279,7 @@ def ('doctestsToMarkup')
 const syntax =
 def ('syntax')
     ({})
-    ([$.String, $.RegExp, Fn ($.String) (Html.Type), $.String, Html.Type])
+    ([$.String, $.RegExp, $.Fn ($.String) (Html.Type), $.String, Html.Type])
     (className => pattern => f => s =>
        prop ('html')
             (reduce (({highlight, html}) => s => ({
@@ -450,7 +447,7 @@ const customize =
 def ('customize')
     ({})
     ([$.String,
-      $.Either ($.String) (Fn ($.String) ($.Either ($.String) ($.String)))])
+      $.Either ($.String) ($.Fn ($.String) ($.Either ($.String) ($.String)))])
     (pipe ([readFile,
             map (splitOnRegex (/\n={79}\n\n/g)),
             chain (ifElse (compose (equals (2)) (prop ('length')))
