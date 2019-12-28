@@ -3,8 +3,8 @@ NPM = npm
 
 ADT = $(shell find adt -name '*.js' | sort)
 CUSTOM = $(shell find custom -name '*.md' | sort)
-VENDOR = ramda sanctuary sanctuary-def sanctuary-descending sanctuary-either sanctuary-identity sanctuary-maybe sanctuary-pair sanctuary-show sanctuary-type-classes sanctuary-type-identifiers
-VENDOR_CHECKS = $(patsubst %,check-%-version,$(VENDOR))
+VENDOR = ramda sanctuary-bundle sanctuary-descending sanctuary-identity
+VENDOR_CHECKS = $(patsubst %,check-%-version,$(filter-out sanctuary-bundle,$(VENDOR)))
 FILES = favicon.png index.html mask-icon.svg $(patsubst %,vendor/%.js,$(VENDOR))
 
 
@@ -22,6 +22,9 @@ mask-icon.svg: node_modules/sanctuary-logo/sanctuary-mask-icon.svg
 
 vendor/ramda.js: node_modules/ramda/dist/ramda.js
 	cp '$<' '$@'
+
+vendor/sanctuary-bundle.js: package.json
+	curl https://raw.githubusercontent.com/sanctuary-js/sanctuary/v$(shell jq -r .dependencies.sanctuary <'$<')/dist/bundle.js >'$@'
 
 vendor/%.js: node_modules/%/index.js
 	cp '$<' '$@'

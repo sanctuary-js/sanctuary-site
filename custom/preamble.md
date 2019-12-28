@@ -1,4 +1,4 @@
-# Sanctuary
+# <span id="section:sanctuary">❑ Sanctuary</span>
 
 [![npm](https://img.shields.io/npm/v/sanctuary.svg)](https://www.npmjs.com/package/sanctuary)
 [![CircleCI](https://img.shields.io/circleci/project/github/sanctuary-js/sanctuary/master.svg)](https://circleci.com/gh/sanctuary-js/sanctuary/tree/master)
@@ -6,4 +6,4 @@
 
 ===============================================================================
 
-## Overview
+## <span id="section:overview">❑ Overview</span>

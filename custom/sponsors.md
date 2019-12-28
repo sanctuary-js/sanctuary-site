@@ -1,8 +1,8 @@
-## Folktale
+## <span id="section:folktale">❑ Folktale</span>
 
 ===============================================================================
 
-## Sponsors
+## <span id="section:sponsors">❑ Sponsors</span>
 
 Development of Sanctuary is encouraged by the following generous supporters:
 
@@ -13,4 +13,4 @@ Development of Sanctuary is encouraged by the following generous supporters:
 [Become a sponsor](https://github.com/sponsors/davidchambers) if you would like
 the Sanctuary ecosystem to grow even stronger.
 
-## Folktale
+## <span id="section:folktale">❑ Folktale</span>
