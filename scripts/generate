@@ -83,7 +83,6 @@ const NO_BREAK_SPACE    = '\u00A0';
 const PILCROW_SIGN      = '\u00B6';
 const ZERO_WIDTH_SPACE  = '\u200B';
 const WORD_JOINER       = '\u2060';
-const SYMBOL_FOR_SPACE  = '\u2420';
 
 const reset             = ESCAPE + '[0m';
 const red               = ESCAPE + '[31m';
@@ -386,11 +385,7 @@ def ('generate')
                     (($0, $1, $2, $3) => Html.unwrap (headingToMarkup ($1) ($2) ($3))),
             replace (regex ('gm') ('^```javascript\\n(> [^]*?)^```\\n'))
                     (($0, $1) => Html.unwrap (doctestsToMarkup ($1))),
-            //  Replace NO-BREAK SPACE characters with SYMBOL FOR SPACE
-            //  characters to work around markedjs/marked#363.
-            replace (regex ('g') (NO_BREAK_SPACE)) (SYMBOL_FOR_SPACE),
             s => marked (s, {}),
-            replace (regex ('g') (SYMBOL_FOR_SPACE)) (NO_BREAK_SPACE),
             replace (regex ('g') (ZERO_WIDTH_SPACE)) (''),
             replace (/&#39;/g) ("'"),
             replace (/&gt;/g) ('>'),
