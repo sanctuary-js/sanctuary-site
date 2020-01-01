@@ -462,6 +462,8 @@ def ('readme')
             readFile,
             ap (customize ('custom/preamble.md')),
             join,
+            ap (customize ('custom/sponsors.md')),
+            join,
             ap (customize ('custom/type-error.md')),
             join,
             ap (customize ('custom/type-checking-sanctuary.md')),
