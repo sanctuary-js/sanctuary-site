@@ -10,7 +10,7 @@ S.add (2) (true);
 //
 //   The value at position 1 is not a member of ‘FiniteNumber’.
 //
-//   See https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.0#FiniteNumber for information about the FiniteNumber type.
+//   See https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber for information about the FiniteNumber type.
 ```
 
 ===============================================================================
@@ -27,5 +27,5 @@ add :: FiniteNumber -> FiniteNumber -> FiniteNumber
 
 The value at position 1 is not a member of ‘FiniteNumber’.
 
-See https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.0#FiniteNumber for information about the FiniteNumber type.
+See https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber for information about the FiniteNumber type.
 ```

@@ -3,8 +3,8 @@
   "private": true,
   "dependencies": {
     "ramda": "0.25.0",
-    "sanctuary": "2.0.0",
-    "sanctuary-def": "0.20.0",
+    "sanctuary": "2.0.1",
+    "sanctuary-def": "0.20.1",
     "sanctuary-descending": "1.2.0",
     "sanctuary-either": "1.2.0",
     "sanctuary-identity": "1.2.0",
