@@ -31,8 +31,6 @@
     }
   }
 
-  List['@@type'] = 'sanctuary-site/List';
-
   //  Nil :: List a
   var Nil = List.Nil = new _List ('Nil');
 
@@ -42,6 +40,9 @@
       return new _List ('Cons', head, tail);
     };
   };
+
+  //  listTypeIdent :: String
+  var listTypeIdent = List.prototype['@@type'] = 'sanctuary-site/List';
 
   List['fantasy-land/empty'] = function() { return Nil; };
 
@@ -107,7 +108,7 @@
     ('List')
     ('https://github.com/sanctuary-js/sanctuary-site/blob/gh-pages/adt/List.js')
     ([])
-    (function(x) { return type (x) === List['@@type']; })
+    (function(x) { return type (x) === listTypeIdent; })
     (function(list) { return list; });
 
   return List;

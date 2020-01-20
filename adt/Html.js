@@ -18,11 +18,14 @@
 
   var def = $.create ({checkTypes: true, env: []});
 
+  //  htmlTypeIdent :: String
+  var htmlTypeIdent = 'sanctuary-site/Html';
+
   var HtmlType = $.NullaryType
     ('Html')
     ('https://github.com/sanctuary-js/sanctuary-site/blob/gh-pages/adt/Html.js')
     ([])
-    (function(x) { return type (x) === Html['@@type']; });
+    (function(x) { return type (x) === htmlTypeIdent; });
 
   //  Html :: String -> Html
   var Html =
@@ -36,7 +39,7 @@
        });
 
   var Html$prototype = {
-    'constructor': Html,
+    '@@type': htmlTypeIdent,
     'fantasy-land/concat': function(other) {
       return Html (this.value + other.value);
     },
@@ -44,8 +47,6 @@
       return 'Html (' + show (this.value) + ')';
     }
   };
-
-  Html['@@type'] = 'sanctuary-site/Html';
 
   Html['fantasy-land/empty'] = function() { return Html (''); };
 

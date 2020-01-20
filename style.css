@@ -130,6 +130,7 @@ a code {
 pre {
   margin: 1.334em 0;
   padding: 0;
+  white-space: pre-wrap;
   line-height: 1.334;
 }
 
