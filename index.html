@@ -26,7 +26,7 @@
     </p>
   </div>
   <div id="css-main">
-    <h1 id="sanctuary">Sanctuary <small>v2.0.2</small></h1>
+    <h1 id="sanctuary">Sanctuary <small>v3.0.0</small></h1>
     <p id="tagline">Refuge from unsafe JavaScript</p>
 
     <ul id="toc">
@@ -394,7 +394,7 @@
                   <a href="#tagBy"><code><b>tagBy</b> :: (a -> Boolean) -> a -> Either a a</code></a>
                 </li>
                 <li>
-                  <a href="#encase"><code><b>encase</b> :: (a -> b) -> a -> Either Error b</code></a>
+                  <a href="#encase"><code><b>encase</b> :: Throwing e a b -> a -> Either e b</code></a>
                 </li>
                 <li>
                   <a href="#eitherToMaybe"><code><b>eitherToMaybe</b> :: Either a b -> Maybe b</code></a>
@@ -496,6 +496,9 @@
                 </li>
                 <li>
                   <a href="#find"><code><b>find</b> :: Foldable f => (a -> Boolean) -> f a -> Maybe a</code></a>
+                </li>
+                <li>
+                  <a href="#intercalate"><code><b>intercalate</b> :: (Monoid m, Foldable f) => m -> f m -> m</code></a>
                 </li>
                 <li>
                   <a href="#foldMap"><code><b>foldMap</b> :: (Monoid m, Foldable f) => TypeRep m -> (a -> m) -> f a -> m</code></a>
@@ -873,10 +876,10 @@ for transducers.</p>
 <a class="pilcrow h3" href="#section:modularity">¶</a>
 <h3 id="section:modularity">Modularity</h3>
 <p>Whereas Ramda has no dependencies, Sanctuary has a modular design:
-<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1">sanctuary-def</a> provides type checking, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0">sanctuary-type-classes</a>
-provides Fantasy Land functions and type classes, <a href="https://github.com/sanctuary-js/sanctuary-show/tree/v1.0.0">sanctuary-show</a>
+<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1">sanctuary-def</a> provides type checking, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0">sanctuary-type-classes</a>
+provides Fantasy Land functions and type classes, <a href="https://github.com/sanctuary-js/sanctuary-show/tree/v2.0.0">sanctuary-show</a>
 provides string representations, and algebraic data types are provided
-by <a href="https://github.com/sanctuary-js/sanctuary-either/tree/v1.2.0">sanctuary-either</a>, <a href="https://github.com/sanctuary-js/sanctuary-maybe/tree/v1.2.0">sanctuary-maybe</a>, and <a href="https://github.com/sanctuary-js/sanctuary-pair/tree/v1.2.0">sanctuary-pair</a>.
+by <a href="https://github.com/sanctuary-js/sanctuary-either/tree/v2.1.0">sanctuary-either</a>, <a href="https://github.com/sanctuary-js/sanctuary-maybe/tree/v2.1.0">sanctuary-maybe</a>, and <a href="https://github.com/sanctuary-js/sanctuary-pair/tree/v2.1.0">sanctuary-pair</a>.
 Not only does this approach reduce the complexity of Sanctuary itself,
 but it allows these components to be reused in other contexts.</p>
 <a class="pilcrow h2" href="#section:types">¶</a>
@@ -950,7 +953,7 @@ type signature, separated from the rest of the signature by a fat arrow
 (<code>=></code>).</p>
 <a class="pilcrow h2" href="#section:type-checking">¶</a>
 <h2 id="section:type-checking">Type checking</h2>
-<p>Sanctuary functions are defined via <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1">sanctuary-def</a> to provide run-time
+<p>Sanctuary functions are defined via <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1">sanctuary-def</a> to provide run-time
 type checking. This is tremendously useful during development: type errors
 are reported immediately, avoiding circuitous stack traces (at best) and
 silent failures due to type coercion (at worst). For example:</p>
@@ -967,7 +970,7 @@ add :: FiniteNumber -> FiniteNumber -> FiniteNumber
 
 The value at position 1 is not a member of ‘FiniteNumber’.
 
-See https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber for information about the FiniteNumber type.
+See https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber for information about the FiniteNumber type.
 </div>
   </form>
 </div>
@@ -995,20 +998,14 @@ via selective use of <a href="#unchecked"><code>unchecked</code></a> functions.<
 <a class="pilcrow h2" href="#section:installation">¶</a>
 <h2 id="section:installation">Installation</h2>
 <p><code>npm install sanctuary</code> will install Sanctuary for use in Node.js.</p>
-<p>Running Sanctuary in the browser is more involved. One must include a
-<code>&lt;script></code> for each dependency in addition to one for Sanctuary itself:</p>
-<pre><code class="language-html">&lt;script src=&quot;vendor/sanctuary-show.js&quot;>&lt;/script>
-&lt;script src=&quot;vendor/sanctuary-type-identifiers.js&quot;>&lt;/script>
-&lt;script src=&quot;vendor/sanctuary-type-classes.js&quot;>&lt;/script>
-&lt;script src=&quot;vendor/sanctuary-either.js&quot;>&lt;/script>
-&lt;script src=&quot;vendor/sanctuary-maybe.js&quot;>&lt;/script>
-&lt;script src=&quot;vendor/sanctuary-pair.js&quot;>&lt;/script>
-&lt;script src=&quot;vendor/sanctuary-def.js&quot;>&lt;/script>
-&lt;script src=&quot;vendor/sanctuary.js&quot;>&lt;/script>
+<p>To add Sanctuary to a website, first run the following command, replacing
+<code>X.Y.Z</code> with a version number greater than or equal to <code>2.0.2</code>:</p>
+<pre><code class="language-console">$ curl https://raw.githubusercontent.com/sanctuary-js/sanctuary/vX.Y.Z/dist/bundle.js >vendor/sanctuary-bundle.js
 </code></pre>
-<p>To ensure compatibility one should use the dependency versions specified
-in <strong>package.json</strong>.</p>
-<p>For convenience one could define aliases for various modules:</p>
+<p>Then reference the bundle from <strong>index.html</strong>:</p>
+<pre><code class="language-html">&lt;script src=&quot;vendor/sanctuary-bundle.js&quot;>&lt;/script>
+</code></pre>
+<p>Optionally, define aliases for various modules:</p>
 <pre><code class="language-javascript"><span class="keyword">const</span> S = window.sanctuary;
 <span class="keyword">const</span> $ = window.sanctuaryDef;
 <span class="comment">// ...</span>
@@ -1018,7 +1015,7 @@ in <strong>package.json</strong>.</p>
 <a class="pilcrow h3" href="#section:configure">¶</a>
 <h3 id="section:configure">Configure</h3>
 <a class="pilcrow h4" href="#create">¶</a>
-<h4 id="create"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L501">create</a> :: { checkTypes :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>, env :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Type">Type</a> } -> Module</code></h4>
+<h4 id="create"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L512">create</a> :: { checkTypes :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>, env :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Type">Type</a> } -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Module">Module</a></code></h4>
 <p>Takes an options record and returns a Sanctuary module. <code>checkTypes</code>
 specifies whether to enable type checking. The module's polymorphic
 functions (such as <a href="#I"><code>I</code></a>) require each value associated with a
@@ -1040,10 +1037,11 @@ descriptive error message.</p>
   <span class="keyword">return</span> identity;
 };
 
-Identity[<span class="string-literal">'@@type'</span>] = <span class="string-literal">'my-package/Identity@1'</span>;
+<span class="comment">//    identityTypeIdent :: String</span>
+<span class="keyword">const</span> identityTypeIdent = <span class="string-literal">'my-package/Identity@1'</span>;
 
 <span class="keyword">const</span> Identity$prototype = {
-  <span class="string-literal">'constructor'</span>: Identity,
+  <span class="string-literal">'@@type'</span>: identityTypeIdent,
   <span class="string-literal">'@@show'</span>: <span class="keyword">function</span>() { <span class="keyword">return</span> <span class="template-literal">`Identity (</span><span class="punctuation">${</span>S.show (<span class="keyword">this</span>.value)<span class="punctuation">}</span><span class="template-literal">)`</span>; },
   <span class="string-literal">'fantasy-land/map'</span>: <span class="keyword">function</span>(f) { <span class="keyword">return</span> Identity (f (<span class="keyword">this</span>.value)); },
 };
@@ -1053,7 +1051,7 @@ Identity[<span class="string-literal">'@@type'</span>] = <span class="string-lit
   (<span class="string-literal">'Identity'</span>)
   (<span class="string-literal">'http://example.com/my-package#Identity'</span>)
   ([])
-  (x => type (x) === Identity[<span class="string-literal">'@@type'</span>])
+  (x => type (x) === identityTypeIdent)
   (identity => [identity.value]);
 
 <span class="keyword">const</span> S = create ({
@@ -1066,18 +1064,18 @@ S.map (S.sub (<span class="number-literal">1</span>)) (Identity (<span class="nu
 </code></pre>
 <p>See also <a href="#env"><code>env</code></a>.</p>
 <a class="pilcrow h4" href="#env">¶</a>
-<h4 id="env"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L576">env</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Type">Type</a></code></h4>
+<h4 id="env"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L588">env</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Type">Type</a></code></h4>
 <p>The Sanctuary module's environment (<code>(S.create ({checkTypes, env})).env</code>
 is a reference to <code>env</code>). Useful in conjunction with <a href="#create"><code>create</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.env">
-    <div class="output">[Function, Arguments, Array Unknown, Array2 Unknown Unknown, Boolean, Date, Descending Unknown, Either Unknown Unknown, Error, Unknown -> Unknown, HtmlElement, Identity Unknown, Maybe Unknown, Null, Number, Object, Pair Unknown Unknown, RegExp, StrMap Unknown, String, Symbol, Type, TypeClass, Undefined]</div>
+    <div class="output">[Function, Arguments, Array Unknown, Array2 Unknown Unknown, Boolean, Date, Descending Unknown, Either Unknown Unknown, Error, Unknown -> Unknown, HtmlElement, Identity Unknown, JsMap Unknown Unknown, JsSet Unknown, Maybe Unknown, Module, Null, Number, Object, Pair Unknown Unknown, RegExp, StrMap Unknown, String, Symbol, Type, TypeClass, Undefined]</div>
   </form>
 </div>
 
 <a class="pilcrow h4" href="#unchecked">¶</a>
-<h4 id="unchecked"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L609">unchecked</a> :: Module</code></h4>
+<h4 id="unchecked"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L624">unchecked</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Module">Module</a></code></h4>
 <p>A complete Sanctuary module that performs no type checking. This is
 useful as it permits operations that Sanctuary's type checking would
 disallow, such as mapping over an object with heterogeneous values.</p>
@@ -1100,8 +1098,8 @@ disallow, such as mapping over an object with heterogeneous values.</p>
 <a class="pilcrow h3" href="#section:classify">¶</a>
 <h3 id="section:classify">Classify</h3>
 <a class="pilcrow h4" href="#type">¶</a>
-<h4 id="type"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L631">type</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Any">Any</a> -> { namespace :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a>, name :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a>, version :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#NonNegativeInteger">NonNegativeInteger</a> }</code></h4>
-<p>Returns the result of parsing the <a href="https://github.com/sanctuary-js/sanctuary-type-identifiers/tree/v2.0.1">type identifier</a> of the given value.</p>
+<h4 id="type"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L646">type</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Any">Any</a> -> { namespace :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a>, name :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a>, version :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#NonNegativeInteger">NonNegativeInteger</a> }</code></h4>
+<p>Returns the result of parsing the <a href="https://github.com/sanctuary-js/sanctuary-type-identifiers/tree/v3.0.0">type identifier</a> of the given value.</p>
 <div class="examples">
   <form>
     <input value="S.type (S.Just (42))">
@@ -1114,9 +1112,9 @@ disallow, such as mapping over an object with heterogeneous values.</p>
 </div>
 
 <a class="pilcrow h4" href="#is">¶</a>
-<h4 id="is"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L656">is</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Type">Type</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="is"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L671">is</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Type">Type</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> <a href="https://en.wikipedia.org/wiki/If_and_only_if">iff</a> the given value is a member of the specified type.
-See <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#test"><code>$.test</code></a> for details.</p>
+See <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#test"><code>$.test</code></a> for details.</p>
 <div class="examples">
   <form>
     <input value="S.is ($.Array ($.Integer)) ([1, 2, 3])">
@@ -1131,8 +1129,8 @@ See <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#test"><c
 <a class="pilcrow h3" href="#section:showable">¶</a>
 <h3 id="section:showable">Showable</h3>
 <a class="pilcrow h4" href="#show">¶</a>
-<h4 id="show"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L671">show</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
-<p>Alias of <a href="https://github.com/sanctuary-js/sanctuary-show/tree/v1.0.0#show"><code>show</code></a>.</p>
+<h4 id="show"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L686">show</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
+<p>Alias of <a href="https://github.com/sanctuary-js/sanctuary-show/tree/v2.0.0#show"><code>show</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.show (-0)">
@@ -1156,8 +1154,8 @@ See <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#test"><c
 <h3 id="section:fantasy-land">Fantasy Land</h3>
 <p>Sanctuary is compatible with the <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1">Fantasy Land</a> specification.</p>
 <a class="pilcrow h4" href="#equals">¶</a>
-<h4 id="equals"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L698">equals</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Setoid">Setoid</a> a => a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#equals"><code>Z.equals</code></a> that requires two arguments of the
+<h4 id="equals"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L713">equals</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Setoid">Setoid</a> a => a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#equals"><code>Z.equals</code></a> that requires two arguments of the
 same type.</p>
 <p>To compare values of different types first use <a href="#create"><code>create</code></a> to
 create a Sanctuary module with type checking disabled, then use that
@@ -1182,9 +1180,9 @@ module's <code>equals</code> function.</p>
 </div>
 
 <a class="pilcrow h4" href="#lt">¶</a>
-<h4 id="lt"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L731">lt</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Ord">Ord</a> a => a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="lt"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L746">lt</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Ord">Ord</a> a => a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> <a href="https://en.wikipedia.org/wiki/If_and_only_if">iff</a> the <em>second</em> argument is less than the first
-according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#lt"><code>Z.lt</code></a>.</p>
+according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#lt"><code>Z.lt</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.filter (S.lt (3)) ([1, 2, 3, 4, 5])">
@@ -1193,9 +1191,9 @@ according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tre
 </div>
 
 <a class="pilcrow h4" href="#lte">¶</a>
-<h4 id="lte"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L751">lte</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Ord">Ord</a> a => a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="lte"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L766">lte</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Ord">Ord</a> a => a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> <a href="https://en.wikipedia.org/wiki/If_and_only_if">iff</a> the <em>second</em> argument is less than or equal to
-the first according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#lte"><code>Z.lte</code></a>.</p>
+the first according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#lte"><code>Z.lte</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.filter (S.lte (3)) ([1, 2, 3, 4, 5])">
@@ -1204,9 +1202,9 @@ the first according to <a href="https://github.com/sanctuary-js/sanctuary-type-c
 </div>
 
 <a class="pilcrow h4" href="#gt">¶</a>
-<h4 id="gt"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L771">gt</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Ord">Ord</a> a => a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="gt"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L786">gt</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Ord">Ord</a> a => a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> <a href="https://en.wikipedia.org/wiki/If_and_only_if">iff</a> the <em>second</em> argument is greater than the first
-according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#gt"><code>Z.gt</code></a>.</p>
+according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#gt"><code>Z.gt</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.filter (S.gt (3)) ([1, 2, 3, 4, 5])">
@@ -1215,9 +1213,9 @@ according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tre
 </div>
 
 <a class="pilcrow h4" href="#gte">¶</a>
-<h4 id="gte"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L791">gte</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Ord">Ord</a> a => a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="gte"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L806">gte</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Ord">Ord</a> a => a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> <a href="https://en.wikipedia.org/wiki/If_and_only_if">iff</a> the <em>second</em> argument is greater than or equal
-to the first according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#gte"><code>Z.gte</code></a>.</p>
+to the first according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#gte"><code>Z.gte</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.filter (S.gte (3)) ([1, 2, 3, 4, 5])">
@@ -1226,8 +1224,8 @@ to the first according to <a href="https://github.com/sanctuary-js/sanctuary-typ
 </div>
 
 <a class="pilcrow h4" href="#min">¶</a>
-<h4 id="min"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L811">min</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Ord">Ord</a> a => a -> a -> a</code></h4>
-<p>Returns the smaller of its two arguments (according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#lte"><code>Z.lte</code></a>).</p>
+<h4 id="min"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L826">min</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Ord">Ord</a> a => a -> a -> a</code></h4>
+<p>Returns the smaller of its two arguments (according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#lte"><code>Z.lte</code></a>).</p>
 <p>See also <a href="#max"><code>max</code></a>.</p>
 <div class="examples">
   <form>
@@ -1245,8 +1243,8 @@ to the first according to <a href="https://github.com/sanctuary-js/sanctuary-typ
 </div>
 
 <a class="pilcrow h4" href="#max">¶</a>
-<h4 id="max"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L833">max</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Ord">Ord</a> a => a -> a -> a</code></h4>
-<p>Returns the larger of its two arguments (according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#lte"><code>Z.lte</code></a>).</p>
+<h4 id="max"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L848">max</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Ord">Ord</a> a => a -> a -> a</code></h4>
+<p>Returns the larger of its two arguments (according to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#lte"><code>Z.lte</code></a>).</p>
 <p>See also <a href="#min"><code>min</code></a>.</p>
 <div class="examples">
   <form>
@@ -1264,7 +1262,7 @@ to the first according to <a href="https://github.com/sanctuary-js/sanctuary-typ
 </div>
 
 <a class="pilcrow h4" href="#clamp">¶</a>
-<h4 id="clamp"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L855">clamp</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Ord">Ord</a> a => a -> a -> a -> a</code></h4>
+<h4 id="clamp"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L870">clamp</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Ord">Ord</a> a => a -> a -> a -> a</code></h4>
 <p>Takes a lower bound, an upper bound, and a value of the same type.
 Returns the value if it is within the bounds; the nearer bound otherwise.</p>
 <p>See also <a href="#min"><code>min</code></a> and <a href="#max"><code>max</code></a>.</p>
@@ -1284,8 +1282,8 @@ Returns the value if it is within the bounds; the nearer bound otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#id">¶</a>
-<h4 id="id"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L878">id</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Category">Category</a> c => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> c -> c</code></h4>
-<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#id"><code>Z.id</code></a>.</p>
+<h4 id="id"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L893">id</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Category">Category</a> c => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> c -> c</code></h4>
+<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#id"><code>Z.id</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.id (Function) (42)">
@@ -1294,8 +1292,8 @@ Returns the value if it is within the bounds; the nearer bound otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#concat">¶</a>
-<h4 id="concat"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L892">concat</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Semigroup">Semigroup</a> a => a -> a -> a</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#concat"><code>Z.concat</code></a>.</p>
+<h4 id="concat"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L907">concat</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Semigroup">Semigroup</a> a => a -> a -> a</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#concat"><code>Z.concat</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.concat ('abc') ('def')">
@@ -1320,8 +1318,8 @@ Returns the value if it is within the bounds; the nearer bound otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#empty">¶</a>
-<h4 id="empty"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L918">empty</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Monoid">Monoid</a> a => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> a -> a</code></h4>
-<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#empty"><code>Z.empty</code></a>.</p>
+<h4 id="empty"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L933">empty</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> a => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> a -> a</code></h4>
+<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#empty"><code>Z.empty</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.empty (String)">
@@ -1342,8 +1340,8 @@ Returns the value if it is within the bounds; the nearer bound otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#invert">¶</a>
-<h4 id="invert"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L941">invert</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Group">Group</a> g => g -> g</code></h4>
-<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#invert"><code>Z.invert</code></a>.</p>
+<h4 id="invert"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L956">invert</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Group">Group</a> g => g -> g</code></h4>
+<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#invert"><code>Z.invert</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.invert (Sum (5))">
@@ -1352,8 +1350,8 @@ Returns the value if it is within the bounds; the nearer bound otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#filter">¶</a>
-<h4 id="filter"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L955">filter</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Filterable">Filterable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> f a -> f a</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#filter"><code>Z.filter</code></a>. Discards every element that does not
+<h4 id="filter"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L970">filter</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Filterable">Filterable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> f a -> f a</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#filter"><code>Z.filter</code></a>. Discards every element that does not
 satisfy the predicate.</p>
 <p>See also <a href="#reject"><code>reject</code></a>.</p>
 <div class="examples">
@@ -1380,8 +1378,8 @@ satisfy the predicate.</p>
 </div>
 
 <a class="pilcrow h4" href="#reject">¶</a>
-<h4 id="reject"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L989">reject</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Filterable">Filterable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> f a -> f a</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#reject"><code>Z.reject</code></a>. Discards every element that satisfies
+<h4 id="reject"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1004">reject</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Filterable">Filterable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> f a -> f a</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#reject"><code>Z.reject</code></a>. Discards every element that satisfies
 the predicate.</p>
 <p>See also <a href="#filter"><code>filter</code></a>.</p>
 <div class="examples">
@@ -1408,8 +1406,8 @@ the predicate.</p>
 </div>
 
 <a class="pilcrow h4" href="#map">¶</a>
-<h4 id="map"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1023">map</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Functor">Functor</a> f => (a -> b) -> f a -> f b</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#map"><code>Z.map</code></a>.</p>
+<h4 id="map"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1038">map</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Functor">Functor</a> f => (a -> b) -> f a -> f b</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#map"><code>Z.map</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.map (Math.sqrt) ([1, 4, 9])">
@@ -1450,8 +1448,8 @@ from combinatory logic (i.e. <a href="#compose"><code>compose</code></a>):</p>
 </div>
 
 <a class="pilcrow h4" href="#flip">¶</a>
-<h4 id="flip"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1069">flip</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Functor">Functor</a> f => f (a -> b) -> a -> f b</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#flip"><code>Z.flip</code></a>. Maps over the given functions, applying
+<h4 id="flip"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1084">flip</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Functor">Functor</a> f => f (a -> b) -> a -> f b</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#flip"><code>Z.flip</code></a>. Maps over the given functions, applying
 each to the given value.</p>
 <p>Replacing <code>Functor f => f</code> with <code>Function x</code> produces the C combinator
 from combinatory logic:</p>
@@ -1482,8 +1480,8 @@ Function a (b -> c) -> b -> Function a c
 </div>
 
 <a class="pilcrow h4" href="#bimap">¶</a>
-<h4 id="bimap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1103">bimap</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Bifunctor">Bifunctor</a> f => (a -> b) -> (c -> d) -> f a c -> f b d</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#bimap"><code>Z.bimap</code></a>.</p>
+<h4 id="bimap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1118">bimap</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Bifunctor">Bifunctor</a> f => (a -> b) -> (c -> d) -> f a c -> f b d</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#bimap"><code>Z.bimap</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.bimap (S.toUpper) (Math.sqrt) (S.Pair ('foo') (64))">
@@ -1500,8 +1498,8 @@ Function a (b -> c) -> b -> Function a c
 </div>
 
 <a class="pilcrow h4" href="#mapLeft">¶</a>
-<h4 id="mapLeft"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1123">mapLeft</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Bifunctor">Bifunctor</a> f => (a -> b) -> f a c -> f b c</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#mapLeft"><code>Z.mapLeft</code></a>. Maps the given function over the left
+<h4 id="mapLeft"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1138">mapLeft</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Bifunctor">Bifunctor</a> f => (a -> b) -> f a c -> f b c</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#mapLeft"><code>Z.mapLeft</code></a>. Maps the given function over the left
 side of a Bifunctor.</p>
 <div class="examples">
   <form>
@@ -1519,8 +1517,8 @@ side of a Bifunctor.</p>
 </div>
 
 <a class="pilcrow h4" href="#promap">¶</a>
-<h4 id="promap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1144">promap</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Profunctor">Profunctor</a> p => (a -> b) -> (c -> d) -> p b c -> p a d</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#promap"><code>Z.promap</code></a>.</p>
+<h4 id="promap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1159">promap</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Profunctor">Profunctor</a> p => (a -> b) -> (c -> d) -> p b c -> p a d</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#promap"><code>Z.promap</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.promap (Math.abs) (S.add (1)) (Math.sqrt) (-100)">
@@ -1529,8 +1527,8 @@ side of a Bifunctor.</p>
 </div>
 
 <a class="pilcrow h4" href="#alt">¶</a>
-<h4 id="alt"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1158">alt</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Alt">Alt</a> f => f a -> f a -> f a</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#alt"><code>Z.alt</code></a> with arguments flipped to facilitate
+<h4 id="alt"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1173">alt</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Alt">Alt</a> f => f a -> f a -> f a</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#alt"><code>Z.alt</code></a> with arguments flipped to facilitate
 partial application.</p>
 <div class="examples">
   <form>
@@ -1552,8 +1550,8 @@ partial application.</p>
 </div>
 
 <a class="pilcrow h4" href="#zero">¶</a>
-<h4 id="zero"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1187">zero</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Plus">Plus</a> f => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> f -> f a</code></h4>
-<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#zero"><code>Z.zero</code></a>.</p>
+<h4 id="zero"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1202">zero</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Plus">Plus</a> f => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> f -> f a</code></h4>
+<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#zero"><code>Z.zero</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.zero (Array)">
@@ -1570,7 +1568,7 @@ partial application.</p>
 </div>
 
 <a class="pilcrow h4" href="#reduce">¶</a>
-<h4 id="reduce"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1207">reduce</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => (b -> a -> b) -> b -> f a -> b</code></h4>
+<h4 id="reduce"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1222">reduce</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => (b -> a -> b) -> b -> f a -> b</code></h4>
 <p>Takes a curried binary function, an initial value, and a <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#foldable">Foldable</a>,
 and applies the function to the initial value and the Foldable's first
 value, then applies the function to the result of the previous
@@ -1590,8 +1588,8 @@ otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#traverse">¶</a>
-<h4 id="traverse"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1239">traverse</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Traversable">Traversable</a> t) => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> f -> (a -> f b) -> t a -> f (t b)</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#traverse"><code>Z.traverse</code></a>.</p>
+<h4 id="traverse"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1254">traverse</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Traversable">Traversable</a> t) => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> f -> (a -> f b) -> t a -> f (t b)</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#traverse"><code>Z.traverse</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.traverse (Array) (S.words) (S.Just ('foo bar baz'))">
@@ -1620,8 +1618,8 @@ otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#sequence">¶</a>
-<h4 id="sequence"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1268">sequence</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Traversable">Traversable</a> t) => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> f -> t (f a) -> f (t a)</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#sequence"><code>Z.sequence</code></a>. Inverts the given <code>t (f a)</code>
+<h4 id="sequence"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1283">sequence</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Traversable">Traversable</a> t) => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> f -> t (f a) -> f (t a)</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#sequence"><code>Z.sequence</code></a>. Inverts the given <code>t (f a)</code>
 to produce an <code>f (t a)</code>.</p>
 <div class="examples">
   <form>
@@ -1647,8 +1645,8 @@ to produce an <code>f (t a)</code>.</p>
 </div>
 
 <a class="pilcrow h4" href="#ap">¶</a>
-<h4 id="ap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1295">ap</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Apply">Apply</a> f => f (a -> b) -> f a -> f b</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#ap"><code>Z.ap</code></a>.</p>
+<h4 id="ap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1310">ap</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Apply">Apply</a> f => f (a -> b) -> f a -> f b</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#ap"><code>Z.ap</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.ap ([Math.sqrt, x => x * x]) ([1, 4, 9, 16, 25])">
@@ -1681,7 +1679,7 @@ Function a (b -> c) -> Function a b -> Function a c
 </div>
 
 <a class="pilcrow h4" href="#lift2">¶</a>
-<h4 id="lift2"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1330">lift2</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Apply">Apply</a> f => (a -> b -> c) -> f a -> f b -> f c</code></h4>
+<h4 id="lift2"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1345">lift2</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Apply">Apply</a> f => (a -> b -> c) -> f a -> f b -> f c</code></h4>
 <p>Promotes a curried binary function to a function that operates on two
 <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#apply">Apply</a>s.</p>
 <div class="examples">
@@ -1704,7 +1702,7 @@ Function a (b -> c) -> Function a b -> Function a c
 </div>
 
 <a class="pilcrow h4" href="#lift3">¶</a>
-<h4 id="lift3"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1354">lift3</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Apply">Apply</a> f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d</code></h4>
+<h4 id="lift3"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1369">lift3</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Apply">Apply</a> f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d</code></h4>
 <p>Promotes a curried ternary function to a function that operates on three
 <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#apply">Apply</a>s.</p>
 <div class="examples">
@@ -1719,8 +1717,8 @@ Function a (b -> c) -> Function a b -> Function a c
 </div>
 
 <a class="pilcrow h4" href="#apFirst">¶</a>
-<h4 id="apFirst"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1372">apFirst</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Apply">Apply</a> f => f a -> f b -> f a</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#apFirst"><code>Z.apFirst</code></a>. Combines two effectful actions,
+<h4 id="apFirst"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1387">apFirst</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Apply">Apply</a> f => f a -> f b -> f a</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#apFirst"><code>Z.apFirst</code></a>. Combines two effectful actions,
 keeping only the result of the first. Equivalent to Haskell's <code>(&lt;*)</code>
 function.</p>
 <p>See also <a href="#apSecond"><code>apSecond</code></a>.</p>
@@ -1736,8 +1734,8 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#apSecond">¶</a>
-<h4 id="apSecond"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1393">apSecond</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Apply">Apply</a> f => f a -> f b -> f b</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#apSecond"><code>Z.apSecond</code></a>. Combines two effectful actions,
+<h4 id="apSecond"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1408">apSecond</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Apply">Apply</a> f => f a -> f b -> f b</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#apSecond"><code>Z.apSecond</code></a>. Combines two effectful actions,
 keeping only the result of the second. Equivalent to Haskell's <code>(*>)</code>
 function.</p>
 <p>See also <a href="#apFirst"><code>apFirst</code></a>.</p>
@@ -1753,8 +1751,8 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#of">¶</a>
-<h4 id="of"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1414">of</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> f -> a -> f a</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#of"><code>Z.of</code></a>.</p>
+<h4 id="of"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1429">of</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> f -> a -> f a</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#of"><code>Z.of</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.of (Array) (42)">
@@ -1775,8 +1773,8 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#chain">¶</a>
-<h4 id="chain"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1442">chain</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Chain">Chain</a> m => (a -> m b) -> m a -> m b</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#chain"><code>Z.chain</code></a>.</p>
+<h4 id="chain"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1457">chain</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Chain">Chain</a> m => (a -> m b) -> m a -> m b</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#chain"><code>Z.chain</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.chain (x => [x, x]) ([1, 2, 3])">
@@ -1797,8 +1795,8 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#join">¶</a>
-<h4 id="join"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1465">join</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Chain">Chain</a> m => m (m a) -> m a</code></h4>
-<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#join"><code>Z.join</code></a>.
+<h4 id="join"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1480">join</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Chain">Chain</a> m => m (m a) -> m a</code></h4>
+<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#join"><code>Z.join</code></a>.
 Removes one level of nesting from a nested monadic structure.</p>
 <div class="examples">
   <form>
@@ -1833,9 +1831,9 @@ Function x (Function x a) -> Function x a
 </div>
 
 <a class="pilcrow h4" href="#chainRec">¶</a>
-<h4 id="chainRec"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1501">chainRec</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#ChainRec">ChainRec</a> m => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> m -> (a -> m (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a b)) -> a -> m b</code></h4>
+<h4 id="chainRec"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1516">chainRec</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#ChainRec">ChainRec</a> m => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> m -> (a -> m (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a b)) -> a -> m b</code></h4>
 <p>Performs a <a href="#chain"><code>chain</code></a>-like computation with constant stack usage.
-Similar to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#chainRec"><code>Z.chainRec</code></a>, but curried and more convenient due to the
+Similar to <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#chainRec"><code>Z.chainRec</code></a>, but curried and more convenient due to the
 use of the Either type to indicate completion (via a Right).</p>
 <div class="examples">
   <form>
@@ -1845,8 +1843,8 @@ use of the Either type to indicate completion (via a Right).</p>
 </div>
 
 <a class="pilcrow h4" href="#extend">¶</a>
-<h4 id="extend"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1530">extend</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Extend">Extend</a> w => (w a -> b) -> w a -> w b</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#extend"><code>Z.extend</code></a>.</p>
+<h4 id="extend"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1545">extend</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Extend">Extend</a> w => (w a -> b) -> w a -> w b</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#extend"><code>Z.extend</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.extend (S.joinWith ('')) (['x', 'y', 'z'])">
@@ -1859,8 +1857,8 @@ use of the Either type to indicate completion (via a Right).</p>
 </div>
 
 <a class="pilcrow h4" href="#duplicate">¶</a>
-<h4 id="duplicate"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1547">duplicate</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Extend">Extend</a> w => w a -> w (w a)</code></h4>
-<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#duplicate"><code>Z.duplicate</code></a>.
+<h4 id="duplicate"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1562">duplicate</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Extend">Extend</a> w => w a -> w (w a)</code></h4>
+<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#duplicate"><code>Z.duplicate</code></a>.
 Adds one level of nesting to a comonadic structure.</p>
 <div class="examples">
   <form>
@@ -1882,8 +1880,8 @@ Adds one level of nesting to a comonadic structure.</p>
 </div>
 
 <a class="pilcrow h4" href="#extract">¶</a>
-<h4 id="extract"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1571">extract</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Comonad">Comonad</a> w => w a -> a</code></h4>
-<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#extract"><code>Z.extract</code></a>.</p>
+<h4 id="extract"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1586">extract</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Comonad">Comonad</a> w => w a -> a</code></h4>
+<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#extract"><code>Z.extract</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.extract (S.Pair ('foo') ('bar'))">
@@ -1892,8 +1890,8 @@ Adds one level of nesting to a comonadic structure.</p>
 </div>
 
 <a class="pilcrow h4" href="#contramap">¶</a>
-<h4 id="contramap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1585">contramap</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Contravariant">Contravariant</a> f => (b -> a) -> f a -> f b</code></h4>
-<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#contramap"><code>Z.contramap</code></a>.</p>
+<h4 id="contramap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1600">contramap</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Contravariant">Contravariant</a> f => (b -> a) -> f a -> f b</code></h4>
+<p><a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1">Type-safe</a> version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#contramap"><code>Z.contramap</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.contramap (s => s.length) (Math.sqrt) ('Sanctuary')">
@@ -1904,7 +1902,7 @@ Adds one level of nesting to a comonadic structure.</p>
 <a class="pilcrow h3" href="#section:combinator">¶</a>
 <h3 id="section:combinator">Combinator</h3>
 <a class="pilcrow h4" href="#I">¶</a>
-<h4 id="I"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1601">I</a> :: a -> a</code></h4>
+<h4 id="I"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1616">I</a> :: a -> a</code></h4>
 <p>The I combinator. Returns its argument. Equivalent to Haskell's <code>id</code>
 function.</p>
 <div class="examples">
@@ -1915,7 +1913,7 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#K">¶</a>
-<h4 id="K"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1619">K</a> :: a -> b -> a</code></h4>
+<h4 id="K"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1634">K</a> :: a -> b -> a</code></h4>
 <p>The K combinator. Takes two values and returns the first. Equivalent to
 Haskell's <code>const</code> function.</p>
 <div class="examples">
@@ -1930,7 +1928,7 @@ Haskell's <code>const</code> function.</p>
 </div>
 
 <a class="pilcrow h4" href="#T">¶</a>
-<h4 id="T"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1642">T</a> :: a -> (a -> b) -> b</code></h4>
+<h4 id="T"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1657">T</a> :: a -> (a -> b) -> b</code></h4>
 <p>The T (<a href="https://github.com/raganwald-deprecated/homoiconic/blob/master/2008-10-30/thrush.markdown">thrush</a>) combinator. Takes a value and a function, and returns
 the result of applying the function to the value. Equivalent to Haskell's
 <code>(&amp;)</code> function.</p>
@@ -1948,7 +1946,7 @@ the result of applying the function to the value. Equivalent to Haskell's
 <a class="pilcrow h3" href="#section:function">¶</a>
 <h3 id="section:function">Function</h3>
 <a class="pilcrow h4" href="#curry2">¶</a>
-<h4 id="curry2"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1668">curry2</a> :: ((a, b) -> c) -> a -> b -> c</code></h4>
+<h4 id="curry2"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1683">curry2</a> :: ((a, b) -> c) -> a -> b -> c</code></h4>
 <p>Curries the given binary function.</p>
 <div class="examples">
   <form>
@@ -1958,7 +1956,7 @@ the result of applying the function to the value. Equivalent to Haskell's
 </div>
 
 <a class="pilcrow h4" href="#curry3">¶</a>
-<h4 id="curry3"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1689">curry3</a> :: ((a, b, c) -> d) -> a -> b -> c -> d</code></h4>
+<h4 id="curry3"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1704">curry3</a> :: ((a, b, c) -> d) -> a -> b -> c -> d</code></h4>
 <p>Curries the given ternary function.</p>
 <div class="examples">
   <form>
@@ -1972,7 +1970,7 @@ the result of applying the function to the value. Equivalent to Haskell's
 </div>
 
 <a class="pilcrow h4" href="#curry4">¶</a>
-<h4 id="curry4"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1716">curry4</a> :: ((a, b, c, d) -> e) -> a -> b -> c -> d -> e</code></h4>
+<h4 id="curry4"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1731">curry4</a> :: ((a, b, c, d) -> e) -> a -> b -> c -> d -> e</code></h4>
 <p>Curries the given quaternary function.</p>
 <div class="examples">
   <form>
@@ -1986,7 +1984,7 @@ the result of applying the function to the value. Equivalent to Haskell's
 </div>
 
 <a class="pilcrow h4" href="#curry5">¶</a>
-<h4 id="curry5"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1745">curry5</a> :: ((a, b, c, d, e) -> f) -> a -> b -> c -> d -> e -> f</code></h4>
+<h4 id="curry5"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1760">curry5</a> :: ((a, b, c, d, e) -> f) -> a -> b -> c -> d -> e -> f</code></h4>
 <p>Curries the given quinary function.</p>
 <div class="examples">
   <form>
@@ -2002,8 +2000,8 @@ the result of applying the function to the value. Equivalent to Haskell's
 <a class="pilcrow h3" href="#section:composition">¶</a>
 <h3 id="section:composition">Composition</h3>
 <a class="pilcrow h4" href="#compose">¶</a>
-<h4 id="compose"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1782">compose</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Semigroupoid">Semigroupoid</a> s => s b c -> s a b -> s a c</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#compose"><code>Z.compose</code></a>.</p>
+<h4 id="compose"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1797">compose</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Semigroupoid">Semigroupoid</a> s => s b c -> s a b -> s a c</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#compose"><code>Z.compose</code></a>.</p>
 <p>When specialized to Function, <code>compose</code> composes two unary functions,
 from right to left (this is the B combinator from combinatory logic).</p>
 <p>The generalized type signature indicates that <code>compose</code> is compatible
@@ -2017,7 +2015,7 @@ with any <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#semigr
 </div>
 
 <a class="pilcrow h4" href="#pipe">¶</a>
-<h4 id="pipe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1804">pipe</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Any">Any</a>) -> a -> b</code></h4>
+<h4 id="pipe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1819">pipe</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Any">Any</a>) -> a -> b</code></h4>
 <p>Takes a sequence of functions assumed to be unary and a value of any
 type, and returns the result of applying the sequence of transformations
 to the initial value.</p>
@@ -2031,7 +2029,7 @@ of functions. <code>pipe ([f, g, h]) (x)</code> is equivalent to <code>h (g (f (
 </div>
 
 <a class="pilcrow h4" href="#pipeK">¶</a>
-<h4 id="pipeK"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1828">pipeK</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Chain">Chain</a> m) => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Any">Any</a> -> m <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Any">Any</a>) -> m a -> m b</code></h4>
+<h4 id="pipeK"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1843">pipeK</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Chain">Chain</a> m) => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Any">Any</a> -> m <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Any">Any</a>) -> m a -> m b</code></h4>
 <p>Takes a sequence of functions assumed to be unary that return values
 with a <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#chain">Chain</a>, and a value of that Chain, and returns the result
 of applying the sequence of transformations to the initial value.</p>
@@ -2046,7 +2044,7 @@ of an sequence of functions. <code>pipeK ([f, g, h]) (x)</code> is equivalent to
 </div>
 
 <a class="pilcrow h4" href="#on">¶</a>
-<h4 id="on"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1853">on</a> :: (b -> b -> c) -> (a -> b) -> a -> a -> c</code></h4>
+<h4 id="on"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1868">on</a> :: (b -> b -> c) -> (a -> b) -> a -> a -> c</code></h4>
 <p>Takes a binary function <code>f</code>, a unary function <code>g</code>, and two
 values <code>x</code> and <code>y</code>. Returns <code>f (g (x)) (g (y))</code>.</p>
 <p>This is the P combinator from combinatory logic.</p>
@@ -2061,9 +2059,9 @@ values <code>x</code> and <code>y</code>. Returns <code>f (g (x)) (g (y))</code>
 <h3 id="section:pair">Pair</h3>
 <p>Pair is the canonical product type: a value of type <code>Pair a b</code> always
 contains exactly two values: one of type <code>a</code>; one of type <code>b</code>.</p>
-<p>The implementation is provided by <a href="https://github.com/sanctuary-js/sanctuary-pair/tree/v1.2.0">sanctuary-pair</a>.</p>
+<p>The implementation is provided by <a href="https://github.com/sanctuary-js/sanctuary-pair/tree/v2.1.0">sanctuary-pair</a>.</p>
 <a class="pilcrow h4" href="#Pair">¶</a>
-<h4 id="Pair"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1886">Pair</a> :: a -> b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Pair">Pair</a> a b</code></h4>
+<h4 id="Pair"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1901">Pair</a> :: a -> b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Pair">Pair</a> a b</code></h4>
 <p>Pair's sole data constructor. Additionally, it serves as the
 Pair <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#type-representatives">type representative</a>.</p>
 <div class="examples">
@@ -2074,7 +2072,7 @@ Pair <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#type-repre
 </div>
 
 <a class="pilcrow h4" href="#pair">¶</a>
-<h4 id="pair"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1901">pair</a> :: (a -> b -> c) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Pair">Pair</a> a b -> c</code></h4>
+<h4 id="pair"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1916">pair</a> :: (a -> b -> c) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Pair">Pair</a> a b -> c</code></h4>
 <p>Case analysis for the <code>Pair a b</code> type.</p>
 <div class="examples">
   <form>
@@ -2084,7 +2082,7 @@ Pair <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#type-repre
 </div>
 
 <a class="pilcrow h4" href="#fst">¶</a>
-<h4 id="fst"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1920">fst</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Pair">Pair</a> a b -> a</code></h4>
+<h4 id="fst"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1935">fst</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Pair">Pair</a> a b -> a</code></h4>
 <p><code>fst (Pair (x) (y))</code> is equivalent to <code>x</code>.</p>
 <div class="examples">
   <form>
@@ -2094,7 +2092,7 @@ Pair <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#type-repre
 </div>
 
 <a class="pilcrow h4" href="#snd">¶</a>
-<h4 id="snd"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1934">snd</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Pair">Pair</a> a b -> b</code></h4>
+<h4 id="snd"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1949">snd</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Pair">Pair</a> a b -> b</code></h4>
 <p><code>snd (Pair (x) (y))</code> is equivalent to <code>y</code>.</p>
 <div class="examples">
   <form>
@@ -2104,7 +2102,7 @@ Pair <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#type-repre
 </div>
 
 <a class="pilcrow h4" href="#swap">¶</a>
-<h4 id="swap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1948">swap</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Pair">Pair</a> a b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Pair">Pair</a> b a</code></h4>
+<h4 id="swap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1963">swap</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Pair">Pair</a> a b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Pair">Pair</a> b a</code></h4>
 <p><code>swap (Pair (x) (y))</code> is equivalent to <code>Pair (y) (x)</code>.</p>
 <div class="examples">
   <form>
@@ -2117,12 +2115,12 @@ Pair <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#type-repre
 <h3 id="section:maybe">Maybe</h3>
 <p>The Maybe type represents optional values: a value of type <code>Maybe a</code> is
 either Nothing (the empty value) or a Just whose value is of type <code>a</code>.</p>
-<p>The implementation is provided by <a href="https://github.com/sanctuary-js/sanctuary-maybe/tree/v1.2.0">sanctuary-maybe</a>.</p>
+<p>The implementation is provided by <a href="https://github.com/sanctuary-js/sanctuary-maybe/tree/v2.1.0">sanctuary-maybe</a>.</p>
 <a class="pilcrow h4" href="#Maybe">¶</a>
-<h4 id="Maybe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1969">Maybe</a> :: <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a></code></h4>
+<h4 id="Maybe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1984">Maybe</a> :: <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a></code></h4>
 <p>Maybe <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#type-representatives">type representative</a>.</p>
 <a class="pilcrow h4" href="#Nothing">¶</a>
-<h4 id="Nothing"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1973">Nothing</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a</code></h4>
+<h4 id="Nothing"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1988">Nothing</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a</code></h4>
 <p>The empty value of type <code>Maybe a</code>.</p>
 <div class="examples">
   <form>
@@ -2132,7 +2130,7 @@ either Nothing (the empty value) or a Just whose value is of type <code>a</code>
 </div>
 
 <a class="pilcrow h4" href="#Just">¶</a>
-<h4 id="Just"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1982">Just</a> :: a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a</code></h4>
+<h4 id="Just"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L1997">Just</a> :: a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a</code></h4>
 <p>Constructs a value of type <code>Maybe a</code> from a value of type <code>a</code>.</p>
 <div class="examples">
   <form>
@@ -2142,7 +2140,7 @@ either Nothing (the empty value) or a Just whose value is of type <code>a</code>
 </div>
 
 <a class="pilcrow h4" href="#isNothing">¶</a>
-<h4 id="isNothing"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L1996">isNothing</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="isNothing"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2011">isNothing</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> if the given Maybe is Nothing; <code>false</code> if it is a Just.</p>
 <div class="examples">
   <form>
@@ -2156,7 +2154,7 @@ either Nothing (the empty value) or a Just whose value is of type <code>a</code>
 </div>
 
 <a class="pilcrow h4" href="#isJust">¶</a>
-<h4 id="isJust"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2016">isJust</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="isJust"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2031">isJust</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> if the given Maybe is a Just; <code>false</code> if it is Nothing.</p>
 <div class="examples">
   <form>
@@ -2170,7 +2168,7 @@ either Nothing (the empty value) or a Just whose value is of type <code>a</code>
 </div>
 
 <a class="pilcrow h4" href="#fromMaybe">¶</a>
-<h4 id="fromMaybe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2036">fromMaybe</a> :: a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a -> a</code></h4>
+<h4 id="fromMaybe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2051">fromMaybe</a> :: a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a -> a</code></h4>
 <p>Takes a default value and a Maybe, and returns the Maybe's value
 if the Maybe is a Just; the default value otherwise.</p>
 <p>See also <a href="#fromMaybe_"><code>fromMaybe_</code></a> and
@@ -2187,7 +2185,7 @@ if the Maybe is a Just; the default value otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#fromMaybe_">¶</a>
-<h4 id="fromMaybe_"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2057">fromMaybe_</a> :: (() -> a) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a -> a</code></h4>
+<h4 id="fromMaybe_"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2072">fromMaybe_</a> :: (() -> a) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a -> a</code></h4>
 <p>Variant of <a href="#fromMaybe"><code>fromMaybe</code></a> that takes a thunk so the default
 value is only computed if required.</p>
 <div class="examples">
@@ -2206,9 +2204,9 @@ value is only computed if required.</p>
 </div>
 
 <a class="pilcrow h4" href="#maybeToNullable">¶</a>
-<h4 id="maybeToNullable"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2077">maybeToNullable</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Nullable">Nullable</a> a</code></h4>
+<h4 id="maybeToNullable"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2092">maybeToNullable</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Nullable">Nullable</a> a</code></h4>
 <p>Returns the given Maybe's value if the Maybe is a Just; <code>null</code> otherwise.
-<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Nullable">Nullable</a> is defined in <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1">sanctuary-def</a>.</p>
+<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Nullable">Nullable</a> is defined in <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1">sanctuary-def</a>.</p>
 <p>See also <a href="#fromMaybe"><code>fromMaybe</code></a>.</p>
 <div class="examples">
   <form>
@@ -2222,7 +2220,7 @@ value is only computed if required.</p>
 </div>
 
 <a class="pilcrow h4" href="#maybe">¶</a>
-<h4 id="maybe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2100">maybe</a> :: b -> (a -> b) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a -> b</code></h4>
+<h4 id="maybe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2115">maybe</a> :: b -> (a -> b) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a -> b</code></h4>
 <p>Takes a value of any type, a function, and a Maybe. If the Maybe is
 a Just, the return value is the result of applying the function to
 the Just's value. Otherwise, the first argument is returned.</p>
@@ -2239,7 +2237,7 @@ the Just's value. Otherwise, the first argument is returned.</p>
 </div>
 
 <a class="pilcrow h4" href="#maybe_">¶</a>
-<h4 id="maybe_"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2128">maybe_</a> :: (() -> b) -> (a -> b) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a -> b</code></h4>
+<h4 id="maybe_"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2143">maybe_</a> :: (() -> b) -> (a -> b) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a -> b</code></h4>
 <p>Variant of <a href="#maybe"><code>maybe</code></a> that takes a thunk so the default value
 is only computed if required.</p>
 <div class="examples">
@@ -2258,7 +2256,7 @@ is only computed if required.</p>
 </div>
 
 <a class="pilcrow h4" href="#justs">¶</a>
-<h4 id="justs"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2155">justs</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Filterable">Filterable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Functor">Functor</a> f) => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a) -> f a</code></h4>
+<h4 id="justs"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2170">justs</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Filterable">Filterable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Functor">Functor</a> f) => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a) -> f a</code></h4>
 <p>Discards each element that is Nothing, and unwraps each element that is
 a Just. Related to Haskell's <code>catMaybes</code> function.</p>
 <p>See also <a href="#lefts"><code>lefts</code></a> and <a href="#rights"><code>rights</code></a>.</p>
@@ -2270,7 +2268,7 @@ a Just. Related to Haskell's <code>catMaybes</code> function.</p>
 </div>
 
 <a class="pilcrow h4" href="#mapMaybe">¶</a>
-<h4 id="mapMaybe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2175">mapMaybe</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Filterable">Filterable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Functor">Functor</a> f) => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> b) -> f a -> f b</code></h4>
+<h4 id="mapMaybe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2190">mapMaybe</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Filterable">Filterable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Functor">Functor</a> f) => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> b) -> f a -> f b</code></h4>
 <p>Takes a function and a structure, applies the function to each element
 of the structure, and returns the &quot;successful&quot; results. If the result of
 applying the function to an element is Nothing, the result is discarded;
@@ -2287,7 +2285,7 @@ if the result is a Just, the Just's value is included.</p>
 </div>
 
 <a class="pilcrow h4" href="#maybeToEither">¶</a>
-<h4 id="maybeToEither"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2195">maybeToEither</a> :: a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a b</code></h4>
+<h4 id="maybeToEither"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2210">maybeToEither</a> :: a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a b</code></h4>
 <p>Converts a Maybe to an Either. Nothing becomes a Left (containing the
 first argument); a Just becomes a Right.</p>
 <p>See also <a href="#eitherToMaybe"><code>eitherToMaybe</code></a>.</p>
@@ -2307,12 +2305,12 @@ first argument); a Just becomes a Right.</p>
 <p>The Either type represents values with two possibilities: a value of type
 <code>Either a b</code> is either a Left whose value is of type <code>a</code> or a Right whose
 value is of type <code>b</code>.</p>
-<p>The implementation is provided by <a href="https://github.com/sanctuary-js/sanctuary-either/tree/v1.2.0">sanctuary-either</a>.</p>
+<p>The implementation is provided by <a href="https://github.com/sanctuary-js/sanctuary-either/tree/v2.1.0">sanctuary-either</a>.</p>
 <a class="pilcrow h4" href="#Either">¶</a>
-<h4 id="Either"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2226">Either</a> :: <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a></code></h4>
+<h4 id="Either"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2241">Either</a> :: <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a></code></h4>
 <p>Either <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#type-representatives">type representative</a>.</p>
 <a class="pilcrow h4" href="#Left">¶</a>
-<h4 id="Left"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2230">Left</a> :: a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a b</code></h4>
+<h4 id="Left"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2245">Left</a> :: a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a b</code></h4>
 <p>Constructs a value of type <code>Either a b</code> from a value of type <code>a</code>.</p>
 <div class="examples">
   <form>
@@ -2322,7 +2320,7 @@ value is of type <code>b</code>.</p>
 </div>
 
 <a class="pilcrow h4" href="#Right">¶</a>
-<h4 id="Right"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2244">Right</a> :: b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a b</code></h4>
+<h4 id="Right"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2259">Right</a> :: b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a b</code></h4>
 <p>Constructs a value of type <code>Either a b</code> from a value of type <code>b</code>.</p>
 <div class="examples">
   <form>
@@ -2332,7 +2330,7 @@ value is of type <code>b</code>.</p>
 </div>
 
 <a class="pilcrow h4" href="#isLeft">¶</a>
-<h4 id="isLeft"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2258">isLeft</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="isLeft"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2273">isLeft</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> if the given Either is a Left; <code>false</code> if it is a Right.</p>
 <div class="examples">
   <form>
@@ -2346,7 +2344,7 @@ value is of type <code>b</code>.</p>
 </div>
 
 <a class="pilcrow h4" href="#isRight">¶</a>
-<h4 id="isRight"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2278">isRight</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="isRight"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2293">isRight</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> if the given Either is a Right; <code>false</code> if it is a Left.</p>
 <div class="examples">
   <form>
@@ -2360,7 +2358,7 @@ value is of type <code>b</code>.</p>
 </div>
 
 <a class="pilcrow h4" href="#fromEither">¶</a>
-<h4 id="fromEither"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2298">fromEither</a> :: b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a b -> b</code></h4>
+<h4 id="fromEither"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2313">fromEither</a> :: b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a b -> b</code></h4>
 <p>Takes a default value and an Either, and returns the Right value
 if the Either is a Right; the default value otherwise.</p>
 <div class="examples">
@@ -2375,7 +2373,7 @@ if the Either is a Right; the default value otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#either">¶</a>
-<h4 id="either"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2319">either</a> :: (a -> c) -> (b -> c) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a b -> c</code></h4>
+<h4 id="either"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2334">either</a> :: (a -> c) -> (b -> c) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a b -> c</code></h4>
 <p>Takes two functions and an Either, and returns the result of
 applying the first function to the Left's value, if the Either
 is a Left, or the result of applying the second function to the
@@ -2392,7 +2390,7 @@ Right's value, if the Either is a Right.</p>
 </div>
 
 <a class="pilcrow h4" href="#lefts">¶</a>
-<h4 id="lefts"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2346">lefts</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Filterable">Filterable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Functor">Functor</a> f) => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a b) -> f a</code></h4>
+<h4 id="lefts"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2361">lefts</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Filterable">Filterable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Functor">Functor</a> f) => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a b) -> f a</code></h4>
 <p>Discards each element that is a Right, and unwraps each element that is
 a Left.</p>
 <p>See also <a href="#rights"><code>rights</code></a>.</p>
@@ -2404,7 +2402,7 @@ a Left.</p>
 </div>
 
 <a class="pilcrow h4" href="#rights">¶</a>
-<h4 id="rights"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2363">rights</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Filterable">Filterable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Functor">Functor</a> f) => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a b) -> f b</code></h4>
+<h4 id="rights"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2378">rights</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Filterable">Filterable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Functor">Functor</a> f) => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a b) -> f b</code></h4>
 <p>Discards each element that is a Left, and unwraps each element that is
 a Right.</p>
 <p>See also <a href="#lefts"><code>lefts</code></a>.</p>
@@ -2416,7 +2414,7 @@ a Right.</p>
 </div>
 
 <a class="pilcrow h4" href="#tagBy">¶</a>
-<h4 id="tagBy"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2380">tagBy</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a a</code></h4>
+<h4 id="tagBy"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2395">tagBy</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a a</code></h4>
 <p>Takes a predicate and a value, and returns a Right of the value if it
 satisfies the predicate; a Left of the value otherwise.</p>
 <div class="examples">
@@ -2431,7 +2429,7 @@ satisfies the predicate; a Left of the value otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#encase">¶</a>
-<h4 id="encase"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2401">encase</a> :: (a -> b) -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Error">Error</a> b</code></h4>
+<h4 id="encase"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2416">encase</a> :: Throwing e a b -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> e b</code></h4>
 <p>Takes a function that may throw and returns a pure function.</p>
 <div class="examples">
   <form>
@@ -2445,7 +2443,7 @@ satisfies the predicate; a Left of the value otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#eitherToMaybe">¶</a>
-<h4 id="eitherToMaybe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2427">eitherToMaybe</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Either">Either</a> a b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> b</code></h4>
+<h4 id="eitherToMaybe"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2442">eitherToMaybe</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Either">Either</a> a b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> b</code></h4>
 <p>Converts an Either to a Maybe. A Left becomes Nothing; a Right becomes
 a Just.</p>
 <p>See also <a href="#maybeToEither"><code>maybeToEither</code></a>.</p>
@@ -2463,7 +2461,7 @@ a Just.</p>
 <a class="pilcrow h3" href="#section:logic">¶</a>
 <h3 id="section:logic">Logic</h3>
 <a class="pilcrow h4" href="#and">¶</a>
-<h4 id="and"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2452">and</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="and"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2467">and</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Boolean &quot;and&quot;.</p>
 <div class="examples">
   <form>
@@ -2485,7 +2483,7 @@ a Just.</p>
 </div>
 
 <a class="pilcrow h4" href="#or">¶</a>
-<h4 id="or"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2480">or</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="or"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2495">or</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Boolean &quot;or&quot;.</p>
 <div class="examples">
   <form>
@@ -2507,7 +2505,7 @@ a Just.</p>
 </div>
 
 <a class="pilcrow h4" href="#not">¶</a>
-<h4 id="not"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2508">not</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="not"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2523">not</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Boolean &quot;not&quot;.</p>
 <p>See also <a href="#complement"><code>complement</code></a>.</p>
 <div class="examples">
@@ -2522,7 +2520,7 @@ a Just.</p>
 </div>
 
 <a class="pilcrow h4" href="#complement">¶</a>
-<h4 id="complement"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2530">complement</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="complement"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2545">complement</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Takes a unary predicate and a value of any type, and returns the logical
 negation of applying the predicate to the value.</p>
 <p>See also <a href="#not"><code>not</code></a>.</p>
@@ -2538,7 +2536,7 @@ negation of applying the predicate to the value.</p>
 </div>
 
 <a class="pilcrow h4" href="#boolean">¶</a>
-<h4 id="boolean"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2550">boolean</a> :: a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a> -> a</code></h4>
+<h4 id="boolean"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2565">boolean</a> :: a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a> -> a</code></h4>
 <p>Case analysis for the <code>Boolean</code> type. <code>boolean (x) (y) (b)</code> evaluates
 to <code>x</code> if <code>b</code> is <code>false</code>; to <code>y</code> if <code>b</code> is <code>true</code>.</p>
 <div class="examples">
@@ -2553,7 +2551,7 @@ to <code>x</code> if <code>b</code> is <code>false</code>; to <code>y</code> if 
 </div>
 
 <a class="pilcrow h4" href="#ifElse">¶</a>
-<h4 id="ifElse"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2575">ifElse</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> (a -> b) -> (a -> b) -> a -> b</code></h4>
+<h4 id="ifElse"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2590">ifElse</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> (a -> b) -> (a -> b) -> a -> b</code></h4>
 <p>Takes a unary predicate, a unary &quot;if&quot; function, a unary &quot;else&quot;
 function, and a value of any type, and returns the result of
 applying the &quot;if&quot; function to the value if the value satisfies
@@ -2572,7 +2570,7 @@ value otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#when">¶</a>
-<h4 id="when"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2607">when</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> (a -> a) -> a -> a</code></h4>
+<h4 id="when"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2622">when</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> (a -> a) -> a -> a</code></h4>
 <p>Takes a unary predicate, a unary function, and a value of any type, and
 returns the result of applying the function to the value if the value
 satisfies the predicate; the value otherwise.</p>
@@ -2589,7 +2587,7 @@ satisfies the predicate; the value otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#unless">¶</a>
-<h4 id="unless"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2631">unless</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> (a -> a) -> a -> a</code></h4>
+<h4 id="unless"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2646">unless</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> (a -> a) -> a -> a</code></h4>
 <p>Takes a unary predicate, a unary function, and a value of any type, and
 returns the result of applying the function to the value if the value
 does not satisfy the predicate; the value otherwise.</p>
@@ -2608,7 +2606,7 @@ does not satisfy the predicate; the value otherwise.</p>
 <a class="pilcrow h3" href="#section:array">¶</a>
 <h3 id="section:array">Array</h3>
 <a class="pilcrow h4" href="#array">¶</a>
-<h4 id="array"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2657">array</a> :: b -> (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a -> b) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a -> b</code></h4>
+<h4 id="array"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2672">array</a> :: b -> (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a -> b) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a -> b</code></h4>
 <p>Case analysis for the <code>Array a</code> type.</p>
 <div class="examples">
   <form>
@@ -2630,7 +2628,7 @@ does not satisfy the predicate; the value otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#head">¶</a>
-<h4 id="head"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2687">head</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a</code></h4>
+<h4 id="head"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2702">head</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a</code></h4>
 <p>Returns Just the first element of the given structure if the structure
 contains at least one element; Nothing otherwise.</p>
 <div class="examples">
@@ -2653,7 +2651,7 @@ contains at least one element; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#last">¶</a>
-<h4 id="last"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2720">last</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a</code></h4>
+<h4 id="last"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2735">last</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a</code></h4>
 <p>Returns Just the last element of the given structure if the structure
 contains at least one element; Nothing otherwise.</p>
 <div class="examples">
@@ -2676,7 +2674,7 @@ contains at least one element; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#tail">¶</a>
-<h4 id="tail"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2752">tail</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Monoid">Monoid</a> (f a)) => f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> (f a)</code></h4>
+<h4 id="tail"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2767">tail</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> (f a)) => f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> (f a)</code></h4>
 <p>Returns Just all but the first of the given structure's elements if the
 structure contains at least one element; Nothing otherwise.</p>
 <div class="examples">
@@ -2699,7 +2697,7 @@ structure contains at least one element; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#init">¶</a>
-<h4 id="init"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2786">init</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Monoid">Monoid</a> (f a)) => f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> (f a)</code></h4>
+<h4 id="init"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2801">init</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> (f a)) => f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> (f a)</code></h4>
 <p>Returns Just all but the last of the given structure's elements if the
 structure contains at least one element; Nothing otherwise.</p>
 <div class="examples">
@@ -2722,7 +2720,7 @@ structure contains at least one element; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#take">¶</a>
-<h4 id="take"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2820">take</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Monoid">Monoid</a> (f a)) => <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Integer">Integer</a> -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> (f a)</code></h4>
+<h4 id="take"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2835">take</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> (f a)) => <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Integer">Integer</a> -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> (f a)</code></h4>
 <p>Returns Just the first N elements of the given structure if N is
 non-negative and less than or equal to the size of the structure;
 Nothing otherwise.</p>
@@ -2750,7 +2748,7 @@ Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#drop">¶</a>
-<h4 id="drop"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2875">drop</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Monoid">Monoid</a> (f a)) => <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Integer">Integer</a> -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> (f a)</code></h4>
+<h4 id="drop"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2890">drop</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> (f a)) => <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Integer">Integer</a> -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> (f a)</code></h4>
 <p>Returns Just all but the first N elements of the given structure if
 N is non-negative and less than or equal to the size of the structure;
 Nothing otherwise.</p>
@@ -2778,7 +2776,7 @@ Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#takeLast">¶</a>
-<h4 id="takeLast"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2907">takeLast</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Monoid">Monoid</a> (f a)) => <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Integer">Integer</a> -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> (f a)</code></h4>
+<h4 id="takeLast"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2922">takeLast</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> (f a)) => <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Integer">Integer</a> -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> (f a)</code></h4>
 <p>Returns Just the last N elements of the given structure if N is
 non-negative and less than or equal to the size of the structure;
 Nothing otherwise.</p>
@@ -2806,7 +2804,7 @@ Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#dropLast">¶</a>
-<h4 id="dropLast"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2940">dropLast</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Monoid">Monoid</a> (f a)) => <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Integer">Integer</a> -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> (f a)</code></h4>
+<h4 id="dropLast"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2955">dropLast</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> (f a)) => <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Integer">Integer</a> -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> (f a)</code></h4>
 <p>Returns Just all but the last N elements of the given structure if
 N is non-negative and less than or equal to the size of the structure;
 Nothing otherwise.</p>
@@ -2834,7 +2832,7 @@ Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#takeWhile">¶</a>
-<h4 id="takeWhile"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L2973">takeWhile</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a</code></h4>
+<h4 id="takeWhile"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L2988">takeWhile</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a</code></h4>
 <p>Discards the first element that does not satisfy the predicate,
 and all subsequent elements.</p>
 <p>See also <a href="#dropWhile"><code>dropWhile</code></a>.</p>
@@ -2850,7 +2848,7 @@ and all subsequent elements.</p>
 </div>
 
 <a class="pilcrow h4" href="#dropWhile">¶</a>
-<h4 id="dropWhile"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3000">dropWhile</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a</code></h4>
+<h4 id="dropWhile"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3015">dropWhile</a> :: (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a</code></h4>
 <p>Retains the first element that does not satisfy the predicate,
 and all subsequent elements.</p>
 <p>See also <a href="#takeWhile"><code>takeWhile</code></a>.</p>
@@ -2866,7 +2864,7 @@ and all subsequent elements.</p>
 </div>
 
 <a class="pilcrow h4" href="#size">¶</a>
-<h4 id="size"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3027">size</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#NonNegativeInteger">NonNegativeInteger</a></code></h4>
+<h4 id="size"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3042">size</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#NonNegativeInteger">NonNegativeInteger</a></code></h4>
 <p>Returns the number of elements of the given structure.</p>
 <div class="examples">
   <form>
@@ -2900,7 +2898,7 @@ and all subsequent elements.</p>
 </div>
 
 <a class="pilcrow h4" href="#all">¶</a>
-<h4 id="all"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3059">all</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="all"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3074">all</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> <a href="https://en.wikipedia.org/wiki/If_and_only_if">iff</a> all the elements of the structure satisfy the
 predicate.</p>
 <p>See also <a href="#any"><code>any</code></a> and <a href="#none"><code>none</code></a>.</p>
@@ -2920,7 +2918,7 @@ predicate.</p>
 </div>
 
 <a class="pilcrow h4" href="#any">¶</a>
-<h4 id="any"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3082">any</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="any"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3097">any</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> <a href="https://en.wikipedia.org/wiki/If_and_only_if">iff</a> any element of the structure satisfies the
 predicate.</p>
 <p>See also <a href="#all"><code>all</code></a> and <a href="#none"><code>none</code></a>.</p>
@@ -2940,7 +2938,7 @@ predicate.</p>
 </div>
 
 <a class="pilcrow h4" href="#none">¶</a>
-<h4 id="none"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3105">none</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="none"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3120">none</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> <a href="https://en.wikipedia.org/wiki/If_and_only_if">iff</a> none of the elements of the structure satisfies
 the predicate.</p>
 <p>Properties:</p>
@@ -2969,7 +2967,7 @@ the predicate.</p>
 </div>
 
 <a class="pilcrow h4" href="#append">¶</a>
-<h4 id="append"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3136">append</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Semigroup">Semigroup</a> (f a)) => a -> f a -> f a</code></h4>
+<h4 id="append"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3151">append</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Semigroup">Semigroup</a> (f a)) => a -> f a -> f a</code></h4>
 <p>Returns the result of appending the first argument to the second.</p>
 <p>See also <a href="#prepend"><code>prepend</code></a>.</p>
 <div class="examples">
@@ -2992,7 +2990,7 @@ the predicate.</p>
 </div>
 
 <a class="pilcrow h4" href="#prepend">¶</a>
-<h4 id="prepend"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3166">prepend</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Semigroup">Semigroup</a> (f a)) => a -> f a -> f a</code></h4>
+<h4 id="prepend"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3181">prepend</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Semigroup">Semigroup</a> (f a)) => a -> f a -> f a</code></h4>
 <p>Returns the result of prepending the first argument to the second.</p>
 <p>See also <a href="#append"><code>append</code></a>.</p>
 <div class="examples">
@@ -3015,14 +3013,14 @@ the predicate.</p>
 </div>
 
 <a class="pilcrow h4" href="#joinWith">¶</a>
-<h4 id="joinWith"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3191">joinWith</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="joinWith"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3206">joinWith</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Joins the strings of the second argument separated by the first argument.</p>
 <p>Properties:</p>
 <ul>
 <li><code>forall s :: String, t :: String.
  S.joinWith (s) (S.splitOn (s) (t)) = t</code></li>
 </ul>
-<p>See also <a href="#splitOn"><code>splitOn</code></a>.</p>
+<p>See also <a href="#splitOn"><code>splitOn</code></a> and <a href="#intercalate"><code>intercalate</code></a>.</p>
 <div class="examples">
   <form>
     <input value="S.joinWith (':') (['foo', 'bar', 'baz'])">
@@ -3031,7 +3029,7 @@ the predicate.</p>
 </div>
 
 <a class="pilcrow h4" href="#elem">¶</a>
-<h4 id="elem"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3212">elem</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Setoid">Setoid</a> a, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f) => a -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="elem"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3227">elem</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Setoid">Setoid</a> a, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f) => a -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Takes a value and a structure and returns <code>true</code> <a href="https://en.wikipedia.org/wiki/If_and_only_if">iff</a> the value is an
 element of the structure.</p>
 <p>See also <a href="#find"><code>find</code></a>.</p>
@@ -3067,7 +3065,7 @@ element of the structure.</p>
 </div>
 
 <a class="pilcrow h4" href="#find">¶</a>
-<h4 id="find"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3247">find</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a</code></h4>
+<h4 id="find"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3262">find</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => (a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> f a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a</code></h4>
 <p>Takes a predicate and a structure and returns Just the leftmost element
 of the structure that satisfies the predicate; Nothing if there is no
 such element.</p>
@@ -3083,9 +3081,42 @@ such element.</p>
   </form>
 </div>
 
+<a class="pilcrow h4" href="#intercalate">¶</a>
+<h4 id="intercalate"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3294">intercalate</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> m, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f) => m -> f m -> m</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#intercalate"><code>Z.intercalate</code></a>. Concatenates the elements of
+the given structure, separating each pair of adjacent elements with
+the given separator.</p>
+<p>See also <a href="#joinWith"><code>joinWith</code></a>.</p>
+<div class="examples">
+  <form>
+    <input value="S.intercalate (', ') ([])">
+    <div class="output">&quot;&quot;</div>
+  </form>
+  <form>
+    <input value="S.intercalate (', ') (['foo', 'bar', 'baz'])">
+    <div class="output">&quot;foo, bar, baz&quot;</div>
+  </form>
+  <form>
+    <input value="S.intercalate (', ') (Nil)">
+    <div class="output">&quot;&quot;</div>
+  </form>
+  <form>
+    <input value="S.intercalate (', ') (Cons ('foo') (Cons ('bar') (Cons ('baz') (Nil))))">
+    <div class="output">&quot;foo, bar, baz&quot;</div>
+  </form>
+  <form>
+    <input value="S.intercalate ([0, 0, 0]) ([])">
+    <div class="output">[]</div>
+  </form>
+  <form>
+    <input value="S.intercalate ([0, 0, 0]) ([[1], [2, 3], [4, 5, 6], [7, 8], [9]])">
+    <div class="output">[1, 0, 0, 0, 2, 3, 0, 0, 0, 4, 5, 6, 0, 0, 0, 7, 8, 0, 0, 0, 9]</div>
+  </form>
+</div>
+
 <a class="pilcrow h4" href="#foldMap">¶</a>
-<h4 id="foldMap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3279">foldMap</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Monoid">Monoid</a> m, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f) => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> m -> (a -> m) -> f a -> m</code></h4>
-<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#foldMap"><code>Z.foldMap</code></a>. Deconstructs a foldable by mapping
+<h4 id="foldMap"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3327">foldMap</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> m, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f) => <a href="https://github.com/fantasyland/fantasy-land#type-representatives">TypeRep</a> m -> (a -> m) -> f a -> m</code></h4>
+<p>Curried version of <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#foldMap"><code>Z.foldMap</code></a>. Deconstructs a foldable by mapping
 every element to a monoid and concatenating the results.</p>
 <div class="examples">
   <form>
@@ -3099,7 +3130,7 @@ every element to a monoid and concatenating the results.</p>
 </div>
 
 <a class="pilcrow h4" href="#unfoldr">¶</a>
-<h4 id="unfoldr"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3297">unfoldr</a> :: (b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Pair">Pair</a> a b)) -> b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a</code></h4>
+<h4 id="unfoldr"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3345">unfoldr</a> :: (b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Pair">Pair</a> a b)) -> b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a</code></h4>
 <p>Takes a function and a seed value, and returns an array generated by
 applying the function repeatedly. The array is initially empty. The
 function is initially applied to the seed value. Each application
@@ -3119,7 +3150,7 @@ the array and the function is applied to the second element.</p>
 </div>
 
 <a class="pilcrow h4" href="#range">¶</a>
-<h4 id="range"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3328">range</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Integer">Integer</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Integer">Integer</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Integer">Integer</a></code></h4>
+<h4 id="range"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3376">range</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Integer">Integer</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Integer">Integer</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Integer">Integer</a></code></h4>
 <p>Returns an array of consecutive integers starting with the first argument
 and ending with the second argument minus one. Returns <code>[]</code> if the second
 argument is less than or equal to the first argument.</p>
@@ -3139,7 +3170,7 @@ argument is less than or equal to the first argument.</p>
 </div>
 
 <a class="pilcrow h4" href="#groupBy">¶</a>
-<h4 id="groupBy"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3357">groupBy</a> :: (a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a)</code></h4>
+<h4 id="groupBy"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3405">groupBy</a> :: (a -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a)</code></h4>
 <p>Splits its array argument into an array of arrays of equal,
 adjacent elements. Equality is determined by the function
 provided as the first argument. Its behaviour can be surprising
@@ -3162,7 +3193,7 @@ for functions that aren't reflexive, transitive, and symmetric
 </div>
 
 <a class="pilcrow h4" href="#reverse">¶</a>
-<h4 id="reverse"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3396">reverse</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Monoid">Monoid</a> (f a)) => f a -> f a</code></h4>
+<h4 id="reverse"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3444">reverse</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> (f a)) => f a -> f a</code></h4>
 <p>Reverses the elements of the given structure.</p>
 <div class="examples">
   <form>
@@ -3180,9 +3211,9 @@ for functions that aren't reflexive, transitive, and symmetric
 </div>
 
 <a class="pilcrow h4" href="#sort">¶</a>
-<h4 id="sort"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3416">sort</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Ord">Ord</a> a, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> m, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> m, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Monoid">Monoid</a> (m a)) => m a -> m a</code></h4>
+<h4 id="sort"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3464">sort</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Ord">Ord</a> a, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> m, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> m, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> (m a)) => m a -> m a</code></h4>
 <p>Performs a <a href="https://en.wikipedia.org/wiki/Sorting_algorithm#Stability">stable sort</a> of the elements of the given structure, using
-<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#lte"><code>Z.lte</code></a> for comparisons.</p>
+<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#lte"><code>Z.lte</code></a> for comparisons.</p>
 <p>Properties:</p>
 <ul>
 <li><code>S.sort (S.sort (m)) = S.sort (m)</code> (idempotence)</li>
@@ -3200,9 +3231,9 @@ for functions that aren't reflexive, transitive, and symmetric
 </div>
 
 <a class="pilcrow h4" href="#sortBy">¶</a>
-<h4 id="sortBy"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3440">sortBy</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Ord">Ord</a> b, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Applicative">Applicative</a> m, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> m, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Monoid">Monoid</a> (m a)) => (a -> b) -> m a -> m a</code></h4>
+<h4 id="sortBy"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3488">sortBy</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Ord">Ord</a> b, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Applicative">Applicative</a> m, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> m, <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Monoid">Monoid</a> (m a)) => (a -> b) -> m a -> m a</code></h4>
 <p>Performs a <a href="https://en.wikipedia.org/wiki/Sorting_algorithm#Stability">stable sort</a> of the elements of the given structure, using
-<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#lte"><code>Z.lte</code></a> to compare the values produced by applying the given function
+<a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#lte"><code>Z.lte</code></a> to compare the values produced by applying the given function
 to each element of the structure.</p>
 <p>Properties:</p>
 <ul>
@@ -3220,7 +3251,7 @@ to each element of the structure.</p>
   </form>
 </div>
 
-<p>If descending order is desired, one may use <a href="https://github.com/sanctuary-js/sanctuary-descending/tree/v1.2.0#Descending"><code>Descending</code></a>:</p>
+<p>If descending order is desired, one may use <a href="https://github.com/sanctuary-js/sanctuary-descending/tree/v2.1.0#Descending"><code>Descending</code></a>:</p>
 <div class="examples">
   <form>
     <input value="S.sortBy (Descending) ([83, 97, 110, 99, 116, 117, 97, 114, 121])">
@@ -3229,7 +3260,7 @@ to each element of the structure.</p>
 </div>
 
 <a class="pilcrow h4" href="#zip">¶</a>
-<h4 id="zip"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3488">zip</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Pair">Pair</a> a b)</code></h4>
+<h4 id="zip"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3536">zip</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Pair">Pair</a> a b)</code></h4>
 <p>Returns an array of pairs of corresponding elements from the given
 arrays. The length of the resulting array is equal to the length of
 the shorter input array.</p>
@@ -3246,7 +3277,7 @@ the shorter input array.</p>
 </div>
 
 <a class="pilcrow h4" href="#zipWith">¶</a>
-<h4 id="zipWith"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3509">zipWith</a> :: (a -> b -> c) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> c</code></h4>
+<h4 id="zipWith"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3557">zipWith</a> :: (a -> b -> c) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> b -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> c</code></h4>
 <p>Returns the result of combining, pairwise, the given arrays using the
 given binary function. The length of the resulting array is equal to the
 length of the shorter input array.</p>
@@ -3265,7 +3296,7 @@ length of the shorter input array.</p>
 <a class="pilcrow h3" href="#section:object">¶</a>
 <h3 id="section:object">Object</h3>
 <a class="pilcrow h4" href="#prop">¶</a>
-<h4 id="prop"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3544">prop</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> a -> b</code></h4>
+<h4 id="prop"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3592">prop</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> a -> b</code></h4>
 <p>Takes a property name and an object with known properties and returns
 the value of the specified property. If for some reason the object
 lacks the specified property, a type error is thrown.</p>
@@ -3279,7 +3310,7 @@ For accessing string map values by key, use <a href="#value"><code>value</code><
 </div>
 
 <a class="pilcrow h4" href="#props">¶</a>
-<h4 id="props"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3571">props</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> a -> b</code></h4>
+<h4 id="props"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3619">props</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> a -> b</code></h4>
 <p>Takes a property path (an array of property names) and an object with
 known structure and returns the value at the given path. If for some
 reason the path does not exist, a type error is thrown.</p>
@@ -3293,7 +3324,7 @@ instead.</p>
 </div>
 
 <a class="pilcrow h4" href="#get">¶</a>
-<h4 id="get"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3600">get</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> b</code></h4>
+<h4 id="get"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3648">get</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> b</code></h4>
 <p>Takes a predicate, a property name, and an object and returns Just the
 value of the specified object property if it exists and the value
 satisfies the given predicate; Nothing otherwise.</p>
@@ -3322,7 +3353,7 @@ satisfies the given predicate; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#gets">¶</a>
-<h4 id="gets"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3633">gets</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> b</code></h4>
+<h4 id="gets"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3681">gets</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> b</code></h4>
 <p>Takes a predicate, a property path (an array of property names), and
 an object and returns Just the value at the given path if such a path
 exists and the value satisfies the given predicate; Nothing otherwise.</p>
@@ -3347,10 +3378,10 @@ exists and the value satisfies the given predicate; Nothing otherwise.</p>
 <p>StrMap is an abbreviation of <em>string map</em>. A string map is an object,
 such as <code>{foo: 1, bar: 2, baz: 3}</code>, whose values are all members of
 the same type. Formally, a value is a member of type <code>StrMap a</code> if its
-<a href="https://github.com/sanctuary-js/sanctuary-type-identifiers/tree/v2.0.1">type identifier</a> is <code>'Object'</code> and the values of its enumerable own
+<a href="https://github.com/sanctuary-js/sanctuary-type-identifiers/tree/v3.0.0">type identifier</a> is <code>'Object'</code> and the values of its enumerable own
 properties are all members of type <code>a</code>.</p>
 <a class="pilcrow h4" href="#value">¶</a>
-<h4 id="value"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3674">value</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a</code></h4>
+<h4 id="value"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3722">value</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a</code></h4>
 <p>Retrieve the value associated with the given key in the given string map.</p>
 <p>Formally, <code>value (k) (m)</code> evaluates to <code>Just (m[k])</code> if <code>k</code> is an
 enumerable own property of <code>m</code>; <code>Nothing</code> otherwise.</p>
@@ -3371,7 +3402,7 @@ enumerable own property of <code>m</code>; <code>Nothing</code> otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#singleton">¶</a>
-<h4 id="singleton"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3706">singleton</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#StrMap">StrMap</a> a</code></h4>
+<h4 id="singleton"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3754">singleton</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#StrMap">StrMap</a> a</code></h4>
 <p>Takes a string and a value of any type, and returns a string map with
 a single entry (mapping the key to the value).</p>
 <div class="examples">
@@ -3382,7 +3413,7 @@ a single entry (mapping the key to the value).</p>
 </div>
 
 <a class="pilcrow h4" href="#insert">¶</a>
-<h4 id="insert"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3728">insert</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#StrMap">StrMap</a> a</code></h4>
+<h4 id="insert"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3776">insert</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#StrMap">StrMap</a> a</code></h4>
 <p>Takes a string, a value of any type, and a string map, and returns a
 string map comprising all the entries of the given string map plus the
 entry specified by the first two arguments (which takes precedence).</p>
@@ -3400,7 +3431,7 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#remove">¶</a>
-<h4 id="remove"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3757">remove</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#StrMap">StrMap</a> a</code></h4>
+<h4 id="remove"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3805">remove</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#StrMap">StrMap</a> a</code></h4>
 <p>Takes a string and a string map, and returns a string map comprising all
 the entries of the given string map except the one whose key matches the
 given string (if such a key exists).</p>
@@ -3418,7 +3449,7 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#keys">¶</a>
-<h4 id="keys"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3786">keys</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="keys"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3834">keys</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Returns the keys of the given string map, in arbitrary order.</p>
 <div class="examples">
   <form>
@@ -3428,7 +3459,7 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#values">¶</a>
-<h4 id="values"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3800">values</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> a</code></h4>
+<h4 id="values"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3848">values</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> a</code></h4>
 <p>Returns the values of the given string map, in arbitrary order.</p>
 <div class="examples">
   <form>
@@ -3438,7 +3469,7 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#pairs">¶</a>
-<h4 id="pairs"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3817">pairs</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Pair">Pair</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> a)</code></h4>
+<h4 id="pairs"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3865">pairs</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#StrMap">StrMap</a> a -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Pair">Pair</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> a)</code></h4>
 <p>Returns the key–value pairs of the given string map, in arbitrary order.</p>
 <div class="examples">
   <form>
@@ -3448,7 +3479,7 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#fromPairs">¶</a>
-<h4 id="fromPairs"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3835">fromPairs</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Pair">Pair</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> a) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#StrMap">StrMap</a> a</code></h4>
+<h4 id="fromPairs"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3883">fromPairs</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => f (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Pair">Pair</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> a) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#StrMap">StrMap</a> a</code></h4>
 <p>Returns a string map containing the key–value pairs specified by the
 given <a href="https://github.com/fantasyland/fantasy-land/tree/v4.0.1#foldable">Foldable</a>. If a key appears in multiple pairs, the rightmost
 pair takes precedence.</p>
@@ -3466,7 +3497,7 @@ pair takes precedence.</p>
 <a class="pilcrow h3" href="#section:number">¶</a>
 <h3 id="section:number">Number</h3>
 <a class="pilcrow h4" href="#negate">¶</a>
-<h4 id="negate"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3862">negate</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#ValidNumber">ValidNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#ValidNumber">ValidNumber</a></code></h4>
+<h4 id="negate"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3910">negate</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#ValidNumber">ValidNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#ValidNumber">ValidNumber</a></code></h4>
 <p>Negates its argument.</p>
 <div class="examples">
   <form>
@@ -3480,7 +3511,7 @@ pair takes precedence.</p>
 </div>
 
 <a class="pilcrow h4" href="#add">¶</a>
-<h4 id="add"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3882">add</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a></code></h4>
+<h4 id="add"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3930">add</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a></code></h4>
 <p>Returns the sum of two (finite) numbers.</p>
 <div class="examples">
   <form>
@@ -3490,7 +3521,7 @@ pair takes precedence.</p>
 </div>
 
 <a class="pilcrow h4" href="#sum">¶</a>
-<h4 id="sum"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3901">sum</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => f <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a></code></h4>
+<h4 id="sum"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3949">sum</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => f <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a></code></h4>
 <p>Returns the sum of the given array of (finite) numbers.</p>
 <div class="examples">
   <form>
@@ -3512,7 +3543,7 @@ pair takes precedence.</p>
 </div>
 
 <a class="pilcrow h4" href="#sub">¶</a>
-<h4 id="sub"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3924">sub</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a></code></h4>
+<h4 id="sub"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3972">sub</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a></code></h4>
 <p>Takes a finite number <code>n</code> and returns the <em>subtract <code>n</code></em> function.</p>
 <div class="examples">
   <form>
@@ -3522,7 +3553,7 @@ pair takes precedence.</p>
 </div>
 
 <a class="pilcrow h4" href="#mult">¶</a>
-<h4 id="mult"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3943">mult</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a></code></h4>
+<h4 id="mult"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L3991">mult</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a></code></h4>
 <p>Returns the product of two (finite) numbers.</p>
 <div class="examples">
   <form>
@@ -3532,7 +3563,7 @@ pair takes precedence.</p>
 </div>
 
 <a class="pilcrow h4" href="#product">¶</a>
-<h4 id="product"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3962">product</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => f <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a></code></h4>
+<h4 id="product"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4010">product</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => f <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a></code></h4>
 <p>Returns the product of the given array of (finite) numbers.</p>
 <div class="examples">
   <form>
@@ -3554,7 +3585,7 @@ pair takes precedence.</p>
 </div>
 
 <a class="pilcrow h4" href="#div">¶</a>
-<h4 id="div"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L3985">div</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#NonZeroFiniteNumber">NonZeroFiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a></code></h4>
+<h4 id="div"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4033">div</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#NonZeroFiniteNumber">NonZeroFiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a></code></h4>
 <p>Takes a non-zero finite number <code>n</code> and returns the <em>divide by <code>n</code></em>
 function.</p>
 <div class="examples">
@@ -3565,7 +3596,7 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#pow">¶</a>
-<h4 id="pow"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4005">pow</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a></code></h4>
+<h4 id="pow"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4053">pow</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a></code></h4>
 <p>Takes a finite number <code>n</code> and returns the <em>power of <code>n</code></em> function.</p>
 <div class="examples">
   <form>
@@ -3579,7 +3610,7 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#mean">¶</a>
-<h4 id="mean"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4027">mean</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v11.0.0#Foldable">Foldable</a> f => f <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#FiniteNumber">FiniteNumber</a></code></h4>
+<h4 id="mean"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4075">mean</a> :: <a href="https://github.com/sanctuary-js/sanctuary-type-classes/tree/v12.1.0#Foldable">Foldable</a> f => f <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#FiniteNumber">FiniteNumber</a></code></h4>
 <p>Returns the mean of the given array of (finite) numbers.</p>
 <div class="examples">
   <form>
@@ -3603,7 +3634,7 @@ function.</p>
 <a class="pilcrow h3" href="#section:integer">¶</a>
 <h3 id="section:integer">Integer</h3>
 <a class="pilcrow h4" href="#even">¶</a>
-<h4 id="even"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4064">even</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Integer">Integer</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="even"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4112">even</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Integer">Integer</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> if the given integer is even; <code>false</code> if it is odd.</p>
 <div class="examples">
   <form>
@@ -3617,7 +3648,7 @@ function.</p>
 </div>
 
 <a class="pilcrow h4" href="#odd">¶</a>
-<h4 id="odd"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4084">odd</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Integer">Integer</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="odd"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4132">odd</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Integer">Integer</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Returns <code>true</code> if the given integer is odd; <code>false</code> if it is even.</p>
 <div class="examples">
   <form>
@@ -3633,9 +3664,9 @@ function.</p>
 <a class="pilcrow h3" href="#section:parse">¶</a>
 <h3 id="section:parse">Parse</h3>
 <a class="pilcrow h4" href="#parseDate">¶</a>
-<h4 id="parseDate"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4106">parseDate</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#ValidDate">ValidDate</a></code></h4>
+<h4 id="parseDate"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4154">parseDate</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#ValidDate">ValidDate</a></code></h4>
 <p>Takes a string <code>s</code> and returns <code>Just (new Date (s))</code> if <code>new Date (s)</code>
-evaluates to a <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#ValidDate"><code>ValidDate</code></a> value; Nothing otherwise.</p>
+evaluates to a <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#ValidDate"><code>ValidDate</code></a> value; Nothing otherwise.</p>
 <p>As noted in <a href="https://github.com/sanctuary-js/sanctuary/issues/488">#488</a>, this function's behaviour is unspecified for some
 inputs! <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date">MDN</a> warns against using the <code>Date</code> constructor
 to parse date strings:</p>
@@ -3658,7 +3689,7 @@ are treated as UTC, not local.</p>
 </div>
 
 <a class="pilcrow h4" href="#parseFloat">¶</a>
-<h4 id="parseFloat"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4172">parseFloat</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Number">Number</a></code></h4>
+<h4 id="parseFloat"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4220">parseFloat</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Number">Number</a></code></h4>
 <p>Takes a string and returns Just the number represented by the string
 if it does in fact represent a number; Nothing otherwise.</p>
 <div class="examples">
@@ -3673,7 +3704,7 @@ if it does in fact represent a number; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#parseInt">¶</a>
-<h4 id="parseInt"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4200">parseInt</a> :: Radix -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Integer">Integer</a></code></h4>
+<h4 id="parseInt"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4248">parseInt</a> :: Radix -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Integer">Integer</a></code></h4>
 <p>Takes a radix (an integer between 2 and 36 inclusive) and a string,
 and returns Just the number represented by the string if it does in
 fact represent a number in the base specified by the radix; Nothing
@@ -3697,7 +3728,7 @@ characters are members of the character set specified by the radix.</p>
 </div>
 
 <a class="pilcrow h4" href="#parseJson">¶</a>
-<h4 id="parseJson"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4240">parseJson</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> a</code></h4>
+<h4 id="parseJson"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4288">parseJson</a> :: (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Any">Any</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a>) -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> a</code></h4>
 <p>Takes a predicate and a string that may or may not be valid JSON, and
 returns Just the result of applying <code>JSON.parse</code> to the string <em>if</em> the
 result satisfies the predicate; Nothing otherwise.</p>
@@ -3723,8 +3754,8 @@ result satisfies the predicate; Nothing otherwise.</p>
 <a class="pilcrow h3" href="#section:regexp">¶</a>
 <h3 id="section:regexp">RegExp</h3>
 <a class="pilcrow h4" href="#regex">¶</a>
-<h4 id="regex"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4292">regex</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#RegexFlags">RegexFlags</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#RegExp">RegExp</a></code></h4>
-<p>Takes a <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#RegexFlags">RegexFlags</a> and a pattern, and returns a RegExp.</p>
+<h4 id="regex"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4340">regex</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#RegexFlags">RegexFlags</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#RegExp">RegExp</a></code></h4>
+<p>Takes a <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#RegexFlags">RegexFlags</a> and a pattern, and returns a RegExp.</p>
 <div class="examples">
   <form>
     <input value="S.regex ('g') (':\\d+:')">
@@ -3733,7 +3764,7 @@ result satisfies the predicate; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#regexEscape">¶</a>
-<h4 id="regexEscape"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4311">regexEscape</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="regexEscape"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4359">regexEscape</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Takes a string that may contain regular expression metacharacters,
 and returns a string with those metacharacters escaped.</p>
 <p>Properties:</p>
@@ -3749,7 +3780,7 @@ and returns a string with those metacharacters escaped.</p>
 </div>
 
 <a class="pilcrow h4" href="#test">¶</a>
-<h4 id="test"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4334">test</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#RegExp">RegExp</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Boolean">Boolean</a></code></h4>
+<h4 id="test"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4382">test</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#RegExp">RegExp</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Boolean">Boolean</a></code></h4>
 <p>Takes a pattern and a string, and returns <code>true</code> <a href="https://en.wikipedia.org/wiki/If_and_only_if">iff</a> the pattern
 matches the string.</p>
 <div class="examples">
@@ -3764,7 +3795,7 @@ matches the string.</p>
 </div>
 
 <a class="pilcrow h4" href="#match">¶</a>
-<h4 id="match"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4357">match</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#NonGlobalRegExp">NonGlobalRegExp</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> { match :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a>, groups :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a>) }</code></h4>
+<h4 id="match"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4405">match</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#NonGlobalRegExp">NonGlobalRegExp</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> { match :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a>, groups :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a>) }</code></h4>
 <p>Takes a pattern and a string, and returns Just a match record if the
 pattern matches the string; Nothing otherwise.</p>
 <p><code>groups :: Array (Maybe String)</code> acknowledges the existence of optional
@@ -3788,7 +3819,7 @@ capturing groups.</p>
 </div>
 
 <a class="pilcrow h4" href="#matchAll">¶</a>
-<h4 id="matchAll"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4392">matchAll</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#GlobalRegExp">GlobalRegExp</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> { match :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a>, groups :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a>) }</code></h4>
+<h4 id="matchAll"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4440">matchAll</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#GlobalRegExp">GlobalRegExp</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> { match :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a>, groups :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> (<a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a>) }</code></h4>
 <p>Takes a pattern and a string, and returns an array of match records.</p>
 <p><code>groups :: Array (Maybe String)</code> acknowledges the existence of optional
 capturing groups.</p>
@@ -3807,7 +3838,7 @@ capturing groups.</p>
 <a class="pilcrow h3" href="#section:string">¶</a>
 <h3 id="section:string">String</h3>
 <a class="pilcrow h4" href="#toUpper">¶</a>
-<h4 id="toUpper"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4429">toUpper</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="toUpper"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4477">toUpper</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Returns the upper-case equivalent of its argument.</p>
 <p>See also <a href="#toLower"><code>toLower</code></a>.</p>
 <div class="examples">
@@ -3818,7 +3849,7 @@ capturing groups.</p>
 </div>
 
 <a class="pilcrow h4" href="#toLower">¶</a>
-<h4 id="toLower"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4445">toLower</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="toLower"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4493">toLower</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Returns the lower-case equivalent of its argument.</p>
 <p>See also <a href="#toUpper"><code>toUpper</code></a>.</p>
 <div class="examples">
@@ -3829,7 +3860,7 @@ capturing groups.</p>
 </div>
 
 <a class="pilcrow h4" href="#trim">¶</a>
-<h4 id="trim"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4461">trim</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="trim"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4509">trim</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Strips leading and trailing whitespace characters.</p>
 <div class="examples">
   <form>
@@ -3839,7 +3870,7 @@ capturing groups.</p>
 </div>
 
 <a class="pilcrow h4" href="#stripPrefix">¶</a>
-<h4 id="stripPrefix"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4475">stripPrefix</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="stripPrefix"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4523">stripPrefix</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Returns Just the portion of the given string (the second argument) left
 after removing the given prefix (the first argument) if the string starts
 with the prefix; Nothing otherwise.</p>
@@ -3856,7 +3887,7 @@ with the prefix; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#stripSuffix">¶</a>
-<h4 id="stripSuffix"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4502">stripSuffix</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="stripSuffix"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4550">stripSuffix</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Maybe">Maybe</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Returns Just the portion of the given string (the second argument) left
 after removing the given suffix (the first argument) if the string ends
 with the suffix; Nothing otherwise.</p>
@@ -3873,7 +3904,7 @@ with the suffix; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#words">¶</a>
-<h4 id="words"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4529">words</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="words"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4577">words</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Takes a string and returns the array of words the string contains
 (words are delimited by whitespace characters).</p>
 <p>See also <a href="#unwords"><code>unwords</code></a>.</p>
@@ -3885,7 +3916,7 @@ with the suffix; Nothing otherwise.</p>
 </div>
 
 <a class="pilcrow h4" href="#unwords">¶</a>
-<h4 id="unwords"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4552">unwords</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="unwords"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4600">unwords</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Takes an array of words and returns the result of joining the words
 with separating spaces.</p>
 <p>See also <a href="#words"><code>words</code></a>.</p>
@@ -3897,7 +3928,7 @@ with separating spaces.</p>
 </div>
 
 <a class="pilcrow h4" href="#lines">¶</a>
-<h4 id="lines"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4569">lines</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="lines"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4617">lines</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Takes a string and returns the array of lines the string contains
 (lines are delimited by newlines: <code>'\n'</code> or <code>'\r\n'</code> or <code>'\r'</code>).
 The resulting strings do not contain newlines.</p>
@@ -3910,7 +3941,7 @@ The resulting strings do not contain newlines.</p>
 </div>
 
 <a class="pilcrow h4" href="#unlines">¶</a>
-<h4 id="unlines"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4591">unlines</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="unlines"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4639">unlines</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Takes an array of lines and returns the result of joining the lines
 after appending a terminating line feed (<code>'\n'</code>) to each.</p>
 <p>See also <a href="#lines"><code>lines</code></a>.</p>
@@ -3922,7 +3953,7 @@ after appending a terminating line feed (<code>'\n'</code>) to each.</p>
 </div>
 
 <a class="pilcrow h4" href="#splitOn">¶</a>
-<h4 id="splitOn"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4611">splitOn</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="splitOn"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4659">splitOn</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Returns the substrings of its second argument separated by occurrences
 of its first argument.</p>
 <p>See also <a href="#joinWith"><code>joinWith</code></a> and <a href="#splitOnRegex"><code>splitOnRegex</code></a>.</p>
@@ -3934,7 +3965,7 @@ of its first argument.</p>
 </div>
 
 <a class="pilcrow h4" href="#splitOnRegex">¶</a>
-<h4 id="splitOnRegex"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v2.0.2/index.js#L4628">splitOnRegex</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#GlobalRegExp">GlobalRegExp</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.20.1#String">String</a></code></h4>
+<h4 id="splitOnRegex"><code><a href="https://github.com/sanctuary-js/sanctuary/blob/v3.0.0/index.js#L4676">splitOnRegex</a> :: <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#GlobalRegExp">GlobalRegExp</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a> -> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#Array">Array</a> <a href="https://github.com/sanctuary-js/sanctuary-def/tree/v0.21.1#String">String</a></code></h4>
 <p>Takes a pattern and a string, and returns the result of splitting the
 string at every non-overlapping occurrence of the pattern.</p>
 <p>Properties:</p>

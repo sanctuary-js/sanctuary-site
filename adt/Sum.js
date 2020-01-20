@@ -24,7 +24,8 @@
     this.value = value;
   }
 
-  Sum['@@type'] = 'sanctuary-site/Sum';
+  //  sumTypeIdent :: String
+  var sumTypeIdent = Sum.prototype['@@type'] = 'sanctuary-site/Sum';
 
   Sum['fantasy-land/empty'] = function() { return Sum (0); };
 
@@ -49,7 +50,7 @@
     ('Sum')
     ('https://github.com/sanctuary-js/sanctuary-site/blob/gh-pages/adt/Sum.js')
     ([])
-    (function(x) { return type (x) === Sum['@@type']; });
+    (function(x) { return type (x) === sumTypeIdent; });
 
   return Sum;
 
