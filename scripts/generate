@@ -9,6 +9,8 @@ const fs                = require ('fs');
 const path              = require ('path');
 const vm                = require ('vm');
 
+const Future            = require ('fluture');
+const flutureTypes      = require ('fluture-sanctuary-types');
 const marked            = require ('marked');
 const R                 = require ('ramda');
 const S_                = require ('sanctuary');
@@ -21,56 +23,64 @@ const Z                 = require ('sanctuary-type-classes');
 const Html              = require ('../adt/Html');
 const List              = require ('../adt/List');
 const Sum               = require ('../adt/Sum');
-const env               = require ('../env');
+const env_              = require ('../env');
 
 
 const checkTypes        = process.env.NODE_ENV !== 'production';
+const env               = env_.concat (flutureTypes.env);
 const S                 = S_.create ({checkTypes, env});
 const def               = $.create ({checkTypes, env});
 
-const Either            = S.Either;
+const $Future           = flutureTypes.FutureType;
 const I                 = S.I;
 const Just              = S.Just;
 const K                 = S.K;
 const Left              = S.Left;
 const Nothing           = S.Nothing;
+const Pair              = S.Pair;
 const Right             = S.Right;
+const T                 = S.T;
 const ap                = S.ap;
+const array             = S.array;
 const bimap             = S.bimap;
 const chain             = S.chain;
 const compose           = S.compose;
 const concat            = S.concat;
 const cond              = R.cond;
 const curry2            = S.curry2;
-const drop              = S.drop;
+const curry3            = S.curry3;
 const either            = S.either;
+const eitherToFuture    = S.either (Future.reject) (Future.resolve);
 const empty             = S.empty;
 const encase            = S.encase;
 const equals            = S.equals;
 const flip              = S.flip;
+const fork              = Future.fork;
 const fst               = S.fst;
 const get               = S.get;
 const has               = R.has;
-const head              = S.head;
 const ifElse            = S.ifElse;
 const is                = S.is;
 const join              = S.join;
 const lift2             = S.lift2;
+const lift3             = S.lift3;
 const map               = S.map;
 const mapLeft           = S.mapLeft;
 const matchAll          = S.matchAll;
 const maybe             = S.maybe;
 const maybe_            = S.maybe_;
-const maybeToEither     = S.maybeToEither;
+const node              = Future.node;
 const of                = S.of;
 const on                = S.on;
+const pair              = S.pair;
 const pairs             = S.pairs;
 const pipe              = S.pipe;
 const prop              = S.prop;
 const reduce            = S.reduce;
 const regex             = S.regex;
+const reject            = Future.reject;
 const replace           = R.replace;
-const sequence          = S.sequence;
+const resolve           = Future.resolve;
 const snd               = S.snd;
 const sort              = S.sort;
 const splitOn           = S.splitOn;
@@ -400,69 +410,57 @@ def ('generate')
                      '<$1 id="$2">$3</$1>\n'),
             Html]));
 
-//    readFile :: String -> Either String String
+//    readFile :: String -> Future String String
 const readFile =
 def ('readFile')
     ({})
-    ([$.String, $.Either ($.String) ($.String)])
-    (compose (mapLeft (prop ('message')))
-             (encase (s => fs.readFileSync (s, 'utf8'))));
+    ([$.String, $Future ($.String) ($.String)])
+    (filename =>
+       mapLeft (prop ('message'))
+               (node (curry3 (fs.readFile) (filename) ('utf8'))));
 
-//    writeFile :: String -> String -> Either String String
+//    writeFile :: String -> String -> Future String String
 const writeFile =
 def ('writeFile')
     ({})
-    ([$.String, $.String, $.Either ($.String) ($.String)])
+    ([$.String, $.String, $Future ($.String) ($.String)])
     (filename => s =>
        bimap (prop ('message'))
              (K (filename))
-             (encase (curry2 (fs.writeFileSync) (filename)) (s)));
+             (node (curry3 (fs.writeFile) (filename) (s))));
 
-//    version :: String -> Either String String
-const version =
-def ('version')
+//    field :: Type -> String -> Object -> Either String a
+const field =
+def ('field')
     ({})
-    ([$.String, $.Either ($.String) ($.String)])
-    (pipe ([s => path.join (s, 'package.json'),
-            readFile,
-            chain (compose (mapLeft (prop ('message'))) (encase (JSON.parse))),
-            map (get (is ($.String)) ('version')),
-            chain (maybeToEither ('Invalid "version"'))]));
+    ([$.Type, $.String, $.Object, $.Either ($.String) (a)])
+    (type => name => record =>
+       maybe (Left (`Invalid "${name}"`))
+             (Right)
+             (get (is (type)) (name) (record)));
 
-//    description :: String -> Either String String
-const description =
-def ('description')
-    ({})
-    ([$.String, $.Either ($.String) ($.String)])
-    (pipe ([s => path.join (s, 'package.json'),
-            readFile,
-            chain (compose (mapLeft (prop ('message'))) (encase (JSON.parse))),
-            map (get (is ($.String)) ('description')),
-            chain (maybeToEither ('Invalid "description"'))]));
-
-//    customize :: String -> Either String (String -> Either String String)
+//    customize :: String -> Future String (String -> Future String String)
 const customize =
 def ('customize')
     ({})
     ([$.String,
-      $.Either ($.String) ($.Fn ($.String) ($.Either ($.String) ($.String)))])
+      $Future ($.String) ($.Fn ($.String) ($Future ($.String) ($.String)))])
     (pipe ([readFile,
             map (splitOnRegex (/\n={79}\n\n/g)),
             chain (ifElse (compose (equals (2)) (prop ('length')))
-                          (Right)
-                          (K (Left ('Expected exactly one separator')))),
+                          (resolve)
+                          (K (reject ('Expected exactly one separator')))),
             map (([existing, replacement]) =>
-                   ifElse (s => s.includes (existing))
-                          (compose (Right) (replace (existing) (replacement)))
-                          (K (Left ('Substring not found:\n\n' + existing))))]));
+                   s => s.includes (existing) ?
+                        resolve (replace (existing) (replacement) (s)) :
+                        reject ('Substring not found:\n\n' + existing))]));
 
-//    readme :: String -> Either String String
+//    readme :: String -> Future String String
 const readme =
 def ('readme')
     ({})
-    ([$.String, $.Either ($.String) ($.String)])
-    (pipe ([s => path.join (s, 'README.md'),
-            readFile,
+    ([$.String, $Future ($.String) ($.String)])
+    (pipe ([readFile,
             ap (customize ('custom/preamble.md')),
             join,
             ap (customize ('custom/sponsors.md')),
@@ -609,6 +607,29 @@ ${content}
 </html>
 `));
 
+//    program :: Array String -> Future String String
+const program = pipe ([
+  array (reject ('Missing command-line argument'))
+        (compose (K) (resolve)),
+  map (curry2 (path.join)),
+  chain (path =>
+           flip (pipe) ('package.json') ([
+             path,
+             readFile,
+             chain (compose (mapLeft (prop ('message')))
+                            (Future.encase (JSON.parse))),
+             join (Pair),
+             bimap (chain (compose (eitherToFuture)
+                                   (field ($.String) ('version'))))
+                   (chain (compose (eitherToFuture)
+                                   (field ($.String) ('description')))),
+             pair (lift3 (toDocument)),
+             T (readme (path ('README.md'))),
+           ])),
+  map (Html.unwrap),
+  chain (writeFile ('index.html')),
+]);
+
 //    failure :: String -> Undefined
 const failure = s => {
   process.stderr.write (`${red}${s}${reset}\n`);
@@ -621,14 +642,4 @@ const success = s => {
   process.exit (0);
 };
 
-pipe ([drop (2),
-       chain (head),
-       maybeToEither ('Missing command-line argument'),
-       map (of (Array)),
-       map (ap ([version, description, readme])),
-       chain (sequence (Either)),
-       map (([version, tagline, content]) =>
-              Html.unwrap (toDocument (version) (tagline) (content))),
-       chain (writeFile ('index.html')),
-       either (failure) (success)])
-     (process.argv);
+fork (failure) (success) (program (process.argv.slice (2)));
