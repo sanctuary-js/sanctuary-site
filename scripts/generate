@@ -47,6 +47,7 @@ const chain             = S.chain;
 const compose           = S.compose;
 const concat            = S.concat;
 const cond              = R.cond;
+const contramap         = S.contramap;
 const curry2            = S.curry2;
 const curry3            = S.curry3;
 const either            = S.either;
@@ -59,9 +60,11 @@ const fork              = Future.fork;
 const fst               = S.fst;
 const get               = S.get;
 const has               = R.has;
+const head              = S.head;
 const ifElse            = S.ifElse;
 const is                = S.is;
 const join              = S.join;
+const justs             = S.justs;
 const lift2             = S.lift2;
 const lift3             = S.lift3;
 const map               = S.map;
@@ -79,14 +82,12 @@ const prop              = S.prop;
 const reduce            = S.reduce;
 const regex             = S.regex;
 const reject            = Future.reject;
-const replace           = R.replace;
 const resolve           = Future.resolve;
 const snd               = S.snd;
 const sort              = S.sort;
 const splitOn           = S.splitOn;
 const splitOnRegex      = S.splitOnRegex;
 const test              = S.test;
-const when              = S.when;
 
 const ESCAPE            = '\u001B';
 const NO_BREAK_SPACE    = '\u00A0';
@@ -107,6 +108,28 @@ def ('fromJust')
     ({})
     ([$.Maybe (a), a])
     (maybe_ (() => { throw new Error ('fromJust applied to Nothing'); }) (I));
+
+//    replaceWith :: String -> RegExp -> String -> String
+const replaceWith =
+def ('replaceWith')
+    ({})
+    ([$.String, $.RegExp, $.String, $.String])
+    (replacement => pattern => text =>
+       text.replace (pattern, () => replacement));
+
+//    replaceBy :: (Array (Maybe String) -> String) -> RegExp -> String -> String
+const replaceBy =
+def ('replaceBy')
+    ({})
+    ([$.Fn ($.Array ($.Maybe ($.String))) ($.String),
+      $.RegExp,
+      $.String,
+      $.String])
+    (substitute => pattern => text =>
+       text.replace (pattern, (...args) =>
+         substitute (map (group => group == null ? Nothing : Just (group))
+                         (args.slice (1, -2)))
+       ));
 
 //    wrap :: Semigroup a => a -> a -> a -> a
 const wrap =
@@ -212,9 +235,9 @@ def ('headingToMarkup')
             c === '(' || c === '[' || c === '{' ?
               {t: '', html: wrap (html) (Html.encode (c)) (linkTokens (t)), ctx: ctx + c} :
             c === ')' || c === ']' || c === '}' ?
-              {t: '', html: wrap (html) (Html.encode (c)) (linkTokens (t)), ctx: (ctx.replace (/:$/, '')).slice (0, -1)} :
+              {t: '', html: wrap (html) (Html.encode (c)) (linkTokens (t)), ctx: (replaceWith ('') (/:$/) (ctx)).slice (0, -1)} :
             c === ',' ?
-              {t: '', html: wrap (html) (Html.encode (c)) (linkTokens (t)), ctx: ctx.replace (/:$/, '')} :
+              {t: '', html: wrap (html) (Html.encode (c)) (linkTokens (t)), ctx: replaceWith ('') (/:$/) (ctx)} :
             c === ' ' || c === NO_BREAK_SPACE || c === '?' ?
               {t: '', html: wrap (html) (Html.encode (c)) ((ctx.endsWith ('{') ? Html.encode : linkTokens) (t)), ctx} :
             // else
@@ -254,7 +277,7 @@ def ('toOutputMarkup')
                                              {displayErrors: false})),
             either (pipe ([prop ('message'),
                            concat ('! '),
-                           replace (/^$/gm) (ZERO_WIDTH_SPACE),
+                           replaceWith (ZERO_WIDTH_SPACE) (/^$/gm),
                            Html.encode,
                            Just,
                            el ('div') ({'class': 'output',
@@ -271,12 +294,12 @@ def ('doctestsToMarkup')
     ([$.String, Html.Type])
     (pipe ([matchAll (/^> .*(?:\n[.] .*)*/gm),
             map (prop ('match')),
-            map (replace (/\[\n[.] */g) ('[')),
-            map (replace (/,\n[.] \]/g) (']')),
-            map (replace (/^../gm) ('')),
-            map (replace (/^ +/gm) (' ')),
-            map (replace (/\n/g) ('')),
-            map (replace (/^global[.]/) ('const ')),
+            map (replaceWith ('[') (/\[\n[.] */g)),
+            map (replaceWith (']') (/,\n[.] \]/g)),
+            map (replaceWith ('') (/^../gm)),
+            map (replaceWith (' ') (/^ +/gm)),
+            map (replaceWith ('') (/\n/g)),
+            map (replaceWith ('const ') (/^global[.]/)),
             map (lift2 (on (concat) (wrap (Html ('    ')) (Html ('\n'))))
                        (toInputMarkup)
                        (toOutputMarkup)),
@@ -391,23 +414,26 @@ const generate =
 def ('generate')
     ({})
     ([$.String, Html.Type])
-    (pipe ([replace (regex ('gm') ('^(#{1,6}) <span id="([^"]*)">❑ (.*)</span>$'))
-                    (($0, $1, $2, $3) => `<h${$1.length} id="${$2}">${$3}</h${$1.length}>`),
-            replace (regex ('gm') ('^#### <a name="(.*)" href="(.*)">`(.*)`</a>$'))
-                    (($0, $1, $2, $3) => Html.unwrap (headingToMarkup ($1) ($2) ($3))),
-            replace (regex ('gm') ('^```javascript\\n(> [^]*?)^```\\n'))
-                    (($0, $1) => Html.unwrap (doctestsToMarkup ($1))),
+    (pipe ([replaceBy (contramap (justs) (([$1, $2, $3]) => `<h${$1.length} id="${$2}">${$3}</h${$1.length}>`))
+                      (regex ('gm') ('^(#{1,6}) <span id="([^"]*)">❑ (.*)</span>$')),
+            replaceBy (contramap (justs) (([$1, $2, $3]) => Html.unwrap (headingToMarkup ($1) ($2) ($3))))
+                      (regex ('gm') ('^#### <a name="(.*)" href="(.*)">`(.*)`</a>$')),
+            replaceBy (contramap (justs) (([$1]) => Html.unwrap (doctestsToMarkup ($1))))
+                      (regex ('gm') ('^```javascript\\n(> [^]*?)^```\\n')),
             s => marked (s, {}),
-            replace (regex ('g') (ZERO_WIDTH_SPACE)) (''),
-            replace (/&#39;/g) ("'"),
-            replace (/&gt;/g) ('>'),
-            replace (regex ('gm') ('(?!^)(?=</code></pre>)')) ('\n'),
-            replace (regex ('g') ('(<pre><code class="language-javascript">)([^]*?)(?=</code></pre>)'))
-                    (($0, $1, $2) => $1 + Html.unwrap (highlight (Html ($2)))),
-            replace (regex ('gm') ('</code></pre>(?!$)')) ($0 => $0 + '\n'),
-            replace (regex ('g') ('<(h[2-6]) id="([^"]*)">(.*)</\\1>\n*'))
-                    ('<a class="pilcrow $1" href="#$2">' + PILCROW_SIGN + '</a>\n' +
-                     '<$1 id="$2">$3</$1>\n'),
+            replaceWith ('') (regex ('g') (ZERO_WIDTH_SPACE)),
+            replaceWith ("'") (/&#39;/g),
+            replaceWith ('>') (/&gt;/g),
+            replaceWith ('\n') (regex ('gm') ('(?!^)(?=</code></pre>)')),
+            replaceBy (contramap (justs) (([$1, $2]) => $1 + Html.unwrap (highlight (Html ($2)))))
+                      (regex ('g') ('(<pre><code class="language-javascript">)([^]*?)(?=</code></pre>)')),
+            replaceBy (contramap (justs) (([$1]) => $1 + '\n'))
+                      (regex ('gm') ('(</code></pre>)(?!$)')),
+            replaceBy (contramap (justs)
+                                 (([tagName, id, markup]) =>
+                                    `<a class="pilcrow ${tagName}" href="#${id}">${PILCROW_SIGN}</a>\n` +
+                                    `<${tagName} id="${id}">${markup}</${tagName}>\n`))
+                      (regex ('g') ('<(h[2-6]) id="([^"]*)">(.*)</\\1>\n*')),
             Html]));
 
 //    readFile :: String -> Future String String
@@ -452,7 +478,7 @@ def ('customize')
                           (K (reject ('Expected exactly one separator')))),
             map (([existing, replacement]) =>
                    s => s.includes (existing) ?
-                        resolve (replace (existing) (replacement) (s)) :
+                        resolve (s.replace (existing, replacement)) :
                         reject ('Substring not found:\n\n' + existing))]));
 
 //    readme :: String -> Future String String
@@ -476,7 +502,7 @@ def ('readme')
             map (generate),
             map (Html.unwrap),
             map (concat ('\n')),
-            map (replace (/\n$/) (''))]));
+            map (replaceWith ('') (/\n$/))]));
 
 //    Heading :: Type
 const Heading = $.RecordType ({
@@ -495,14 +521,17 @@ def ('tocListItem')
     ({})
     ([Heading, Html.Type])
     (function recur({level, id, html, subheads}) {
+       const pattern = '<a [^>]*>([^<]*)</a>';
        const a = el ('a')
                     ({href: '#' + id})
-                    (Just (Html (Html.unwrap (html)
-                                 .replace (/<a [^>]*>([^<]*)<[/]a>/g,
-                                           ($0, $1, idx) =>
-                                             when (K (idx === '<code>'.length))
-                                                  (wrap ('<b>') ('</b>'))
-                                                  ($1)))));
+                    (pipe ([Html.unwrap,
+                            replaceBy (contramap (justs) (([$1]) => `<b>${$1}</b>`))
+                                      (regex ('') (pattern)),
+                            replaceBy (contramap (justs) (([$1]) => $1))
+                                      (regex ('g') (pattern)),
+                            Html,
+                            Just])
+                          (html));
        return Html.indent (4) (reduce (concat) (empty (Html)) (join (join ([
          [[Html ('<li>\n')]],
          subheads.length === 0 ?
@@ -528,20 +557,19 @@ const toc =
 def ('toc')
     ({})
     ([$.String, Html.Type])
-    (pipe ([matchAll (/<(h[1-6]) id="([^"]*)">(.*)<[/]\1>/g),
+    (pipe ([matchAll (/<h([1-6]) id="([^"]*)">(.*)<[/]h\1>/g),
             map (prop ('groups')),
-            map (map (fromJust)),
-            reduce (heading => ([tagName, id, s]) => {
-                      const level = Number (replace ('h', '', tagName));
-                      for (let subheads = heading.subheads;
-                           true;
-                           subheads = subheads[subheads.length - 1].subheads) {
-                        if (subheads.length === 0 ||
-                            subheads[0].level === level) {
-                          subheads.push ({level, id, html: Html (s), subheads: []});
-                          return heading;
-                        }
+            map (justs),
+            reduce (heading => ([_level, id, s]) => {
+                      const level = Number (_level);
+                      let {subheads} = heading;
+                      while (maybe (false)
+                                   (heading => heading.level !== level)
+                                   (head (subheads))) {
+                        ({subheads} = subheads[subheads.length - 1]);
                       }
+                      subheads.push ({level, id, html: Html (s), subheads: []});
+                      return heading;
                     })
                    ({level: 1, id: '', html: empty (Html), subheads: []}),
             prop ('subheads'),
