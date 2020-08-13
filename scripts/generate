@@ -37,7 +37,6 @@ const Just              = S.Just;
 const K                 = S.K;
 const Left              = S.Left;
 const Nothing           = S.Nothing;
-const Pair              = S.Pair;
 const Right             = S.Right;
 const T                 = S.T;
 const ap                = S.ap;
@@ -72,7 +71,6 @@ const maybe_            = S.maybe_;
 const node              = Future.node;
 const of                = S.of;
 const on                = S.on;
-const pair              = S.pair;
 const pairs             = S.pairs;
 const pipe              = S.pipe;
 const prop              = S.prop;
@@ -618,12 +616,11 @@ const program = pipe ([
              readFile,
              chain (compose (mapLeft (prop ('message')))
                             (Future.encase (JSON.parse))),
-             join (Pair),
-             bimap (chain (compose (eitherToFuture)
+             lift2 (lift3 (toDocument))
+                   (chain (compose (eitherToFuture)
                                    (field ($.String) ('version'))))
                    (chain (compose (eitherToFuture)
                                    (field ($.String) ('description')))),
-             pair (lift3 (toDocument)),
              T (readme (path ('README.md'))),
            ])),
   map (Html.unwrap),
