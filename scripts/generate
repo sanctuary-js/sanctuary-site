@@ -45,7 +45,6 @@ const bimap             = S.bimap;
 const chain             = S.chain;
 const compose           = S.compose;
 const concat            = S.concat;
-const cond              = R.cond;
 const contramap         = S.contramap;
 const curry2            = S.curry2;
 const curry3            = S.curry3;
@@ -58,7 +57,6 @@ const flip              = S.flip;
 const fork              = Future.fork;
 const fst               = S.fst;
 const get               = S.get;
-const has               = R.has;
 const head              = S.head;
 const ifElse            = S.ifElse;
 const is                = S.is;
@@ -96,6 +94,10 @@ const WORD_JOINER       = '\u2060';
 const reset             = ESCAPE + '[0m';
 const red               = ESCAPE + '[31m';
 const green             = ESCAPE + '[32m';
+
+const {
+  hasOwnProperty,
+} = Object.prototype;
 
 //    a :: Type
 const a = $.TypeVariable ('a');
@@ -198,15 +200,13 @@ const linkTokens =
 def ('linkTokens')
     ({})
     ([$.String, Html.Type])
-    (cond ([[test (/^[a-z]$/),                 Html.encode],
-            [equals (''),                      Html.encode],
-            [equals ('=>'),                    Html.encode],
-            [equals ('~>'),                    Html.encode],
-            [equals ('-' + WORD_JOINER + '>'), K (Html.encode ('->'))],
-            [equals ('TypeRep'),               anchor ('https://github.com/fantasyland/fantasy-land#type-representatives')],
-            [flip (has) ($),                   externalLink ('sanctuary-def')],
-            [flip (has) (Z),                   externalLink ('sanctuary-type-classes')],
-            [K (true),                         Html.encode]]));
+    (s =>
+       test (/^[a-z]$/) (s)          ? Html.encode (s) :
+       s === '-' + WORD_JOINER + '>' ? Html.encode ('->') :
+       s === 'TypeRep'               ? anchor ('https://github.com/fantasyland/fantasy-land#type-representatives') (s) :
+       hasOwnProperty.call ($, s)    ? externalLink ('sanctuary-def') (s) :
+       hasOwnProperty.call (Z, s)    ? externalLink ('sanctuary-type-classes') (s) :
+       /* else */                      Html.encode (s));
 
 //    headingToMarkup :: String -> String -> String -> Html
 const headingToMarkup =
