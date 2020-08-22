@@ -9,11 +9,23 @@ const fs                = require ('fs');
 const path              = require ('path');
 const vm                = require ('vm');
 
-const Future            = require ('fluture');
-const flutureTypes      = require ('fluture-sanctuary-types');
+const {
+  encase: encaseFuture,
+  fork,
+  node,
+  reject,
+  resolve,
+}                       = require ('fluture');
+const {
+  FutureType: Future,
+  env: flutureEnv,
+}                       = require ('fluture-sanctuary-types');
 const marked            = require ('marked');
 const R                 = require ('ramda');
-const S_                = require ('sanctuary');
+const {
+  create,
+  env: sanctuaryEnv,
+}                       = require ('sanctuary');
 const pkg               = require ('sanctuary/package.json');
 const $                 = require ('sanctuary-def');
 const Descending        = require ('sanctuary-descending');
@@ -23,67 +35,8 @@ const Z                 = require ('sanctuary-type-classes');
 const Html              = require ('../adt/Html');
 const List              = require ('../adt/List');
 const Sum               = require ('../adt/Sum');
-const env_              = require ('../env');
+const customEnv         = require ('../env');
 
-
-const checkTypes        = process.env.NODE_ENV !== 'production';
-const env               = env_.concat (flutureTypes.env);
-const S                 = S_.create ({checkTypes, env});
-const def               = $.create ({checkTypes, env});
-
-const $Future           = flutureTypes.FutureType;
-const I                 = S.I;
-const Just              = S.Just;
-const K                 = S.K;
-const Left              = S.Left;
-const Nothing           = S.Nothing;
-const Right             = S.Right;
-const T                 = S.T;
-const ap                = S.ap;
-const array             = S.array;
-const bimap             = S.bimap;
-const chain             = S.chain;
-const compose           = S.compose;
-const concat            = S.concat;
-const contramap         = S.contramap;
-const curry2            = S.curry2;
-const curry3            = S.curry3;
-const either            = S.either;
-const eitherToFuture    = S.either (Future.reject) (Future.resolve);
-const empty             = S.empty;
-const encase            = S.encase;
-const equals            = S.equals;
-const flip              = S.flip;
-const fork              = Future.fork;
-const fst               = S.fst;
-const get               = S.get;
-const head              = S.head;
-const ifElse            = S.ifElse;
-const is                = S.is;
-const join              = S.join;
-const justs             = S.justs;
-const lift2             = S.lift2;
-const lift3             = S.lift3;
-const map               = S.map;
-const mapLeft           = S.mapLeft;
-const matchAll          = S.matchAll;
-const maybe             = S.maybe;
-const maybe_            = S.maybe_;
-const node              = Future.node;
-const of                = S.of;
-const on                = S.on;
-const pairs             = S.pairs;
-const pipe              = S.pipe;
-const prop              = S.prop;
-const reduce            = S.reduce;
-const regex             = S.regex;
-const reject            = Future.reject;
-const resolve           = Future.resolve;
-const snd               = S.snd;
-const sort              = S.sort;
-const splitOn           = S.splitOn;
-const splitOnRegex      = S.splitOnRegex;
-const test              = S.test;
 
 const ESCAPE            = '\u001B';
 const NO_BREAK_SPACE    = '\u00A0';
@@ -94,6 +47,59 @@ const WORD_JOINER       = '\u2060';
 const reset             = ESCAPE + '[0m';
 const red               = ESCAPE + '[31m';
 const green             = ESCAPE + '[32m';
+
+const checkTypes = process.env.NODE_ENV !== 'production';
+const env = customEnv.concat (flutureEnv);
+const def = $.create ({checkTypes, env});
+const {
+  I,
+  Just,
+  K,
+  Left,
+  Nothing,
+  Right,
+  T,
+  ap,
+  array,
+  bimap,
+  chain,
+  compose,
+  concat,
+  contramap,
+  curry2,
+  curry3,
+  either,
+  empty,
+  encase,
+  equals,
+  flip,
+  fst,
+  get,
+  head,
+  ifElse,
+  is,
+  join,
+  justs,
+  lift2,
+  lift3,
+  map,
+  mapLeft,
+  matchAll,
+  maybe,
+  maybe_,
+  of,
+  on,
+  pairs,
+  pipe,
+  prop,
+  reduce,
+  regex,
+  snd,
+  sort,
+  splitOn,
+  splitOnRegex,
+  test,
+} = create ({checkTypes, env});
 
 const {
   hasOwnProperty,
@@ -252,8 +258,8 @@ def ('toInputMarkup')
 //    $context :: ContextifiedSandbox
 const $context = (() => {
   const {Nil, Cons} = List;
-  const S = Object.assign (S_.create ({checkTypes: true, env}),
-                           {env: S_.env});
+  const S = Object.assign (create ({checkTypes: true, env}),
+                           {env: sanctuaryEnv});
   return vm.createContext ({$, Cons, Descending, List, Nil, R, S, Sum});
 }) ();
 
@@ -434,7 +440,7 @@ def ('generate')
 const readFile =
 def ('readFile')
     ({})
-    ([$.String, $Future ($.String) ($.String)])
+    ([$.String, Future ($.String) ($.String)])
     (filename =>
        mapLeft (prop ('message'))
                (node (curry3 (fs.readFile) (filename) ('utf8'))));
@@ -443,7 +449,7 @@ def ('readFile')
 const writeFile =
 def ('writeFile')
     ({})
-    ([$.String, $.String, $Future ($.String) ($.String)])
+    ([$.String, $.String, Future ($.String) ($.String)])
     (filename => s =>
        bimap (prop ('message'))
              (K (filename))
@@ -464,7 +470,7 @@ const customize =
 def ('customize')
     ({})
     ([$.String,
-      $Future ($.String) ($.Fn ($.String) ($Future ($.String) ($.String)))])
+      Future ($.String) ($.Fn ($.String) (Future ($.String) ($.String)))])
     (pipe ([readFile,
             map (splitOnRegex (/\n={79}\n\n/g)),
             chain (ifElse (compose (equals (2)) (prop ('length')))
@@ -479,7 +485,7 @@ def ('customize')
 const readme =
 def ('readme')
     ({})
-    ([$.String, $Future ($.String) ($.String)])
+    ([$.String, Future ($.String) ($.String)])
     (pipe ([readFile,
             ap (customize ('custom/preamble.md')),
             join,
@@ -639,11 +645,11 @@ const program = pipe ([
              path,
              readFile,
              chain (compose (mapLeft (prop ('message')))
-                            (Future.encase (JSON.parse))),
+                            (encaseFuture (JSON.parse))),
              lift2 (lift3 (toDocument))
-                   (chain (compose (eitherToFuture)
+                   (chain (compose (either (reject) (resolve))
                                    (field ($.String) ('version'))))
-                   (chain (compose (eitherToFuture)
+                   (chain (compose (either (reject) (resolve))
                                    (field ($.String) ('description')))),
              T (readme (path ('README.md'))),
            ])),
