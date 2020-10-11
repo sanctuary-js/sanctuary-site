@@ -290,3 +290,18 @@ strong {
   text-align: center;
   color: #eee;
 }
+
+#logo-fink {
+  background: none;
+}
+
+#logo-fink svg {
+  margin-top: -10px;
+  height: 1.524em;
+  fill: #f0885d;
+}
+
+#logo-fink:focus svg,
+#logo-fink:hover svg {
+  fill: #454d60;
+}
