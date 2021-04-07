@@ -122,8 +122,14 @@ a code {
 #toc details summary::-webkit-details-marker {
   color: #999;
 }
+#toc details summary::marker {
+  color: #999;
+}
 
 #toc details summary:focus::-webkit-details-marker {
+  color: #080;
+}
+#toc details summary:focus::marker {
   color: #080;
 }
 
