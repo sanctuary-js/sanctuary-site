@@ -4,7 +4,7 @@
   "overrides": [
     {
       "files": ["adt/*.js", "env.js"],
-      "globals": {"module": false, "require": false, "self": false}
+      "globals": {"module": "readonly", "require": "readonly", "self": "readonly"}
     },
     {
       "files": ["behaviour.js"],
