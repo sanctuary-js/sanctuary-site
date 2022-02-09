@@ -761,9 +761,7 @@ In JavaScript it's trivial to introduce a possible run-time type error.</p>
   front-end coding, and ensuring the stuff we make works as intended.
   Our company is entirely employee-owned; we place great importance on
   the well-being of every employee, both professionally and personally.
-</p>
-
-</li>
+</p></li>
 </ul>
 <p>Development of Sanctuary is further encouraged by the following generous
 <strong>supporters</strong>:</p>
@@ -970,8 +968,7 @@ it returns a value of type <code>Maybe b</code>.</em></p>
 <code>Maybe a ~> Boolean</code>, for example, represents a Boolean property of a value
 of type <code>Maybe a</code>.</p>
 <p>Sanctuary supports type classes: constraints on type variables. Whereas
-<code>a -> a</code> implicitly supports every type, <code>Functor f => (a -> b) -> f a ->
-f b</code> requires that <code>f</code> be a type that satisfies the requirements of the
+<code>a -> a</code> implicitly supports every type, <code>Functor f => (a -> b) -> f a -> f b</code> requires that <code>f</code> be a type that satisfies the requirements of the
 Functor type class. Type-class constraints appear at the beginning of a
 type signature, separated from the rest of the signature by a fat arrow
 (<code>=></code>).</p>
@@ -3015,11 +3012,9 @@ predicate.</p>
 the predicate.</p>
 <p>Properties:</p>
 <ul>
-<li><p><code>forall p :: a -> Boolean, xs :: Foldable f => f a.
- S.none (p) (xs) = S.not (S.any (p) (xs))</code></p>
+<li><p><code>forall p :: a -> Boolean, xs :: Foldable f => f a.  S.none (p) (xs) = S.not (S.any (p) (xs))</code></p>
 </li>
-<li><p><code>forall p :: a -> Boolean, xs :: Foldable f => f a.
- S.none (p) (xs) = S.all (S.complement (p)) (xs)</code></p>
+<li><p><code>forall p :: a -> Boolean, xs :: Foldable f => f a.  S.none (p) (xs) = S.all (S.complement (p)) (xs)</code></p>
 </li>
 </ul>
 <p>See also <a href="#all"><code>all</code></a> and <a href="#any"><code>any</code></a>.</p>
@@ -3089,8 +3084,7 @@ the predicate.</p>
 <p>Joins the strings of the second argument separated by the first argument.</p>
 <p>Properties:</p>
 <ul>
-<li><code>forall s :: String, t :: String.
- S.joinWith (s) (S.splitOn (s) (t)) = t</code></li>
+<li><code>forall s :: String, t :: String.  S.joinWith (s) (S.splitOn (s) (t)) = t</code></li>
 </ul>
 <p>See also <a href="#splitOn"><code>splitOn</code></a> and <a href="#intercalate"><code>intercalate</code></a>.</p>
 <div class="examples">
@@ -3250,8 +3244,7 @@ for functions that aren't reflexive, transitive, and symmetric
 (see <a href="https://en.wikipedia.org/wiki/Equivalence_relation">equivalence</a> relation).</p>
 <p>Properties:</p>
 <ul>
-<li><code>forall f :: a -> a -> Boolean, xs :: Array a.
- S.join (S.groupBy (f) (xs)) = xs</code></li>
+<li><code>forall f :: a -> a -> Boolean, xs :: Array a.  S.join (S.groupBy (f) (xs)) = xs</code></li>
 </ul>
 <div class="examples">
   <form>
@@ -3841,8 +3834,7 @@ result satisfies the predicate; Nothing otherwise.</p>
 and returns a string with those metacharacters escaped.</p>
 <p>Properties:</p>
 <ul>
-<li><code>forall s :: String.
- S.test (S.regex ('') (S.regexEscape (s))) (s) = true</code></li>
+<li><code>forall s :: String.  S.test (S.regex ('') (S.regexEscape (s))) (s) = true</code></li>
 </ul>
 <div class="examples">
   <form>
@@ -3874,9 +3866,7 @@ pattern matches the string; Nothing otherwise.</p>
 capturing groups.</p>
 <p>Properties:</p>
 <ul>
-<li><code>forall p :: Pattern, s :: String.
- S.head (S.matchAll (S.regex ('g') (p)) (s))
- = S.match (S.regex ('') (p)) (s)</code></li>
+<li><code>forall p :: Pattern, s :: String.  S.head (S.matchAll (S.regex ('g') (p)) (s))  = S.match (S.regex ('') (p)) (s)</code></li>
 </ul>
 <p>See also <a href="#matchAll"><code>matchAll</code></a>.</p>
 <div class="examples">
@@ -4042,9 +4032,7 @@ of its first argument.</p>
 string at every non-overlapping occurrence of the pattern.</p>
 <p>Properties:</p>
 <ul>
-<li><code>forall s :: String, t :: String.
- S.joinWith (s) (S.splitOnRegex (S.regex ('g') (S.regexEscape (s))) (t))
- = t</code></li>
+<li><code>forall s :: String, t :: String.  S.joinWith (s) (S.splitOnRegex (S.regex ('g') (S.regexEscape (s))) (t))  = t</code></li>
 </ul>
 <p>See also <a href="#splitOn"><code>splitOn</code></a>.</p>
 <div class="examples">

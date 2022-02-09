@@ -16,7 +16,7 @@
     "eslint": "6.8.x",
     "fluture": "12.3.x",
     "fluture-sanctuary-types": "6.0.x",
-    "marked": "0.8.0",
+    "marked": "4.0.12",
     "sanctuary-style": "4.0.x"
   }
 }

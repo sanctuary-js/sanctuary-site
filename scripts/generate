@@ -21,7 +21,7 @@ const {
   FutureType: Future,
   env: flutureEnv,
 }                       = require ('fluture-sanctuary-types');
-const marked            = require ('marked');
+const {marked}          = require ('marked');
 const R                 = require ('ramda');
 const {
   create,
