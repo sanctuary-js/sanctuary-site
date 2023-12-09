@@ -1,4 +1,4 @@
-(function(f) {
+(f => {
 
   'use strict';
 
@@ -14,7 +14,7 @@
                   self.sanctuaryTypeIdentifiers);
   }
 
-} (function($, show, Z, type) {
+}) (($, show, Z, type) => {
 
   'use strict';
 
@@ -25,9 +25,9 @@
   }
 
   //  sumTypeIdent :: String
-  var sumTypeIdent = Sum.prototype['@@type'] = 'sanctuary-site/Sum';
+  const sumTypeIdent = Sum.prototype['@@type'] = 'sanctuary-site/Sum';
 
-  Sum['fantasy-land/empty'] = function() { return Sum (0); };
+  Sum['fantasy-land/empty'] = () => Sum (0);
 
   Sum.prototype['fantasy-land/equals'] = function(other) {
     return Z.equals (this.value, other.value);
@@ -50,8 +50,8 @@
     ('Sum')
     ('https://github.com/sanctuary-js/sanctuary-site/blob/gh-pages/adt/Sum.js')
     ([])
-    (function(x) { return type (x) === sumTypeIdent; });
+    (x => type (x) === sumTypeIdent);
 
   return Sum;
 
-}));
+});
