@@ -14,11 +14,11 @@
                    self.sanctuaryTypeIdentifiers);
   }
 
-} (function($, show, Z, type) {
+} (($, show, Z, type) => {
 
   'use strict';
 
-  var List = {prototype: _List.prototype};
+  const List = {prototype: _List.prototype};
 
   List.prototype.constructor = List;
 
@@ -32,21 +32,17 @@
   }
 
   //  Nil :: List a
-  var Nil = List.Nil = new _List ('Nil');
+  const Nil = List.Nil = new _List ('Nil');
 
   //  Cons :: (a, List a) -> List a
-  var Cons = List.Cons = function(head) {
-    return function(tail) {
-      return new _List ('Cons', head, tail);
-    };
-  };
+  const Cons = List.Cons = head => tail => new _List ('Cons', head, tail);
 
   //  listTypeIdent :: String
-  var listTypeIdent = List.prototype['@@type'] = 'sanctuary-site/List';
+  const listTypeIdent = List.prototype['@@type'] = 'sanctuary-site/List';
 
-  List['fantasy-land/empty'] = function() { return Nil; };
+  List['fantasy-land/empty'] = () => Nil;
 
-  List['fantasy-land/of'] = function(x) { return Cons (x) (Nil); };
+  List['fantasy-land/of'] = x => Cons (x) (Nil);
 
   List['fantasy-land/zero'] = List['fantasy-land/empty'];
 
@@ -108,8 +104,8 @@
     ('List')
     ('https://github.com/sanctuary-js/sanctuary-site/blob/gh-pages/adt/List.js')
     ([])
-    (function(x) { return type (x) === listTypeIdent; })
-    (function(list) { return list; });
+    (x => type (x) === listTypeIdent)
+    (list => list);
 
   return List;
 

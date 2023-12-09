@@ -1,4 +1,4 @@
-(function(f) {
+(f => {
 
   'use strict';
 
@@ -11,10 +11,10 @@
     self.env = f (self.sanctuaryDef, self.Html, self.List, self.Sum);
   }
 
-} (function($, Html, List, Sum) {
+}) (($, Html, List, Sum) => {
 
   'use strict';
 
   return $.env.concat ([Html.Type, List.Type ($.Unknown), Sum.Type]);
 
-}));
+});
