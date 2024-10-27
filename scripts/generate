@@ -5,7 +5,6 @@
 
 'use strict';
 
-const {execSync}        = require ('child_process');
 const fs                = require ('fs');
 const path              = require ('path');
 const vm                = require ('vm');
@@ -479,11 +478,7 @@ def ('customize')
                           (K (reject ('Expected exactly one separator')))),
             map (([existing, replacement]) =>
                    s => s.includes (existing) ?
-                        map (replacement => s.replace (existing, replacement))
-                            (encaseFuture (replace (contramap (justs)
-                                                              (([$1]) => execSync ($1, {encoding: 'utf8'})))
-                                                   (regex ('g') ('<shell>([^]*?)</shell>')))
-                                          (replacement)) :
+                        resolve (s.replace (existing, replacement)) :
                         reject ('Substring not found:\n\n' + existing))]));
 
 //    readme :: String -> Future String String
